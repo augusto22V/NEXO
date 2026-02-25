@@ -1,0 +1,134 @@
+/* ===== HEADER ===== */
+.home-header {
+  background: #1F1F1F; /* negro elegante */
+  color: white;
+  padding: 22px 28px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.15);
+}
+
+.home-header h1 {
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: .5px;
+}
+
+.home-header span {
+  font-size: 14px;
+  opacity: .8;
+  color: #7ED957; /* verde lima marca */
+}
+
+/* ===== DASHBOARD ===== */
+.dashboard {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 28px;
+  padding: 40px;
+  background: #f7f7f7;
+}
+
+/* ===== TARJETAS ===== */
+.card {
+  background: white;
+  border-radius: 18px;
+  padding: 30px;
+  text-align: center;
+  cursor: pointer;
+
+  box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+  transition: transform .2s ease, box-shadow .2s ease, border .2s ease;
+
+  border: 2px solid transparent;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.15);
+  border-color: #7ED957;
+}
+
+/* ===== ICONO ===== */
+.card i {
+  font-size: 48px;
+  color: #7ED957;
+  margin-bottom: 15px;
+  transition: transform .2s ease;
+}
+
+.card:hover i {
+  transform: scale(1.1);
+}
+
+/* ===== TITULO ===== */
+.card h3 {
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #1F1F1F;
+}
+
+/* ===== TEXTO ===== */
+.card p {
+  font-size: 14px;
+  color: #777;
+}
+/* ===== CARD COMPRA ===== */
+.card-compra {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.compra-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.compra-total {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(0,0,0,.08);
+  font-size: 14px;
+  color: #444;
+}
+
+/* ===== BOTONES (MEJORADOS) ===== */
+.btn-comprar {
+  border: none;
+  padding: 10px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 700;
+  transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 8px 18px rgba(0,0,0,.10);
+}
+
+.btn-comprar:active {
+  transform: translateY(1px) scale(.99);
+}
+
+.btn-comprar--primary {
+  background: #7ED957; /* tu verde marca */
+  color: #1F1F1F;
+}
+
+.btn-comprar--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px rgba(0,0,0,.16);
+}
+
+.btn-comprar--ghost {
+  background: rgba(31,31,31,.06);
+  color: #1F1F1F;
+  box-shadow: none;
+  border: 1px solid rgba(31,31,31,.12);
+}
+
+.btn-comprar--ghost:hover {
+  background: rgba(31,31,31,.10);
+}

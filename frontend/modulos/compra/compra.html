@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Stop Top | Compra</title>
+
+  <link rel="stylesheet" href="../../compartido/css/base.css">
+  <link rel="stylesheet" href="compra.css">
+</head>
+
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <button class="btn-volver" onclick="volver()">← Volver</button>
+
+  <div class="titulo">
+    <h1>Stop Top</h1>
+    <span id="moduloTitulo">Compra</span>
+  </div>
+</div>
+
+<div class="admin-container">
+
+  <!-- PANEL IZQUIERDO -->
+  <div class="panel panel-form">
+    <h2>Datos de compra</h2>
+
+    <form>
+
+      <label>Fecha</label>
+      <input type="date">
+
+      <label>Proveedor</label>
+      <input type="text" placeholder="Buscar proveedor">
+
+      <label>Tipo</label>
+      <select>
+        <option>Contado</option>
+        <option>Crédito</option>
+      </select>
+
+      <label>Forma de pago</label>
+      <select>
+        <option>Efectivo</option>
+        <option>Transferencia</option>
+        <option>Tarjeta</option>
+      </select>
+
+      <label>Observación</label>
+      <input type="text">
+
+      <!-- ACCIONES -->
+      <div class="acciones">
+
+        <button type="button">
+          <img src="../../recursos/img/nueva.png">
+          <span>Nuevo</span>
+          <small>F2</small>
+        </button>
+
+        <button type="button">
+          <img src="../../recursos/img/guardar.png">
+          <span>Guardar</span>
+          <small>F3</small>
+        </button>
+
+        <button type="button">
+          <img src="../../recursos/img/limpiar.png">
+          <span>Eliminar</span>
+          <small>Del</small>
+        </button>
+
+        <button type="button">
+          <img src="../../recursos/img/cancelar.png">
+          <span>Cancelar</span>
+          <small>F4</small>
+        </button>
+
+      </div>
+
+    </form>
+  </div>
+
+  <!-- PANEL DERECHO -->
+  <div class="panel panel-lista">
+
+    <input type="text" placeholder="Buscar producto..." class="buscador">
+
+    <div class="tabla-categorias">
+
+      <div class="tabla-header">
+        <span>ID</span>
+        <span>Producto</span>
+        <span>Cantidad</span>
+        <span>Costo</span>
+        <span>Total</span>
+      </div>
+
+      <div class="tabla-body">
+        <!-- filas dinámicas -->
+      </div>
+
+    </div>
+
+    <!-- TOTALES -->
+    <div class="totales">
+      <div class="line">
+        <span>Subtotal</span>
+        <b>Gs 0</b>
+      </div>
+
+      <div class="total">
+        <span>Total</span>
+        <b>Gs 0</b>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+function volver(){
+  window.location.href = "../../home.html";
+}
+</script>
+
+</body>
+</html>

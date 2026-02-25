@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Andy Closet | Venta</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="../../compartido/css/base.css" />
+  <link rel="stylesheet" href="venta.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <button class="btn-volver" onclick="volver()">←</button>
+  <div class="top-title">
+    <h1>Venta</h1>
+  </div>
+</header>
+
+<section class="categorias">
+
+  <div class="cat-grid" id="catGrid"></div>
+
+  <div class="cat-search">
+    <input id="buscador"
+           type="text"
+           placeholder="Buscar producto..."
+           onkeyup="cargarProductos()" />
+  </div>
+
+</section>
+
+<main class="venta-grid">
+
+  <!-- ================= CATALOGO ================= -->
+  <section class="catalogo">
+    <div id="productos" class="carrusel"></div>
+  </section>
+
+  <!-- ================= PANEL VENTA ================= -->
+  <aside class="venta-panel">
+    <div class="venta-card">
+
+      <!-- HEADER -->
+     <div class="venta-head">
+
+  <div class="venta-head-left">
+    <div class="venta-title-row">
+      <h3>Movimentación de venta</h3>
+      <span class="venta-estado estado-concluido">CONCLUIDO</span>
+    </div>
+    <div class="venta-sub">
+      Contado (rápida) · Cliente opcional
+    </div>
+  </div>
+
+<div class="venta-head-right">
+  <button class="btn-icon-img"
+          type="button"
+          onclick="abrirMovimientos()">
+    <img src="../../recursos/img/buscar.png">
+    <span>Buscar</span>
+  </button>
+
+  <button class="btn-icon-img"
+          type="button"
+          onclick="vaciarVenta()">
+    <img src="../../recursos/img/limpiar.png">
+    <span>Vaciar</span>
+  </button>
+</div>
+
+
+</div>
+
+
+      <!-- ================= FORMULARIO ================= -->
+      <div class="venta-form">
+
+        <div class="field">
+          <label>Fecha</label>
+          <input id="fechaVenta" type="date" />
+        </div>
+
+        <div class="field">
+          <label>Tipo</label>
+          <select id="tipoVenta">
+            <option value="CONTADO">Contado</option>
+            <option value="CREDITO">Crédito</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Pago</label>
+          <select id="formaPago">
+            <option value="EFECTIVO">Efectivo</option>
+            <option value="TRANSFERENCIA">Transferencia</option>
+            <option value="TARJETA">Tarjeta</option>
+          </select>
+        </div>
+
+        <div class="field field-cliente">
+          <label>Cliente</label>
+
+          <div class="cliente-row">
+            <input id="clienteCodigo"
+                   class="cliente-cod"
+                   type="text"
+                   inputmode="numeric"
+                   maxlength="3"
+                   placeholder="001"
+                   autocomplete="off" />
+
+            <input id="clienteNombre"
+                   class="cliente-nombre"
+                   type="text"
+                   placeholder="Consumidor final"
+                   disabled />
+
+            <button class="btn-icon"
+                    type="button"
+                    onclick="crearCliente()">
+              ＋
+            </button>
+
+               <button class="btn-icon" onclick="abrirBuscadorCliente()">
+  <img src="../../recursos/img/buscar.png" style="width:18px">
+</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ================= TABLA ================= -->
+      <div class="venta-tabla-wrap">
+
+        <div class="venta-tabla-head">
+          <div>Item</div>
+          <div>Producto</div>
+          <div>Cant.</div>
+          <div>P. Unit.</div>
+          <div>Subtotal</div>
+          <div></div>
+        </div>
+
+        <div id="ventaBody" class="venta-tabla-body">
+          <div class="venta-vacio">Carrito vacío</div>
+        </div>
+
+      </div>
+
+      <!-- ================= TOTALES ================= -->
+      <div class="venta-totales">
+
+        <div class="tot-line">
+          <span>Productos</span>
+          <b id="cantProductos">0</b>
+        </div>
+
+        <div class="tot-line">
+          <span>Items</span>
+          <b id="cantItems">0</b>
+        </div>
+
+        <div class="tot-line total">
+          <span>Total</span>
+          <b>Gs. <span id="total">0</span></b>
+        </div>
+
+      </div>
+
+      <!-- ================= ACCIONES ================= -->
+    <div class="venta-actions">
+
+<button class="btn-icon-img"
+
+          type="button"
+          onclick="nuevaVenta()">
+    <img src="../../recursos/img/nueva.png" alt="">
+    <span>Nueva</span>
+  </button>
+
+<button class="btn-icon-img"
+
+          type="button"
+          onclick="cancelarVenta()">
+    <img src="../../recursos/img/cancelar.png" alt="">
+    <span>Cancelar</span>
+  </button>
+
+
+<button class="btn-icon-img"
+        type="button"
+        onclick="imprimirVenta()">
+  <img src="../../recursos/img/imprimir.png" alt="">
+  <span>Imprimir</span>
+</button>
+
+<button class="btn-icon-img btn-main-icon"
+
+          type="button"
+          onclick="efectivizarVenta()">
+    <img src="../../recursos/img/efectivizar.png" alt="">
+    <span>Efectivizar</span>
+  </button>
+
+</div>
+
+
+    </div>
+  </aside>
+
+</main>
+
+<div id="toastWrap" class="toast-wrap"></div>
+
+<script src="venta.js"></script>
+
+<script>
+  function volver(){
+    window.location.href = "../../home.html";
+  }
+</script>
+
+</body>
+</html>

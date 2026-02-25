@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Andy Closet | Precio</title>
+
+  <link rel="stylesheet" href="../../compartido/css/base.css">
+  <link rel="stylesheet" href="precio.css">
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <button class="btn-volver" onclick="volver()">← Volver</button>
+  <div class="titulo">
+    <h1>Stop Top</h1>
+    <span>Precio del Producto</span>
+  </div>
+</div>
+
+<div class="precio-container">
+
+  <!-- PRODUCTO -->
+  <div class="panel panel-producto">
+    <button class="btn-buscar" onclick="abrirSelector()">
+      🔍 Buscar producto
+    </button>
+
+    <strong id="nombreProducto">---</strong>
+    <small id="descripcionProducto"></small>
+  </div>
+
+  <!-- PRECIO -->
+  <div class="panel panel-precio">
+    <form id="formPrecio">
+
+      <input type="hidden" id="producto_id">
+
+      <div class="fila">
+        <label>Compra</label>
+        <input type="text" id="precioCompra" inputmode="numeric" required>
+      </div>
+
+      <div class="fila">
+        <label>Transporte</label>
+        <input type="text" id="costoTransporte" inputmode="numeric">
+      </div>
+
+      <hr>
+
+      <!-- TABLA -->
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>Tipo</th>
+            <th>%</th>
+            <th>Precio</th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <tr data-tipo="venta">
+            <td>Venta</td>
+            <td>
+              <input
+                type="number"
+                class="margen"
+                step="0.01"
+                min="0"
+                inputmode="decimal"
+              >
+            </td>
+            <td>
+              <input type="text" class="precio" inputmode="numeric">
+            </td>
+          </tr>
+
+          <tr data-tipo="minimo">
+            <td>Mínimo</td>
+            <td>
+              <input
+                type="number"
+                class="margen"
+                step="0.01"
+                min="0"
+                inputmode="decimal"
+              >
+            </td>
+            <td>
+              <input type="text" class="precio" inputmode="numeric">
+            </td>
+          </tr>
+
+          <tr data-tipo="promo">
+            <td>Promo</td>
+            <td>
+              <input
+                type="number"
+                class="margen"
+                step="0.01"
+                min="0"
+                inputmode="decimal"
+              >
+            </td>
+            <td>
+              <input type="text" class="precio" inputmode="numeric">
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+
+      <button type="submit" class="btn-guardar">
+        Guardar Precio
+      </button>
+
+    </form>
+  </div>
+
+</div>
+
+<script src="precio.js"></script>
+</body>
+</html>

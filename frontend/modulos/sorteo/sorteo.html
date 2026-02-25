@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Sorteo Promocional - Andy Closet</title>
+
+  <link rel="stylesheet" href="../../compartido/css/base.css">
+  <link rel="stylesheet" href="sorteo.css">
+</head>
+<body>
+
+<!-- ================= TOPBAR ================= -->
+<header class="topbar">
+  <button class="btn-volver" onclick="volver()">← Volver</button>
+  <div>
+    <h1>Stop Top</h1>
+    <span>Sorteo Promocional</span>
+  </div>
+</header>
+
+<main class="sorteo-layout">
+
+  <!-- ================= PANEL PARTICIPANTES ================= -->
+ <section class="panel panel-participantes">
+
+  <h2 class="titulo-panel">
+    <img src="../../recursos/img/participantes.png" alt="Participantes">
+    Participantes
+  </h2>
+
+  <!-- CONFIG GENERAL -->
+  <div class="bloque bloque-config">
+    <label for="cantidadSorteos"><strong>Cantidad de sorteos</strong></label>
+
+    <div class="config-row">
+      <select id="cantidadSorteos">
+        <option value="1">1 sorteo</option>
+        <option value="2">2 sorteos</option>
+        <option value="3" selected>3 sorteos</option>
+        <option value="4">4 sorteos</option>
+        <option value="5">5 sorteos</option>
+        <option value="6">6 sorteos</option>
+        <option value="7">7 sorteos</option>
+        <option value="8">8 sorteos</option>
+        <option value="9">9 sorteos</option>
+        <option value="10">10 sorteos</option>
+      </select>
+
+      <button class="btn-secundario btn-aplicar" onclick="aplicarCantidadSorteos()">
+        Aplicar
+      </button>
+    </div>
+  </div>
+
+  <!-- ACCIONES GLOBALES -->
+  <div class="bloque bloque-acciones">
+  
+  <button class="btn-secundario" onclick="abrirModalClientes()">
+  ➕ Cargar clientes
+</button>
+
+  </div>
+
+  <!-- AGREGAR PARTICIPANTE -->
+  <div class="bloque bloque-agregar">
+    <div class="input-row">
+      <input
+        type="text"
+        id="nombreParticipante"
+        placeholder="Buscar cliente o escribir nombre…"
+        onkeydown="handleEnter(event)"
+      >
+      <button class="btn-agregar" onclick="agregarParticipante()">Agregar</button>
+    </div>
+  </div>
+
+  <!-- RESUMEN -->
+  <div class="bloque bloque-resumen">
+    <div class="total-principal">
+      <span id="totalActual"></span>
+      <small id="textoTotal">participantes en este sorteo</small>
+    </div>
+  </div>
+
+  <!-- OPCIONES -->
+  <label class="check-duplicados">
+    <input type="checkbox" id="permitirDuplicados">
+    Permitir participantes duplicados
+  </label>
+
+  <!-- LISTA -->
+  <ul id="listaParticipantes"></ul>
+
+</section>
+
+
+  <!-- ================= RULETA ================= -->
+  <section class="ruleta-container">
+
+    <!--  ETAPAS (DINÁMICO) -->
+    <div class="etapas" id="etapas"></div>
+
+    <!-- RULETA + PUNTERO -->
+    <div class="ruleta-wrapper">
+      <div class="puntero">▼</div>
+      <canvas id="ruleta" width="500" height="500"></canvas>
+    </div>
+
+    <!-- BOTONES -->
+    <button class="btn-girar" id="btnGirar" onclick="girar()">GIRAR</button>
+    <button class="btn-nuevo-sorteo" onclick="nuevoSorteo()">Nuevo Sorteo</button>
+
+    <!--  RESUMEN GANADORES (DINÁMICO) -->
+    <div class="resumen-sorteos" id="resumenSorteos"></div>
+
+  </section>
+</main>
+
+<!-- ================= MODAL GANADOR ================= -->
+<div id="modalGanador" class="modal hidden">
+  <div class="modal-content">
+    <h2 class="titulo-modal">
+      <img src="img/felicitaciones.png" alt="Felicitaciones">
+      <span id="tituloModal">¡FELICITACIONES!</span>
+    </h2>
+    <p id="nombreGanador"></p>
+    <button onclick="cerrarModal()">Cerrar</button>
+  </div>
+</div>
+
+<!-- ================= MODAL NUEVO SORTEO ================= -->
+<div id="modalConfirmar" class="modal hidden">
+  <div class="modal-content">
+    <h2>🔄 Nuevo sorteo</h2>
+    <p>¿Deseas iniciar un nuevo sorteo?<br>Se borrarán todos los participantes.</p>
+    <div class="modal-actions">
+      <button class="btn-secundario" onclick="cerrarConfirmacion()">Cancelar</button>
+      <button class="btn-girar" onclick="confirmarNuevoSorteo()">Sí, iniciar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MODAL DUPLICADO ================= -->
+<div id="modalDuplicado" class="modal hidden">
+  <div class="modal-content">
+    <h2>⚠️ Atención</h2>
+    <p>Este participante ya está cargado.</p>
+    <div class="modal-actions">
+      <button class="btn-girar" onclick="cerrarDuplicado()">Aceptar</button>
+    </div>
+  </div>
+</div>
+
+
+<div id="modalClientes" class="modal hidden">
+  <div class="modal-content modal-clientes">
+
+    <h2>Seleccionar clientes</h2>
+
+    <input
+      type="text"
+      id="buscarCliente"
+      placeholder="Buscar cliente..."
+      oninput="filtrarClientesModal()"
+    >
+
+    <label class="check-todos">
+      <input type="checkbox" onclick="seleccionarTodosClientes(this)">
+      Seleccionar todos
+    </label>
+
+<div class="clientes-header">
+  <span></span>
+  <span>ID</span>
+  <span>Nombre</span>
+  <span>Correo</span>
+</div>
+
+<div id="listaClientesModal" class="lista-clientes-modal"></div>
+
+
+    <div class="modal-actions">
+      <button class="btn-secundario" onclick="cerrarModalClientes()">Cancelar</button>
+      <button class="btn-girar" onclick="agregarClientesSeleccionados()">
+        Agregar al sorteo
+      </button>
+    </div>
+
+  </div>
+</div>
+
+
+
+
+<script src="sorteo.js"></script>
+
+<script>
+function volver() {
+  window.location.href = "../../home.html";
+}
+</script>
+
+</body>
+</html>

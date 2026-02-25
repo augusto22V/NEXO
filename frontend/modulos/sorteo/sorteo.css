@@ -1,0 +1,558 @@
+/* =========================
+   LAYOUT GENERAL
+========================= */
+.sorteo-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 40px;
+  padding: 40px;
+}
+
+
+/* =========================
+   RULETA
+========================= */
+.ruleta-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+canvas {
+    width: 520px;
+  height: 520px;  
+  display: block;
+  background: #a09e9e;
+  border-radius: 50%;
+  box-shadow: 0 18px 40px rgba(0,0,0,.18);
+}
+
+.ruleta-wrapper {
+  margin-top: 30px;  
+  position: relative;
+}
+
+.btn-nuevo-sorteo {
+  margin-top: 12px;          /* separación del botón GIRAR */
+  background: none;         /* estilo secundario */
+  border: none;
+  color: #000000;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+
+  transition: opacity 0.2s ease, transform 0.15s ease;
+}
+
+.btn-nuevo-sorteo:hover {
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+.btn-nuevo-sorteo:active {
+  transform: scale(0.97);
+}
+
+
+/* =========================
+   PUNTERO
+========================= */
+.puntero {
+  position: absolute;
+  top: -28px;              /* altura sobre la rueda */
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 28px;
+  color: var(--color-acento);
+  z-index: 10;
+  pointer-events: none;
+  text-shadow: 0 3px 8px rgba(0,0,0,.25);
+}
+/* =========================
+   BOTÓN GIRAR
+========================= */
+.btn-girar {
+  margin-top: 36px;
+  padding: 14px 40px;
+  background: linear-gradient(135deg, var(--color-acento), #0f7a32);
+  color: #fff;
+  border-radius: 40px;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(22,163,74,0.35);
+  transition: all .2s ease;
+}
+
+.btn-girar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(22,163,74,0.45);
+}
+
+.btn-girar:active {
+  transform: scale(.97);
+}
+
+
+/* =========================
+   MODAL GANADOR
+========================= */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-content {
+  background: white;
+  padding: 30px 40px;
+  border-radius: 24px;
+  text-align: center;
+  animation: pop 0.4s ease;
+}
+
+.modal-content h2 {
+  color: #000000;
+  margin-bottom: 10px;
+}
+
+.modal-content p {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+/* =========================
+   ANIMACIÓN
+========================= */
+@keyframes pop {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+@media (max-width: 900px) {
+  .sorteo-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .ruleta-container {
+  margin-top: 0;
+
+  }
+}
+.btn-secundario {
+  margin-top: 10px;
+  padding: 10px 30px;
+  background: #eee;
+  border-radius: 30px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+
+.input-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+  width: 100%;
+}
+
+.input-row input {
+  flex: 1;
+  min-width: 0; 
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  outline: none;
+}
+
+
+.input-row input:focus {
+  border-color: var(--color-acento);
+}
+
+.btn-agregar {
+  background: var(--color-acento);
+  color: #fff;
+}
+
+.btn-agregar:hover {
+  background: #0f7a32;
+}
+
+/* CHECKBOX */
+.check-duplicados {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #444;
+  margin-bottom: 12px;
+}
+
+.check-duplicados input {
+  accent-color: var(--color-acento);
+}
+
+
+#nombreGanador {
+  font-size: 25px;
+  font-weight: 700;
+  color: #111010;
+  margin: 15px 0 25px;
+  text-align: center;
+}
+.modal-content button {
+  background: var(--color-acento);
+  color: #fff;
+}
+
+.modal-content button:hover {
+  background: #0f7a32;
+}
+
+
+.modal-content p {
+  font-size: 15px;
+  color: #444;
+  line-height: 1.4;
+}
+.titulo-panel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 20px;    
+  font-weight: 700;
+  margin-bottom: 18px;   
+}
+
+.titulo-panel img {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+}
+.titulo-modal {
+  color: var(--color-acento);
+}
+
+.titulo-modal img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+
+
+/* =========================
+   ETAPAS DE SORTEO (PRO)
+========================= */
+.etapas {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.etapa {
+  padding: 6px 14px;
+  border-radius: 18px;
+  background: #eee;
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+}
+
+.etapa.activa {
+  background: var(--color-acento);
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(22,163,74,0.35);
+}
+
+.flecha {
+  font-size: 14px;
+  color: #999;
+}
+/* =========================
+   RESUMEN DE SORTEOS
+========================= */
+.resumen-sorteos {
+  background: #fafafa;
+    margin-top: 16px;  
+  border-radius: 14px;
+  padding: 12px 18px;
+  font-size: 13px;
+  color: #444;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 14px;
+  margin-bottom: 14px;
+  box-shadow: 0 6px 16px rgba(0,0,0,.06);
+}
+
+.resumen-sorteos strong {
+  color: var(--color-acento);
+}
+
+.flecha {
+  color: #999;
+}
+
+
+/* =========================
+   CONFIG (cantidad sorteos)
+========================= */
+.config-row{
+  display:flex;
+   align-items:flex-start;
+  align-items:center;
+  gap:10px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-aplicar {
+  margin-top: -2px;   /* probá -2px o -3px */
+}
+
+
+#cantidadSorteos{
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  outline: none;
+  font-size: 14px;
+}
+
+.btn-aplicar{
+  padding: 10px 16px;
+  border-radius: 12px;
+}
+.btn-cargar-clientes {
+  width: 100%;
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* =========================
+   ETAPAS DE SORTEO
+========================= */
+.etapas {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  margin-top: -35px;   /* 🔼 SUBE las etapas */
+  margin-bottom: 10px;
+}
+
+
+.etapa {
+  padding: 6px 14px;
+  border-radius: 18px;
+  background: #eee;
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.flecha {
+  font-size: 14px;
+  color: #999;
+}
+
+
+
+/* =========================
+   BLOQUES PANEL PARTICIPANTES
+========================= */
+
+.bloque {
+  margin-bottom: 18px;
+}
+
+.bloque-config label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  color: #333;
+}
+
+.bloque-acciones {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bloque-agregar {
+  margin-top: 6px;
+}
+
+.bloque-resumen {
+  background: #fff;
+  border-radius: 14px;
+  padding: 10px 14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,.05);
+}
+
+.total-principal {
+  text-align: center;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.total-principal span {
+  font-size: 18px;
+  color: var(--color-acento);
+}
+
+.modal-clientes {
+  max-width: 620px;
+    width: 100%;
+}
+
+.lista-clientes-modal {
+  max-height: 260px;
+  overflow-y: auto;
+  margin: 10px 0;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  padding: 8px;
+}
+
+.cliente-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 6px 0;
+}
+
+.check-todos {
+  font-size: 13px;
+  margin: 8px 0;
+}
+.cliente-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.cliente-extra {
+  font-size: 12px;
+  color: #777;
+}
+.cliente-nombre {
+  font-weight: 600;
+}
+/* ====== HEADER TABLA CLIENTES ====== */
+.clientes-header {
+  display: grid;
+  grid-template-columns: 24px 50px 1fr 1fr;
+  gap: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #666;
+  padding: 6px 8px;
+  border-bottom: 1px solid #ddd;
+  margin-top: 10px;
+}
+
+/* ====== FILAS ====== */
+.cliente-row {
+  display: grid;
+  grid-template-columns: 24px 50px 1fr 1fr;
+  gap: 10px;
+  align-items: center;
+  padding: 6px 8px;
+  font-size: 13px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.cliente-row:hover {
+  background: #fafafa;
+}
+
+/* COLUMNAS */
+.col-id {
+  color: #555;
+  font-size: 12px;
+}
+
+.col-nombre {
+  font-weight: 600;
+  color: #222;
+}
+
+.col-correo {
+  font-size: 12px;
+  color: #777;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ===== BOTONES MODAL CLIENTES ===== */
+
+.modal-clientes .modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.modal-clientes .modal-actions button {
+  min-width: 150px;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Cancelar */
+.modal-clientes .btn-secundario {
+  background: #e5e7eb;
+  color: #333;
+}
+
+.modal-clientes .btn-secundario:hover {
+  background: #d1d5db;
+}
+
+/* Agregar */
+.modal-clientes .btn-girar {
+  background: linear-gradient(135deg, var(--color-acento), #0f7a32);
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(22,163,74,0.25);
+}
+
+.modal-clientes .btn-girar:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(22,163,74,0.35);
+}
+
+.modal-clientes .modal-actions {
+  margin-top: 22px;
+}

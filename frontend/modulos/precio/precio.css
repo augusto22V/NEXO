@@ -1,0 +1,137 @@
+.precio-container {
+  max-width: 720px;
+  margin: 25px auto;
+  display: grid;
+  gap: 18px;
+}
+
+/* ===== PANEL ===== */
+.panel {
+  background: #ffffff;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* ===== PRODUCTO ===== */
+.panel-producto strong {
+  font-size: 17px;
+  color: #1b1b1b;
+}
+
+.panel-producto small {
+  display: block;
+  color: #777;
+  margin-top: 4px;
+}
+
+/* ===== FILAS ===== */
+.fila {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.fila label {
+  width: 95px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #444;
+}
+
+.fila input {
+  flex: 1;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  background: #fafafa;
+  transition: 0.2s;
+}
+
+.fila input:focus {
+  border-color: #4caf50;
+  background: #fff;
+  outline: none;
+}
+
+/* ===== TABLA ===== */
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+}
+
+.tabla th {
+  font-size: 13px;
+  color: #666;
+  padding-bottom: 6px;
+}
+
+.tabla td {
+  padding: 6px;
+  border-bottom: 1px solid #eee;
+}
+
+.tabla input {
+  width: 100%;
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  background: #fafafa;
+  text-align: right;
+}
+
+.tabla input:focus {
+  border-color: #4caf50;
+  background: #fff;
+}
+
+/* ===== BOTON GUARDAR ===== */
+.btn-guardar {
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  font-size: 14px;
+  background: linear-gradient(135deg, #43a047, #2e7d32);
+  color: white;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-guardar:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+}
+
+/* ===== BOTON BUSCAR ===== */
+.btn-buscar {
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: none;
+  background: #f0f0f0;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.btn-buscar:hover {
+  background: #e0e0e0;
+}
+
+/* ===== BOTON VOLVER ===== */
+.btn-volver {
+  background: rgba(255,255,255,0.25);
+  border: none;
+  color: white;
+  padding: 6px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-volver:hover {
+  background: rgba(255,255,255,0.4);
+}

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Stop Top | Productos</title>
+
+  <link rel="stylesheet" href="../../compartido/css/base.css">
+  <link rel="stylesheet" href="productos.css">
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <button class="btn-volver" onclick="volver()">← Volver</button>
+
+  <div class="titulo">
+    <h1>Stop Top</h1>
+    <span id="moduloTitulo">Producto</span>
+  </div>
+</div>
+
+<div class="admin-container">
+
+  <!-- PANEL IZQUIERDO / FORM -->
+  <div class="panel panel-form">
+    <h2>Producto</h2>
+
+    <form id="formProducto" enctype="multipart/form-data">
+
+      <!-- ID interno (por si querés usar luego) -->
+      <input type="hidden" id="productoId">
+
+      <div class="form-grid">
+
+        <!-- COLUMNA CAMPOS -->
+        <div class="form-fields">
+
+          <label>Código</label>
+         <input type="text" id="codigoProducto" inputmode="numeric" pattern="[0-9]*">
+
+          <label>Nombre</label>
+          <input type="text" name="nombre" id="nombreProducto" required>
+
+          <label>Descripción</label>
+          <textarea name="descripcion" id="descripcionProducto"></textarea>
+
+          <label>Precio de venta</label>
+          <div class="precio-row">
+            <input type="text" id="precioVenta" name="precio_venta" placeholder="Definir precio"> 
+            <button type="button" class="btn-precio" onclick="irAPrecio()" title="Definir / modificar precio">💲</button>
+          </div>
+
+          <label>IVA</label>
+          <select name="iva_tipo" id="ivaProducto" required>
+            <option value="10">IVA 10%</option>
+            <option value="5">IVA 5%</option>
+            <option value="0">Exento</option>
+          </select>
+
+       
+          <label>Categoría</label>
+          <div class="categoria-row">
+            <input
+              type="number"
+              id="categoriaIdInput"
+              placeholder="ID"
+              min="1"
+              class="categoria-id"
+            >
+            <select name="categoria_id" id="categoriaSelect" ></select>
+            <button type="button" class="btn-add" onclick="irACategorias()" title="Ir a categorías">+</button>
+          </div>
+
+          <label>Imagen</label>
+          <input type="file" id="imagenProducto" name="imagen" accept="image/*">
+
+          <!-- ACCIONES (ESTILO CATEGORÍAS) -->
+          <div class="acciones acciones-iconos">
+
+            <button type="button" id="btnNuevo" onclick="nuevoProducto()" title="Nuevo">
+              <img src="../../recursos/img/nueva.png" alt="">
+              <span>Nuevo</span>
+              <small>F2</small>
+            </button>
+
+            <button type="submit" id="btnGuardar" title="Guardar" disabled>
+              <img src="../../recursos/img/guardar.png" alt="">
+              <span>Guardar</span>
+              <small>F3</small>
+            </button>
+
+            <button type="button" id="btnEliminar" onclick="eliminarProducto()" title="Eliminar" disabled>
+              <img src="../../recursos/img/limpiar.png" alt="">
+              <span>Eliminar</span>
+              <small>Del</small>
+            </button>
+
+            <button type="button" id="btnCancelar" onclick="cancelarProducto()" title="Cancelar" disabled>
+              <img src="../../recursos/img/cancelar.png" alt="">
+              <span>Cancelar</span>
+              <small>F4</small>
+            </button>
+
+          </div>
+
+        </div>
+
+        <!-- COLUMNA PREVIEW -->
+        <div class="preview-wrapper">
+          <div class="preview-title">Vista previa</div>
+
+          <div class="preview-box">
+            <img id="previewImagen" src="" alt="">
+            <span id="previewPlaceholder">Sin imagen</span>
+          </div>
+        </div>
+
+      </div>
+    </form>
+  </div>
+
+
+<!-- PANEL LISTA -->
+<div class="panel panel-lista">
+
+  <input
+    type="text"
+    id="buscadorProductos"
+    placeholder=" Buscar producto..."
+    class="buscador"
+  >
+
+  <div class="tabla-productos">
+
+    <div class="tabla-header">
+      <span>ID</span>
+      <span>Nombre</span>
+      <span>Precio Costo</span>
+      <span>Precio Venta</span>
+      <span>Stock</span>
+      <span>Categoría</span>
+    </div>
+
+    <div id="listaProductos" class="tabla-body"></div>
+
+  </div>
+
+</div>
+
+</div>
+
+<!-- MODAL CONFIRMACION GLOBAL -->
+<div id="modalEliminar" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="modal-icon">🗑️</div>
+
+    <h3 class="modal-title">Confirmar eliminación</h3>
+
+    <p class="modal-text"></p>
+
+    <p class="modal-nombre hidden"></p>
+
+    <div class="modal-actions">
+      <button class="btn-cancelar" onclick="cerrarModalEliminar()">Cancelar</button>
+      <button class="btn-eliminar">Eliminar</button>
+    </div>
+  </div>
+</div>
+<!-- MODAL ADVERTENCIA GLOBAL -->
+<div id="modalAdvertencia" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="modal-icon">⚠️</div>
+
+    <h3 class="modal-title">Atención</h3>
+
+    <p class="modal-text"></p>
+
+    <div class="modal-actions center">
+      <button class="btn-aceptar" onclick="cerrarAdvertencia()">Aceptar</button>
+    </div>
+  </div>
+</div>
+
+<!-- modal compartido -->
+<script src="../../compartido/js/baseModal.js"></script>
+<script src="productos.js"></script>
+
+<script>
+function volver() {
+  window.location.href = "../../home.html";
+}
+
+function irACategorias() {
+  location.href = "../categorias/categorias.html?from=producto";
+
+}
+</script>
+
+</body>
+</html>

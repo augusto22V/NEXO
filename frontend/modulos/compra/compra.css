@@ -1,0 +1,137 @@
+/* =========================
+   LAYOUT
+========================= */
+
+.admin-container{
+  display:grid;
+  grid-template-columns:420px 1fr;
+  gap:24px;
+  padding:24px;
+  height:calc(100vh - 120px);
+}
+
+@media(max-width:1000px){
+  .admin-container{
+    grid-template-columns:1fr;
+    height:auto;
+  }
+}
+
+/* =========================
+   PANEL
+========================= */
+
+.panel{
+  background:#fff;
+  border-radius:18px;
+  padding:22px;
+  box-shadow:0 10px 30px rgba(0,0,0,.08);
+}
+
+/* =========================
+   FORM
+========================= */
+
+.panel-form form{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+/* =========================
+   ACCIONES
+========================= */
+
+.acciones{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+  margin-top:20px;
+}
+
+.acciones button{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px 14px;
+  border-radius:14px;
+  font-size:14px;
+  font-weight:500;
+  background:var(--color-principal);
+  color:white;
+}
+
+.acciones button img{
+  width:22px;
+  height:22px;
+}
+
+.acciones button:hover{
+  transform:translateY(-1px);
+  box-shadow:0 4px 10px rgba(0,0,0,.15);
+}
+
+/* =========================
+   LISTA
+========================= */
+
+.panel-lista{
+  display:flex;
+  flex-direction:column;
+  height:100%;
+  overflow:hidden;
+}
+
+.buscador{
+  width:100%;
+  margin-bottom:16px;
+  padding:10px 12px 10px 36px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  font-size:14px;
+
+  background-image:url("../../recursos/img/buscar.png");
+  background-repeat:no-repeat;
+  background-position:10px center;
+  background-size:16px;
+}
+
+/* =========================
+   TABLA
+========================= */
+
+.tabla-header{
+  display:grid;
+  grid-template-columns:80px 1fr 120px 120px 120px;
+  background:#f0f0f0;
+  padding:12px 14px;
+  font-weight:600;
+  border-bottom:1px solid #ddd;
+}
+
+.tabla-body{
+  flex:1;
+  overflow-y:auto;
+}
+
+/* =========================
+   TOTALES
+========================= */
+
+.totales{
+  margin-top:16px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.line{
+  display:flex;
+  justify-content:space-between;
+}
+
+.total{
+  font-weight:600;
+  border-top:1px solid #ddd;
+  padding-top:6px;
+}
