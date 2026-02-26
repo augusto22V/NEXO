@@ -1,130 +1,225 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <title>Stop Top | Compra</title>
 
+  <!-- estilos base del sistema -->
   <link rel="stylesheet" href="../../compartido/css/base.css">
+
+  <!-- estilos globales -->
+  <link rel="stylesheet" href="../../css/home.css">
+
+  <!-- estilos específicos del módulo -->
   <link rel="stylesheet" href="compra.css">
 </head>
 
 <body>
 
-<!-- TOPBAR -->
-<div class="topbar">
-  <button class="btn-volver" onclick="volver()">← Volver</button>
+  <!-- ===== TOPBAR ===== -->
+  <div class="topbar">
 
-  <div class="titulo">
-    <h1>Stop Top</h1>
-    <span id="moduloTitulo">Compra</span>
-  </div>
-</div>
+    <button class="btn-volver" onclick="volver()">
+      <img src="../../recursos/img/volver.png">
+      Volver
+    </button>
 
-<div class="admin-container">
-
-  <!-- PANEL IZQUIERDO -->
-  <div class="panel panel-form">
-    <h2>Datos de compra</h2>
-
-    <form>
-
-      <label>Fecha</label>
-      <input type="date">
-
-      <label>Proveedor</label>
-      <input type="text" placeholder="Buscar proveedor">
-
-      <label>Tipo</label>
-      <select>
-        <option>Contado</option>
-        <option>Crédito</option>
-      </select>
-
-      <label>Forma de pago</label>
-      <select>
-        <option>Efectivo</option>
-        <option>Transferencia</option>
-        <option>Tarjeta</option>
-      </select>
-
-      <label>Observación</label>
-      <input type="text">
-
-      <!-- ACCIONES -->
-      <div class="acciones">
-
-        <button type="button">
-          <img src="../../recursos/img/nueva.png">
-          <span>Nuevo</span>
-          <small>F2</small>
-        </button>
-
-        <button type="button">
-          <img src="../../recursos/img/guardar.png">
-          <span>Guardar</span>
-          <small>F3</small>
-        </button>
-
-        <button type="button">
-          <img src="../../recursos/img/limpiar.png">
-          <span>Eliminar</span>
-          <small>Del</small>
-        </button>
-
-        <button type="button">
-          <img src="../../recursos/img/cancelar.png">
-          <span>Cancelar</span>
-          <small>F4</small>
-        </button>
-
-      </div>
-
-    </form>
-  </div>
-
-  <!-- PANEL DERECHO -->
-  <div class="panel panel-lista">
-
-    <input type="text" placeholder="Buscar producto..." class="buscador">
-
-    <div class="tabla-categorias">
-
-      <div class="tabla-header">
-        <span>ID</span>
-        <span>Producto</span>
-        <span>Cantidad</span>
-        <span>Costo</span>
-        <span>Total</span>
-      </div>
-
-      <div class="tabla-body">
-        <!-- filas dinámicas -->
-      </div>
-
-    </div>
-
-    <!-- TOTALES -->
-    <div class="totales">
-      <div class="line">
-        <span>Subtotal</span>
-        <b>Gs 0</b>
-      </div>
-
-      <div class="total">
-        <span>Total</span>
-        <b>Gs 0</b>
-      </div>
+    <div class="titulo">
+      <h1>Stop Top</h1>
+      <span id="moduloTitulo">Compra</span>
     </div>
 
   </div>
 
+  <!-- ===== CONTENEDOR PRINCIPAL ===== -->
+  <div class="admin-container">
+
+    <!-- ===== PANEL IZQUIERDO ===== -->
+    <div class="panel panel-form">
+
+      <h2>Datos de Compra</h2>
+
+      <form id="formCompra">
+
+        <!-- ===== FECHA ===== -->
+        <div class="cab-row">
+          <label>Fecha</label>
+          <input type="date" id="fecha">
+        </div>
+
+        <!-- ===== PROVEEDOR ===== -->
+        <div class="cab-row">
+          <label>Proveedor</label>
+
+          <div class="input-dual">
+
+            <input type="text"
+                   id="proveedorCodigo"
+                   placeholder="Código"
+                   class="input-codigo">
+
+            <input type="text"
+                   id="proveedorNombre"
+                   placeholder="Nombre proveedor"
+                   readonly>
+
+            <button type="button"
+                    class="btn-mini"
+                    onclick="buscarProveedor()">
+              <img src="../../recursos/img/buscar.png">
+            </button>
+
+
+          </div>
+        </div>
+
+        <!-- ===== COMPRADOR ===== -->
+        <div class="cab-row">
+          <label>Comprador</label>
+
+          <div class="input-dual">
+
+            <input type="text"
+                   id="compradorCodigo"
+                   placeholder="Código"
+                   class="input-codigo">
+
+            <input type="text"
+                   id="compradorNombre"
+                   placeholder="Nombre comprador"
+                   readonly>
+
+            <button type="button"
+                    class="btn-mini"
+                    onclick="buscarComprador()">
+              <img src="../../recursos/img/buscar.png">
+            </button>
+
+           
+
+          </div>
+        </div>
+
+        <!-- ===== ESTADO ===== -->
+        <div class="cab-row">
+          <label>Estado</label>
+          <div class="estado-badge">ABIERTA</div>
+        </div>
+
+        <!-- ===== ACCIONES ===== -->
+        <div class="acciones">
+
+          <button type="button" id="btnNuevo" onclick="nuevaCompra()">
+            <img src="../../recursos/img/nueva.png">
+            <span>Nuevo</span>
+          </button>
+
+          <button type="button" id="btnGuardar" onclick="guardarCompra()">
+            <img src="../../recursos/img/guardar.png">
+            <span>Guardar</span>
+          </button>
+
+          <button type="button" id="btnEfectivar" onclick="efectivar()">
+            <img src="../../recursos/img/efectivizar.png">
+            <span>Efectivar</span>
+          </button>
+
+          <button type="button" id="btnCancelar" onclick="cancelarCompra()">
+            <img src="../../recursos/img/cancelar.png">
+            <span>Cancelar</span>
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+    <!-- ===== PANEL DERECHO ===== -->
+    <div class="panel panel-lista">
+
+      <h2>Detalle de Productos</h2>
+      
+     <!-- CARGA PRODUCTO -->
+    <div class="detalle-bar">
+
+  <div class="producto-dual">
+
+    <input type="text"
+           id="productoCodigo"
+           class="input-codigo"
+           placeholder="Código">
+
+    <input type="text"
+           id="productoDescripcion"
+           placeholder="Descripción del producto"
+           readonly>
+
+    <button type="button"
+            class="btn-mini"
+            onclick="buscarProducto()">
+      <img src="../../recursos/img/buscar.png">
+    </button>
+
+  </div>
+
+  <input type="number"
+         id="cantidad"
+         class="input-cant"
+         placeholder="Cant">
+
+  <div class="costo-box">
+    <select id="moneda">
+      <option value="PYG">Gs</option>
+      <option value="BRL">R$</option>
+      <option value="USD">$</option>
+    </select>
+
+    <input type="number"
+           id="costo"
+           class="input-costo"
+           placeholder="Costo">
+  </div>
+
 </div>
 
-<script>
-function volver(){
-  window.location.href = "../../home.html";
-}
-</script>
+  
+      <!-- TABLA -->
+      <div class="tabla-compra">
+
+        <div class="tabla-header">
+          <span>#</span>
+          <span>Producto</span>
+          <span>Cantidad</span>
+          <span>Costo</span>
+          <span>Total</span>
+          <span></span>
+        </div>
+
+        <div id="detalleBody" class="tabla-body"></div>
+
+  
+      <!-- TOTAL -->
+      <div class="compra-total">
+        TOTAL: <span id="totalCompra">Gs 0</span>
+      </div>
+
+    </div>
+    </div>
+    </div>
+  </div>
+
+  <!-- ===== SCRIPTS ===== -->
+  <script src="compra.js"></script>
+
+  <script>
+    function volver() {
+      window.location.href = "../../home.html";
+    }
+
+    document.getElementById("moduloTitulo").textContent = "Compra";
+  </script>
 
 </body>
 </html>

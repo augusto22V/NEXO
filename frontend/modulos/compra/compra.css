@@ -1,137 +1,363 @@
-/* =========================
-   LAYOUT
-========================= */
-
-.admin-container{
-  display:grid;
-  grid-template-columns:420px 1fr;
-  gap:24px;
-  padding:24px;
-  height:calc(100vh - 120px);
+/* ============================.topbar .titulo {
+= */
+/* ===== CONTENEDOR GENERAL ===== */
+/* ============================= */
+.admin-container {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 24px;
+  padding: 18px 28px 28px 28px; /* 👈 menos arriba */
+  min-height: calc(100vh - 80px);
+  background: #f4f6f9;
 }
 
-@media(max-width:1000px){
-  .admin-container{
-    grid-template-columns:1fr;
-    height:auto;
-  }
+.titulo {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* 👈 ya no pegado extremo */
+  margin-right: 20px;
+}
+.titulo {
+  margin-right: 100px;
 }
 
-/* =========================
-   PANEL
-========================= */
-
-.panel{
-  background:#fff;
-  border-radius:18px;
-  padding:22px;
-  box-shadow:0 10px 30px rgba(0,0,0,.08);
+/* ============================= */
+/* ===== TOPBAR PREMIUM ===== */
+/* ============================= */
+.topbar {
+  background: #1F1F1F;
+  padding: 16px 40px;
+  display: flex;
+  align-items: center;
+  position: relative; /* IMPORTANTE */
 }
 
-/* =========================
-   FORM
-========================= */
-
-.panel-form form{
-  display:flex;
-  flex-direction:column;
-  gap:8px;
+.topbar h1 {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: .5px;
 }
 
-/* =========================
-   ACCIONES
-========================= */
-
-.acciones{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:10px;
-  margin-top:20px;
+#moduloTitulo {
+  color: #7ED957;
+  font-weight: 600;
 }
 
-.acciones button{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:12px 14px;
-  border-radius:14px;
-  font-size:14px;
-  font-weight:500;
-  background:var(--color-principal);
-  color:white;
+.titulo {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
 }
 
-.acciones button img{
-  width:22px;
-  height:22px;
+.titulo h1 {
+  margin: 0;
 }
 
-.acciones button:hover{
-  transform:translateY(-1px);
-  box-shadow:0 4px 10px rgba(0,0,0,.15);
+#moduloTitulo {
+  display: block;
+  margin-top: 2px;
 }
 
-/* =========================
-   LISTA
-========================= */
 
-.panel-lista{
-  display:flex;
-  flex-direction:column;
-  height:100%;
-  overflow:hidden;
+/* ============================= */
+/* ===== BOTÓN VOLVER ===== */
+/* ============================= */
+.btn-volver {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,.12);
+  border: none;
+  color: white;
+  padding: 7px 16px;
+  border-radius: 22px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all .2s ease;
 }
 
-.buscador{
-  width:100%;
-  margin-bottom:16px;
-  padding:10px 12px 10px 36px;
-  border-radius:8px;
-  border:1px solid #ccc;
-  font-size:14px;
-
-  background-image:url("../../recursos/img/buscar.png");
-  background-repeat:no-repeat;
-  background-position:10px center;
-  background-size:16px;
+.btn-volver img {
+  width: 14px;
 }
 
-/* =========================
-   TABLA
-========================= */
-
-.tabla-header{
-  display:grid;
-  grid-template-columns:80px 1fr 120px 120px 120px;
-  background:#f0f0f0;
-  padding:12px 14px;
-  font-weight:600;
-  border-bottom:1px solid #ddd;
+.btn-volver:hover {
+  background: rgba(255,255,255,.25);
+  transform: translateY(-1px);
 }
 
-.tabla-body{
-  flex:1;
-  overflow-y:auto;
+
+/* ============================= */
+/* ===== PANELES ===== */
+/* ============================= */
+.panel {
+  background: white;
+  border-radius: 22px;
+  padding: 28px;
+  box-shadow: 0 12px 30px rgba(0,0,0,.08);
+  display: flex;
+  flex-direction: column;
 }
 
-/* =========================
-   TOTALES
-========================= */
-
-.totales{
-  margin-top:16px;
-  display:flex;
-  flex-direction:column;
-  gap:8px;
+.panel-form h2,
+.panel-lista h2 {
+  margin-bottom: 18px;
+  font-weight: 600;
+  font-size: 22px;   /* 👈 más grande */
+  color: #1c1c1c;
 }
 
-.line{
-  display:flex;
-  justify-content:space-between;
+
+/* ============================= */
+/* ===== FORMULARIO ===== */
+/* ============================= */
+.cab-row {
+  margin-bottom: 20px;
 }
 
-.total{
-  font-weight:600;
-  border-top:1px solid #ddd;
-  padding-top:6px;
+.panel-form label {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 6px;
+  display: block;
+  font-weight: 500;
+}
+
+.panel-form input,
+#productoDescripcion,
+.input-cant,
+.input-costo,
+#moneda {
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid #dcdcdc;
+  font-size: 14px;
+  transition: all .2s ease;
+}
+
+.panel-form input:focus,
+.input-cant:focus,
+.input-costo:focus,
+#moneda:focus {
+  border-color: #7ED957;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(126,217,87,.15);
+}
+
+
+/* ============================= */
+/* ===== FECHA ===== */
+/* ============================= */
+#fecha {
+  width: 200px;
+}
+
+
+/* ============================= */
+/* ===== INPUT CODIGO + NOMBRE ===== */
+/* ============================= */
+.input-dual {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.input-codigo {
+  width: 95px;
+  flex: none;
+}
+
+#proveedorNombre,
+#compradorNombre {
+  flex: 1;
+  background: #f5f5f5;
+  min-width: 0;
+}
+
+
+/* ============================= */
+/* ===== BOTONES MINI ===== */
+/* ============================= */
+.btn-mini {
+  background: #7ED957;
+  border: none;
+  padding: 8px 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .2s ease;
+}
+
+.btn-mini img {
+  width: 14px;
+}
+
+.btn-mini:hover {
+  background: #6bc74b;
+  transform: scale(1.05);
+}
+
+
+/* ============================= */
+/* ===== ESTADO BADGE ===== */
+/* ============================= */
+.estado-badge {
+  background: #7ED957;
+  color: #1F1F1F;
+  padding: 8px 16px;
+  border-radius: 24px;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+
+/* ============================= */
+/* ===== BOTONES ACCIONES ===== */
+/* ============================= */
+.acciones {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin-top: 28px;
+}
+
+.acciones button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 16px;
+  border: none;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .2s ease;
+}
+
+.acciones button img {
+  width: 18px;
+  height: 18px;
+}
+
+#btnNuevo { background: #7ED957; color: #1F1F1F; }
+#btnGuardar { background: #2e7d32; color: white; }
+#btnEfectivar { background: #1976d2; color: white; }
+#btnCancelar { background: #757575; color: white; }
+
+.acciones button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(0,0,0,.15);
+}
+
+
+/* ============================= */
+/* ===== DETALLE BAR ===== */
+/* ============================= */
+.detalle-bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+
+/* PRODUCTO CODIGO + DESCRIPCION */
+.producto-dual {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 3;
+}
+
+.producto-dual .input-codigo {
+  width: 95px;
+  flex: none;
+}
+
+#productoDescripcion {
+  flex: 1;
+  background: #f5f5f5;
+  min-width: 0;
+}
+
+
+/* CANTIDAD */
+.input-cant {
+  width: 90px;
+  flex: none;
+}
+
+
+/* COSTO + MONEDA */
+.costo-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#moneda {
+  width: 75px;
+  background: #f5f5f5;
+}
+
+.input-costo {
+  width: 130px;
+}
+
+
+/* ============================= */
+/* ===== TABLA MODERNA ===== */
+/* ============================= */
+.tabla-compra {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.tabla-header {
+  display: grid;
+  grid-template-columns: 50px 1fr 110px 110px 130px 50px;
+  background: #1F1F1F;
+  color: white;
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 14px 14px 0 0;
+}
+
+.tabla-body {
+  flex: 1;
+  overflow-y: auto;
+  border: 1px solid #eee;
+  border-top: none;
+  border-radius: 0 0 14px 14px;
+}
+
+.tabla-row {
+  display: grid;
+  grid-template-columns: 50px 1fr 110px 110px 130px 50px;
+  padding: 12px 16px;
+  border-top: 1px solid #f1f1f1;
+  font-size: 13px;
+  align-items: center;
+  transition: background .15s ease;
+}
+
+.tabla-row:hover {
+  background: #f7f9fb;
+}
+
+
+/* ============================= */
+/* ===== TOTAL ===== */
+/* ============================= */
+.compra-total {
+  margin-top: 22px;
+  text-align: right;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1F1F1F;
 }

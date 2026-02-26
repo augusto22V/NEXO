@@ -9,9 +9,9 @@ const pool = require("../db");
   CANCELADO
 */
 
-// =========================
+// ============
 // POST /ventas/efectivizar
-// =========================
+// ============
 router.post("/efectivizar", async (req, res) => {
 
   const mov = req.body;
@@ -75,7 +75,7 @@ router.post("/efectivizar", async (req, res) => {
         throw new Error(`Producto ${p.nombre} sin precio`);
       }
 
-      // 👉 Solo validar stock si NO es preparo
+      //  Solo validar stock si NO es preparo
       if (!p.tiene_preparo && stock < cantidad) {
         throw new Error(`Stock insuficiente ${p.nombre}`);
       }
@@ -125,7 +125,7 @@ router.post("/efectivizar", async (req, res) => {
         [ventaId, d.producto_id, d.nombre, d.cantidad, d.precio_unit, d.subtotal, d.nota]
       );
 
-      // 👉 Descontar stock SOLO si no es preparo
+      //  Descontar stock SOLO si no es preparo
       if (!d.tiene_preparo) {
         await client.query(
           `UPDATE producto SET stock = stock - $1 WHERE id = $2`,
