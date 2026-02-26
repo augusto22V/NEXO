@@ -19,6 +19,7 @@ app.use('/api/ventas', require('./routes/ventas.routes'));
 app.use('/api/compra', require('./routes/compra.routes'));
 app.use('/api/sorteo', require('./routes/sorteo.routes'));
 app.use('/api/proveedores', require('./routes/proveedores.routes'));
+app.use('/api/comprador', require('./routes/comprador.routes'));
 app.use('/api/productos-precio', require('./routes/productosPrecio.routes'));
 
 /* Archivos subidos */
