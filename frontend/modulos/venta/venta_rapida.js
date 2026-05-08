@@ -982,7 +982,7 @@ function filtrarProductosRapido(valor) {
   renderProductos();
 }
 
-function ajustarCantidadEdit(delta) {
+window.ajustarCantidadEdit = function (delta) {
   const input = document.getElementById("editCantidad");
   if (!input) return;
   const actual = parseFloat(input.value) || 0;
@@ -991,7 +991,7 @@ function ajustarCantidadEdit(delta) {
   input.value = Number.isInteger(nuevo) ? String(nuevo) : nuevo.toFixed(2).replace(/\.?0+$/, "");
   input.focus();
   input.dispatchEvent(new Event("input", { bubbles: true }));
-}
+};
 
 /* =========================
   PEDIDO - CREAR / CARGAR

@@ -1,6 +1,6 @@
-    @import url("./venta.layout.css");
-    @import url("./venta.catalogo.css");
-    @import url("./venta.pedido.css");
-    @import url("./venta.modales.css");
-    @import url("./venta.drag.css");
-    @import url("./venta.responsive.css");
+    @import url("./venta.layout.css?v=2026.05.08.06");
+    @import url("./venta.catalogo.css?v=2026.05.08.06");
+    @import url("./venta.pedido.css?v=2026.05.08.06");
+    @import url("./venta.modales.css?v=2026.05.08.06");
+    @import url("./venta.drag.css?v=2026.05.08.06");
+    @import url("./venta.responsive.css?v=2026.05.08.06");

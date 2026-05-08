@@ -511,50 +511,62 @@ button {
 }
 
 /* === STEPPER DE CANTIDAD (+/-) === */
+.modal .qty-stepper,
 .qty-stepper {
-  display: flex;
-  align-items: stretch;
-  gap: 6px;
-  margin-bottom: 8px;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: stretch !important;
+  gap: 6px !important;
+  margin-bottom: 8px !important;
+  width: 100% !important;
 }
 
+.modal .qty-stepper input[type="number"],
 .qty-stepper input[type="number"] {
-  flex: 1;
-  min-width: 0;
-  text-align: center;
-  font-size: 18px;
-  font-weight: 700;
-  padding: 8px 4px;
-  border: 1px solid #cfd6dd;
-  border-radius: 6px;
-  -moz-appearance: textfield;
-  appearance: textfield;
+  flex: 1 1 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  text-align: center !important;
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  padding: 8px 4px !important;
+  border: 1px solid #cfd6dd !important;
+  border-radius: 6px !important;
+  margin: 0 !important;
+  display: block !important;
+  -moz-appearance: textfield !important;
+  appearance: textfield !important;
 }
 .qty-stepper input[type="number"]::-webkit-outer-spin-button,
 .qty-stepper input[type="number"]::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  appearance: none;
-  margin: 0;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  margin: 0 !important;
 }
 
+.modal .qty-stepper .qty-btn,
 .qty-stepper .qty-btn {
-  flex: 0 0 46px;
-  background: #1a6474;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 22px;
-  font-weight: 700;
-  cursor: pointer;
-  user-select: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-  transition: background 0.15s, transform 0.05s;
+  flex: 0 0 46px !important;
+  width: 46px !important;
+  height: auto !important;
+  background: #1a6474 !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 6px !important;
+  font-size: 22px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  transition: background 0.15s, transform 0.05s !important;
 }
-.qty-stepper .qty-btn:hover  { background: #0f4a58; }
-.qty-stepper .qty-btn:active { transform: scale(0.94); }
-.qty-stepper .qty-minus      { background: #c62828; }
-.qty-stepper .qty-minus:hover{ background: #b71c1c; }
+.qty-stepper .qty-btn:hover   { background: #0f4a58 !important; }
+.qty-stepper .qty-btn:active  { transform: scale(0.94); }
+.qty-stepper .qty-minus       { background: #c62828 !important; }
+.qty-stepper .qty-minus:hover { background: #b71c1c !important; }
 
