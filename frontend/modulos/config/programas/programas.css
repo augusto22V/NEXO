@@ -1,0 +1,267 @@
+body {
+  margin: 0;
+  background: #f4f7fb;
+  color: #1f2b34;
+}
+
+.prog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  background: #153142;
+  color: #fff;
+}
+
+.prog-header h1 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.prog-header p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+.prog-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.prog-actions button {
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  color: #fff;
+  background: transparent;
+  border-radius: 8px;
+  padding: 7px 11px;
+  cursor: pointer;
+}
+
+.prog-main {
+  padding: 16px 20px 24px;
+}
+
+.prog-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.prog-filtros {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.prog-filtros input,
+.prog-filtros select {
+  border: 1px solid #c6d4df;
+  border-radius: 8px;
+  padding: 9px 10px;
+  min-width: 180px;
+  background: #fff;
+}
+
+.prog-filtros input {
+  min-width: 280px;
+  flex: 1;
+}
+
+.prog-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.prog-toolbar-right span {
+  font-size: 12px;
+  color: #536b7a;
+  font-weight: 700;
+}
+
+.btn-principal,
+.btn-secundario,
+.btn-tabla {
+  border: none;
+  border-radius: 8px;
+  padding: 9px 12px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.btn-principal {
+  background: #156f8a;
+  color: #fff;
+}
+
+.btn-secundario {
+  background: #dbe4ea;
+  color: #183748;
+}
+
+.btn-tabla {
+  background: #e9f2f8;
+  color: #20445a;
+  padding: 6px 9px;
+  font-size: 12px;
+}
+
+.prog-table-wrap {
+  border: 1px solid #d4e0e8;
+  border-radius: 12px;
+  overflow: auto;
+  background: #fff;
+}
+
+.prog-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1080px;
+}
+
+.prog-table th,
+.prog-table td {
+  border-bottom: 1px solid #edf2f6;
+  padding: 9px 10px;
+  font-size: 12px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.prog-table th {
+  background: #f2f7fb;
+  color: #355366;
+  font-size: 11px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.prog-table code {
+  background: #eef5fa;
+  border-radius: 6px;
+  padding: 2px 5px;
+  color: #27475a;
+}
+
+.sin-datos {
+  text-align: center;
+  padding: 26px 10px;
+  color: #617684;
+}
+
+.acciones {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.tag-operativo {
+  background: #dbedf8;
+  color: #1c5a77;
+}
+
+.tag-admin {
+  background: #f0e8ff;
+  color: #5d38a5;
+}
+
+.prog-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  z-index: 1200;
+}
+
+.prog-modal.is-open {
+  display: flex;
+}
+
+.prog-modal-content {
+  width: min(840px, 100%);
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+}
+
+.prog-modal-content h3 {
+  margin: 0 0 12px;
+}
+
+.prog-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.prog-form-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #355366;
+}
+
+.prog-form-grid input,
+.prog-form-grid select {
+  border: 1px solid #cad7e0;
+  border-radius: 8px;
+  padding: 9px 10px;
+  font-size: 13px;
+}
+
+.check-label {
+  flex-direction: row !important;
+  align-items: center;
+  gap: 8px !important;
+  font-weight: 600 !important;
+}
+
+.col-span-2 {
+  grid-column: span 2;
+}
+
+.prog-modal-actions {
+  margin-top: 14px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+@media (max-width: 760px) {
+  .prog-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .col-span-2 {
+    grid-column: span 1;
+  }
+
+  .prog-toolbar {
+    align-items: stretch;
+  }
+
+  .prog-toolbar-right {
+    justify-content: space-between;
+    width: 100%;
+  }
+}

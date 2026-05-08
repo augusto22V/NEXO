@@ -6,10 +6,294 @@
   padding: 24px;
   height: calc(100vh - 120px);
 }
-#moduloTitulo {
-  color: #7ED957;
+
+/* ===== PANELES ===== */
+.panel {
+  background: #fff;
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.08);
+}
+
+.panel h2 {
+  margin-bottom: 14px;
+}
+.panel-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-form form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+/* ===== FORMULARIO ===== */
+.panel {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.06);
+}
+
+.panel-form input {
+  width: 100%;
+  padding: 11px;
+  margin-top: 4px;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+}
+
+/* input bloqueado */
+.panel-form input:disabled {
+  background: #ececec;
+  border-color: #bdbdbd;
+  color: #666;
+  cursor: not-allowed;
+}
+
+/* ===== ACCIONES ===== */
+.acciones {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-top: 20px;
+}
+.acciones button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .2s ease;
+}
+
+.acciones button img {
+  width: 22px;
+  height: 22px;
+}
+
+.acciones button span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.acciones button b {
+  font-size: 11px;
+  opacity: .7;
+}
+
+/* Hover */
+.acciones button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0,0,0,.15);
+}
+
+/* Disabled */
+.acciones button:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+
+/* Hover */
+.acciones button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,.15);
+}
+
+/* Disabled */
+.acciones button:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+
+/* estados disabled */
+.acciones button:disabled {
+  background: #bdbdbd !important;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* ===== COLORES DE BOTONES ===== */
+#btnNuevo {
+  background: #7ED957;
+  color: white;
+}
+
+#btnGuardar {
+  background: #2e7d32;
+  color: white;
+}
+
+#btnModificar {
+  background: #546e7a;
+  color: white;
+}
+
+#btnEliminar {
+  background: #c62828;
+  color: white;
+}
+
+#btnCancelar {
+  background: #757575;
+  color: white;
+}
+
+
+/* ===== PANEL LISTA ===== */
+.panel-lista {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden; /* evita que se mueva la página */
+}
+/* ===== BUSCADOR ===== */
+.buscador {
+  width: 100%;
+  margin-bottom: 20px;
+  padding: 14px 18px 14px 46px; /* espacio para icono */
+  border-radius: 14px;
+  border: 1px solid #ddd;
+  font-size: 15px;
+
+  background-image: url("../../recursos/img/buscar.png");
+  background-repeat: no-repeat;
+  background-position: 14px center;
+  background-size: 18px;
+}
+
+.buscador::placeholder {
+  color: #999;
+}
+
+.buscador:focus {
+  border-color: #7ED957;
+}
+
+
+ /* ===== TABLA CATEGORIAS ===== */
+
+
+
+.tabla-header {
+  display: grid;
+   grid-template-columns: 60px 1fr 120px;/* 👈 columnas alineadas */
+  background: #f0f0f0;
+  padding: 14px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #333;
+  border-bottom: 1px solid #ddd;
+}
+
+.tabla-row {
+  display: grid;
+  grid-template-columns: 60px 1fr 120px;/* 👈 mismo tamaño que header */
+  padding: 12px 16px;
+  border-top: 1px solid #eee;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.tabla-row:hover {
+  background: #f7f7fb;
+}
+
+.tabla-row.activo {
+  background: #e0e0e6;
+  border-left: 4px solid #7ED957;
+}
+
+/* ===== TABLA BLOQUEADA (cuando editás) ===== */
+.tabla-categorias.bloqueada {
+  pointer-events: none;
+  opacity: 0.45;
+}
+
+.tabla-categorias {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.tabla-body {
+  flex: 1;
+  overflow-y: auto;   /* 👈 SCROLL SOLO AQUÍ */
+  overflow-x: hidden;
+}
+
+.preview-box {
+  margin-top: 12px;
+  width: 100%;
+  height: 200px; /* 🔥 más grande */
+  border: 1px dashed #ccc;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #fafafa;
+}
+.preview-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* 👈 no recorta */
+  background: #fff;
+}
+
+.estado-activo {
+  color: #16a34a;
   font-weight: 600;
 }
+
+.estado-inactivo {
+  color: #9ca3af;
+}
+
+
+
+.panel-form #codigoCategoria {
+  width: 80px;
+  flex: none;
+}
+
+.panel-form input#codigoCategoria {
+  width: 80px !important;
+  max-width: 80px;
+  flex: none;
+}
+
+#codigoCategoria {
+  width: 80px !important;
+  display: inline-block;
+}
+
+.codigo-row {
+  width: 90px;
+}
+
+.codigo-row input {
+  width: 90px !important;
+}
+
+
+/* ===== LAYOUT GENERAL ===== */
+.admin-container {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  gap: 24px;
+  padding: 24px;
+  height: calc(100vh - 120px);
+}
+
 /* ===== PANELES ===== */
 .panel {
   background: #fff;
@@ -190,9 +474,11 @@
 
  /* ===== TABLA CATEGORIAS ===== */
 
+
+
 .tabla-header {
   display: grid;
-  grid-template-columns: 80px 280px 120px; /* 👈 columnas alineadas */
+   grid-template-columns: 60px 1fr 120px;/* 👈 columnas alineadas */
   background: #f0f0f0;
   padding: 14px 16px;
   font-size: 14px;
@@ -203,7 +489,7 @@
 
 .tabla-row {
   display: grid;
-  grid-template-columns: 80px 280px 120px; /* 👈 mismo tamaño que header */
+  grid-template-columns: 60px 1fr 120px;/* 👈 mismo tamaño que header */
   padding: 12px 16px;
   border-top: 1px solid #eee;
   font-size: 14px;
@@ -264,4 +550,194 @@
 
 .estado-inactivo {
   color: #9ca3af;
+}
+
+
+
+.panel-form #codigoCategoria {
+  width: 80px;
+  flex: none;
+}
+
+.panel-form input#codigoCategoria {
+  width: 80px !important;
+  max-width: 80px;
+  flex: none;
+}
+
+#codigoCategoria {
+  width: 80px !important;
+  display: inline-block;
+}
+
+.codigo-row {
+  width: 90px;
+}
+
+.codigo-row input {
+  width: 90px !important;
+}
+
+
+.categoria-row{
+  display:flex;
+  gap:10px;
+}
+
+.categoria-id{
+  width:70px !important;
+  max-width:70px;
+  text-align:center;
+  flex:0 0 70px;
+}
+
+#categoriaSelect{
+  flex:1;
+}
+/* =========================
+   UNIFICACION RESPONSIVE TOUCH
+========================= */
+@media (min-width: 701px) and (max-width: 1024px) {
+  .admin-container {
+    grid-template-columns: 320px minmax(0, 1fr);
+    gap: 12px;
+    padding: 12px;
+    height: auto;
+  }
+
+  .panel {
+    padding: 14px;
+  }
+
+  .acciones button {
+    min-height: 42px;
+    font-size: 13px;
+  }
+
+  .tabla-body {
+    max-height: 56dvh;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-container {
+    grid-template-columns: 1fr;
+    padding: 10px;
+    gap: 10px;
+    height: auto;
+  }
+
+  .panel {
+    padding: 12px;
+    border-radius: 14px;
+  }
+
+  .acciones {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  .acciones button {
+    min-height: 40px;
+    font-size: 12px;
+  }
+
+  .acciones button img {
+    width: 18px;
+    height: 18px;
+  }
+
+  .buscador {
+    padding: 10px 12px 10px 38px;
+    background-position: 10px center;
+    background-size: 16px;
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+
+  .tabla-categorias {
+    overflow: hidden;
+  }
+
+  .tabla-body {
+    max-height: 44dvh;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .tabla-header,
+  .tabla-row {
+    grid-template-columns: 46px minmax(120px, 1.15fr) minmax(88px, 0.9fr);
+    min-width: 0;
+    gap: 6px;
+    padding-inline: 8px;
+  }
+
+  .tabla-header {
+    font-size: 11px;
+    padding-block: 10px;
+  }
+
+  .tabla-row {
+    font-size: 11px;
+    padding-block: 8px;
+  }
+}
+
+@media (max-width: 768px) and (orientation: landscape) {
+  .admin-container {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .acciones {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .tabla-body {
+    max-height: 38dvh;
+  }
+
+  .tabla-header,
+  .tabla-row {
+    grid-template-columns: 40px minmax(100px, 1.12fr) minmax(78px, 0.88fr);
+    gap: 5px;
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) and (orientation: portrait) {
+  .acciones {
+    grid-template-columns: 1fr;
+  }
+
+  .tabla-header,
+  .tabla-row {
+    grid-template-columns: 36px minmax(92px, 1.08fr) minmax(70px, 0.82fr);
+    gap: 4px;
+    padding-inline: 6px;
+    font-size: 10px;
+  }
+
+  .tabla-body {
+    max-height: 48dvh;
+  }
+}
+
+/* ============================= */
+/* MODO SELECCION               */
+/* ============================= */
+.admin-container.modo-seleccion {
+  grid-template-columns: 1fr;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+.admin-container.modo-seleccion .panel-form {
+  display: none !important;
+}
+
+.admin-container.modo-seleccion .panel-lista {
+  min-height: 70vh;
 }

@@ -1,0 +1,125 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: monospace;
+  width: 80mm;
+  margin: 0;
+  font-size: 14px; 
+  background: #fff;
+}
+
+/* CONTENEDOR */
+.ticket {
+  width: 100%;
+  padding: 3mm;
+  border-left: 2px dashed #000;
+  border-right: 2px dashed #000;
+  border-top: 2px dashed #000;
+  border-bottom: 2px dashed #000;
+}
+
+/* TEXTOS */
+.center { text-align: center; }
+.bold { font-weight: bold; }
+
+.line {
+  border-top: 1px dashed #000;
+  margin: 4px 0;
+}
+
+/* EMPRESA */
+#empresaNombre {
+  font-size: 17px;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* LOGO */
+.logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 6px;
+}
+
+.logo img {
+  width: 70px;
+}
+
+/* TABLA */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+th {
+  font-size: 12px;
+  text-align: left;
+}
+
+td {
+  font-size: 13px;
+  padding: 3px 0;
+  vertical-align: top;
+}
+
+/* COLUMNAS (ajustadas) */
+.col-cant   { width: 10%; }
+.col-desc   { width: 46%; }
+.col-precio { width: 22%; text-align: right; }
+
+.col-total  { 
+  width: 22%;
+  text-align: right;
+  padding-right: 8px; 
+}
+
+
+/* FILA SECUNDARIA (TOTAL ABAJO) */
+.item-subrow td {
+  padding-top: 2px;
+}
+
+.item-subrow .col-total {
+  font-variant-numeric: tabular-nums;
+}
+
+/* DESCRIPCIÓN */
+.detalle-desc {
+  word-break: break-word;
+}
+
+.detalle-num {
+  text-align: right;
+}
+
+/* TEXTOS LARGOS */
+#empresaDireccion,
+#empresaActividad,
+#clienteFactura {
+  word-wrap: break-word;
+}
+
+/* TOTAL FINAL */
+.total {
+  font-size: 17px;
+  font-weight: bold;
+  text-align: right;
+}
+
+/* IMPRESIÓN */
+@page {
+  size: 80mm auto;
+  margin: 0;
+}
+
+.ticket {
+  display: inline-block;
+}
+
+/* OCULTAR BOTÓN */
+button {
+  display: none;
+}

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+
+<meta charset="UTF-8">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="/manifest.json">
+
+<title>LibreríaSys | ConfiguraciÃ³n Empresa</title>
+
+<link rel="stylesheet" href="../../../compartido/css/base.css">
+<link rel="stylesheet" href="../../../compartido/css/panelAuditoria.css">
+<link rel="stylesheet" href="empresa.css">
+<link rel="stylesheet" href="../../../recursos/css/all.min.css">
+
+</head>
+
+<body>
+
+<header class="topbar">
+
+  <button class="btn-volver" onclick="volver()">â† Volver</button>
+
+  <div class="titulo">
+    <span>ConfiguraciÃ³n de empresa</span>
+  </div>
+
+  <button class="btn-salir" onclick="salirSistema()">
+    <i class="fa-solid fa-right-from-bracket"></i> Salir
+  </button>
+
+</header>
+
+<main class="contenedor">
+
+<!-- FORMULARIO -->
+<section class="panel formulario-panel">
+
+  <div class="panel-title">
+    <i class="fa-solid fa-building"></i>
+    <span>Registro de Empresa</span>
+  </div>
+
+  <div id="msgBox" class="msg-box"></div>
+  <input type="hidden" id="empresaIdActual">
+
+  <div class="form-grid">
+
+    <div class="form-group">
+      <label>CÃ³digo</label>
+      <input type="text" id="codigo">
+    </div>
+
+    <div class="form-group">
+      <label>Nombre</label>
+      <input type="text" id="nombre">
+    </div>
+
+    <div class="form-group">
+      <label>RUC</label>
+      <input type="text" id="ruc">
+    </div>
+
+    <div class="form-group">
+      <label>DirecciÃ³n</label>
+      <input type="text" id="direccion">
+    </div>
+
+    <div class="form-group">
+      <label>Email</label>
+      <input type="text" id="email">
+    </div>
+
+    <div class="form-group">
+      <label>TelÃ©fono</label>
+      <input type="text" id="telefono">
+    </div>
+
+    <div class="form-group full">
+      <label>Logo</label>
+      <input type="file" id="logo">
+    </div>
+
+  </div>
+
+  <panel-auditoria id="auditEmpresa" data-tabla="empresa" data-id-input="empresaIdActual"></panel-auditoria>
+
+  <div class="form-actions">
+
+    <button class="btn btn-secondary" onclick="limpiar()">
+      <i class="fa-solid fa-file"></i> Nuevo
+    </button>
+
+    <button class="btn btn-primary" onclick="guardarEmpresa()">
+      <i class="fa-solid fa-floppy-disk"></i> Guardar
+    </button>
+
+  </div>
+
+</section>
+
+<!-- LISTADO -->
+<section class="panel listado-panel">
+
+  <div class="panel-title">
+    <i class="fa-solid fa-table"></i>
+    <span>Empresas registradas</span>
+  </div>
+
+  <div class="list-toolbar">
+
+    <input 
+      type="text"
+      id="buscarEmpresa"
+      placeholder="Buscar empresa..."
+      oninput="filtrarEmpresas()"
+    />
+
+  </div>
+
+  <div class="table-wrap">
+
+    <table class="data-table tabla">
+
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>CÃ³digo</th>
+          <th>Nombre</th>
+          <th>RUC</th>
+          <th>DirecciÃ³n</th>
+          <th>TelÃ©fono</th>
+          <th>Email</th>
+          <th>Logo</th>
+          <th>Estado</th>
+          <th>AcciÃ³n</th>
+        </tr>
+      </thead>
+
+      <tbody></tbody>
+
+    </table>
+
+  </div>
+
+</section>
+
+</main>
+
+<script src="../../../compartido/js/panelAuditoria.js"></script>
+<script src="empresa.js"></script>
+
+</body>
+</html>
+

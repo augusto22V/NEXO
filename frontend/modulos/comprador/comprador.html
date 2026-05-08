@@ -2,19 +2,22 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Comprador | Stop Top</title>
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="/manifest.json">
+  <title>LibreríaSys | Comprador</title>
 
-  <link rel="stylesheet" href="../../compartido/css/base.css">
-  <link rel="stylesheet" href="comprador.css">
+  <link rel="stylesheet" href="../../compartido/css/base.css?v=2026.04.18.03">
+  <link rel="stylesheet" href="../../compartido/css/panelAuditoria.css?v=2026.04.18.03">
+  <link rel="stylesheet" href="comprador.css?v=2026.04.18.03">
 </head>
 <body>
 
 <header class="topbar">
-  <button class="btn-volver" onclick="volver()">← Volver</button>
+<button class="btn-volver" onclick="volverSeguro()">← Volver</button>
 
   <div class="titulo">
-    <h1>Stop Top</h1>
-    <span id="moduloTitulo">Comprador</span>
+    <span id="moduloTitulo">Carga de Comprador</span>
   </div>
 </header>
 
@@ -26,12 +29,18 @@
 
     <input type="hidden" id="compradorId">
 
-    <label>Código</label>
-    <input type="text" id="codigoComprador">
+        <label>Código</label>
+      <input type="text" id="codigoComprador" inputmode="numeric" autocomplete="off">
 
-    <label>Nombre</label>
-    <input type="text" id="nombre">
+      <label>Nombre</label>
+      <input type="text" id="nombre">
 
+      <label class="check-row">
+        <input type="checkbox" id="activo">
+        <span>Comprador activo</span>
+     </label>
+
+    <panel-auditoria id="auditComprador" data-tabla="comprador" data-id-input="compradorId"></panel-auditoria>
     <div class="acciones">
 
       <button type="button" id="btnNuevo" onclick="nuevo()" title="Nuevo">
@@ -58,6 +67,12 @@
         <small>F4</small>
       </button>
 
+      <button type="button" id="btnSeleccionar" onclick="seleccionarComprador()" title="Seleccionar" style="display:none;">
+        <img src="../../recursos/img/buscar.png">
+        <span>Seleccionar</span>
+        <small>Enter</small>
+      </button>
+
     </div>
 
   </section>
@@ -81,7 +96,7 @@
     <div class="tabla-clientes">
 
       <div class="tabla-header">
-        <span>ID ▼</span>
+        <span id="thId">ID ▼</span>
         <span>Nombre</span>
       </div>
 
@@ -108,12 +123,8 @@
     <p class="modal-nombre" id="modalNombreComprador"></p>
 
     <div class="modal-actions">
-      <button class="btn-cancelar" onclick="cerrarModalEliminar()">
-        Cancelar
-      </button>
-      <button class="btn-eliminar" onclick="confirmarEliminar()">
-        Eliminar
-      </button>
+    <button class="btn-cancelar" type="button">Cancelar</button>
+    <button class="btn-eliminar" type="button">Eliminar</button>
     </div>
 
   </div>
@@ -130,21 +141,16 @@
     <p class="modal-text" id="modalAdvertenciaTexto"></p>
 
     <div class="modal-actions center">
-      <button class="btn-aceptar" onclick="cerrarAdvertencia()">
-        Aceptar
-      </button>
+      <button class="btn-aceptar" type="button">Aceptar</button>
     </div>
 
   </div>
 </div>
 
-<script src="comprador.js"></script>
-
-<script>
-function volver() {
-  history.back();
-}
-</script>
+<script src="../../compartido/js/baseModal.js?v=2026.04.18.03"></script>
+<script src="../../compartido/js/panelAuditoria.js?v=2026.04.18.03"></script>
+<script src="comprador.js?v=2026.04.18.03"></script>
+<script src="/compartido/js/seguridad.js?v=2026.04.18.03"></script>
 
 </body>
 </html>

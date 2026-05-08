@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="/manifest.json">
+  <title>LibreríaSys | Informe de Compra</title>
+  <link rel="stylesheet" href="../../compartido/css/base.css">
+  <link rel="stylesheet" href="../../compartido/css/home.css">
+  <link rel="stylesheet" href="informes.css">
+</head>
+<body>
+
+  <div class="topbar no-print">
+    <button class="btn-volver" onclick="history.back()">← Volver</button>
+    <div class="titulo">
+      <span>Informe de Compra</span>
+    </div>
+    <div class="topbar-acciones">
+      <button class="btn-accion btn-imprimir" onclick="imprimir()">🖨 Imprimir</button>
+      <button class="btn-accion btn-pdf" onclick="exportarPDF()">⬇ Exportar PDF</button>
+      <button class="btn-accion btn-excel" onclick="exportarExcel()">⬇ Exportar Excel</button>
+    </div>
+  </div>
+
+  <div class="informe-wrap">
+  <div class="informe-container" id="informe">
+
+    <div class="informe-header">
+      <div class="informe-empresa">
+        <p>Sistema de Gestión</p>
+      </div>
+      <div class="tipo-informe">
+        <select id="tipoInforme" onchange="buscarCompras()">
+          <option value="detallado">Compras Detalladas</option>
+          <option value="producto">Total por Producto</option>
+          <option value="proveedor">Por Proveedor</option>
+        </select>
+      </div>
+    </div>
+
+    <hr class="informe-divider">
+
+    <div class="filtro-fecha-wrap">
+      <div class="filtro-fecha-titulo">🔎 Filtros de búsqueda</div>
+      <div class="filtro-fecha-inputs">
+
+        <div class="filtro-fecha-campo">
+          <label>Desde</label>
+          <input type="date" id="filtroDesde">
+        </div>
+
+        <div class="filtro-fecha-campo">
+          <label>Hasta</label>
+          <input type="date" id="filtroHasta">
+        </div>
+
+        <div class="filtro-fecha-campo">
+          <label>Proveedor</label>
+          <div class="input-busqueda">
+            <input type="text" id="filtroProveedor" placeholder="Nombre proveedor">
+            <button class="btn-lupa" onclick="abrirBuscadorProveedor()">
+              <img src="/recursos/img/buscar.png" alt="Buscar">
+            </button>
+          </div>
+        </div>
+
+        <div class="filtro-fecha-campo">
+          <label>Producto</label>
+          <div class="input-busqueda">
+            <input type="text" id="filtroProducto" placeholder="Nombre producto" readonly>
+            <button class="btn-lupa" onclick="abrirBuscadorProducto()">
+              <img src="/recursos/img/buscar.png" alt="Buscar">
+            </button>
+          </div>
+        </div>
+
+        <div class="filtro-botones">
+          <button class="btn-filtrar" onclick="buscarCompras()">🔎 Filtrar</button>
+          <button class="btn-filtrar btn-limpiar" onclick="limpiarFiltro()">Limpiar</button>
+        </div>
+
+      </div>
+    </div>
+
+    <table class="informe-tabla">
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Nº Compra</th>
+          <th>Proveedor</th>
+          <th>Comprador</th>
+          <th id="thProducto">Producto</th>
+          <th class="text-right">Cantidad</th>
+          <th class="text-right">Costo Unit.</th>
+          <th class="text-right">Subtotal</th>
+        </tr>
+      </thead>
+      <tbody id="tablaCompras">
+        <tr><td colspan="8" class="inf-cargando">Seleccione un rango de fechas y presione Filtrar</td></tr>
+      </tbody>
+      <tfoot>
+        <tr class="inf-total-row">
+          <td colspan="7" class="text-right"><strong>TOTAL</strong></td>
+          <td class="text-right" id="totalCompras">Gs 0</td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <div class="informe-pie">
+      <span>Generado el <span id="fechaGenerado"></span></span>
+    </div>
+
+  </div>
+  </div>
+
+  <div id="spinnerOverlay" class="spinner-overlay hidden">
+    <div class="spinner-box">
+      <div class="spinner"></div>
+      <span id="spinnerTexto">Cargando...</span>
+    </div>
+  </div>
+
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script src="informe_compra.js"></script>
+  <script src="/compartido/js/seguridad.js"></script>
+</body>
+</html>
+

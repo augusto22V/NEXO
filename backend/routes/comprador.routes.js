@@ -6,7 +6,7 @@ const db = require("../db");
    CREAR COMPRADOR
 ========================= */
 router.post("/", async (req, res) => {
-  const { nombre } = req.body;
+  const { nombre, activo } = req.body;
 
   if (!nombre || !nombre.trim()) {
     return res.status(400).json({ error: "Nombre obligatorio" });
@@ -15,9 +15,9 @@ router.post("/", async (req, res) => {
   try {
     const result = await db.query(
       `INSERT INTO comprador (nombre, activo)
-       VALUES ($1, true)
+       VALUES ($1, $2)
        RETURNING *`,
-      [nombre.trim()]
+      [nombre.trim(), activo === undefined ? true : !!activo]
     );
 
     res.json(result.rows[0]);
@@ -33,12 +33,11 @@ router.post("/", async (req, res) => {
    LISTAR COMPRADORES ACTIVOS
    GET /api/comprador
 ========================= */
-router.get("/", async (req, res) => {
+  router.get("/", async (req, res) => {
   try {
     const r = await db.query(
-      `SELECT id, nombre
+      `SELECT id, nombre, activo
        FROM comprador
-       WHERE activo = true
        ORDER BY id DESC`
     );
 
@@ -59,9 +58,9 @@ router.get("/:id", async (req, res) => {
     const id = Number(req.params.id);
 
     const r = await db.query(
-      `SELECT id, nombre
+      `SELECT id, nombre, activo
        FROM comprador
-       WHERE id = $1 AND activo = true`,
+       WHERE id = $1`,
       [id]
     );
 
@@ -70,7 +69,6 @@ router.get("/:id", async (req, res) => {
     }
 
     res.json(r.rows[0]);
-
   } catch (err) {
     console.error("ERROR GET COMPRADOR:", err);
     res.status(500).json({ error: "Error al leer comprador" });
@@ -83,7 +81,7 @@ router.get("/:id", async (req, res) => {
 ========================= */
 router.put("/:id", async (req, res) => {
   const id = Number(req.params.id);
-  const { nombre } = req.body;
+  const { nombre, activo } = req.body;
 
   if (!nombre || !nombre.trim()) {
     return res.status(400).json({ error: "Nombre obligatorio" });
@@ -92,10 +90,11 @@ router.put("/:id", async (req, res) => {
   try {
     const r = await db.query(
       `UPDATE comprador
-       SET nombre = $1
-       WHERE id = $2 AND activo = true
+       SET nombre = $1,
+           activo = $2
+       WHERE id = $3
        RETURNING *`,
-      [nombre.trim(), id]
+      [nombre.trim(), !!activo, id]
     );
 
     if (r.rowCount === 0) {
@@ -112,18 +111,22 @@ router.put("/:id", async (req, res) => {
 
 
 /* =========================
-   ELIMINAR (BORRADO LÓGICO)
+   ELIMINAR (BORRADO FÍSICO)
 ========================= */
 router.delete("/:id", async (req, res) => {
   try {
     const id = Number(req.params.id);
 
-    await db.query(
-      `UPDATE comprador
-       SET activo = false
-       WHERE id = $1`,
+    const r = await db.query(
+      `DELETE FROM comprador
+       WHERE id = $1
+       RETURNING id`,
       [id]
     );
+
+    if (r.rowCount === 0) {
+      return res.status(404).json({ error: "Comprador no existe" });
+    }
 
     res.sendStatus(200);
 

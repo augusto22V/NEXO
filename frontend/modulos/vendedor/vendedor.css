@@ -1,0 +1,560 @@
+/* ============================= */
+/* ===== LAYOUT GENERAL ======== */
+/* ============================= */
+
+.cliente-layout {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  gap: 30px;
+  padding: 30px;
+}
+
+.cliente-layout > * {
+  min-width: 0;
+}
+
+.panel {
+  background: #fff;
+  padding: 25px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.08);
+}
+
+/* ============================= */
+/* ===== FORMULARIO ============ */
+/* ============================= */
+
+.form-panel label {
+  display: block;
+  font-size: 14px;
+  color: #555;
+  margin-top: 12px;
+}
+
+.form-panel input {
+  width: 100%;
+  padding: 12px;
+  font-size: 15px;
+  border-radius: 14px;
+  border: 1px solid #ccc;
+  transition: .2s ease;
+}
+
+.form-panel input:focus {
+  border-color: #c2185b;
+
+}
+
+.form-panel select {
+  width: 100%;
+  padding: 12px;
+  font-size: 15px;
+  border-radius: 14px;
+  border: 1px solid #ccc;
+  transition: .2s ease;
+  background: #fff;
+}
+
+.form-panel select:focus {
+  border-color: #c2185b;
+}
+
+/* INPUT DESHABILITADO */
+.form-panel input:disabled,
+.form-panel select:disabled {
+  background: #ececec;
+  border-color: #bdbdbd;
+  color: #666;
+  cursor: not-allowed;
+}
+
+.comision-card {
+  margin-top: 18px;
+  padding: 16px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #fff9f2, #fff);
+  border: 1px solid #f0d9bc;
+}
+
+.comision-card h3 {
+  margin: 0 0 10px;
+  font-size: 14px;
+  letter-spacing: .08em;
+  color: #7a4b1f;
+}
+
+.comision-field-group.hidden {
+  display: none;
+}
+
+/* ============================= */
+/* ===== ACCIONES ============== */
+/* ============================= */
+
+.acciones {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.acciones button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .2s ease;
+}
+
+.acciones button img {
+  width: 22px;
+  height: 22px;
+}
+
+.acciones button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,.15);
+}
+
+.acciones button:disabled {
+  background: #bdbdbd !important;
+  cursor: not-allowed;
+  opacity: 0.7;
+  transform: none;
+}
+
+/* COLORES BOTONES */
+
+#btnNuevo {
+  background: #7ED957;
+  color: white;
+}
+
+#btnGuardar {
+  background: #2e7d32;
+  color: white;
+}
+
+#btnEliminar {
+  background: #c62828;
+  color: white;
+}
+
+#btnCancelar {
+  background: #757575;
+  color: white;
+}
+
+/* ============================= */
+/* ===== PANEL DERECHO ========= */
+/* ============================= */
+
+.lista-panel {
+  min-height: 520px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ============================= */
+/* ===== BUSCADOR ============== */
+/* ============================= */
+
+.lista-panel input {
+  width: 60%;
+  margin: 0 auto 25px auto;
+  padding: 14px 18px;
+  border-radius: 18px;
+  border: 1px solid #5c5656;
+  font-size: 16px;
+
+}
+
+.lista-panel input::placeholder {
+  color: #928d8d;
+  font-size: 15px;
+}
+
+/* ============================= */
+/* ===== TABLA COMPRADOR ======= */
+/* ============================= */
+
+.tabla-clientes {
+  border: 1px solid #eee;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.tabla-header {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  background: #f0f0f0;
+  padding: 14px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #333;
+  border-bottom: 1px solid #ddd;
+}
+
+.tabla-body {
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.tabla-row {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  padding: 12px 16px;
+  border-top: 1px solid #eee;
+  font-size: 14px;
+  cursor: pointer;
+  transition: .15s ease;
+}
+
+.tabla-row:hover {
+  background: #fafafa;
+}
+
+.tabla-row.activo {
+  background: #e0e0e6;
+  border-left: 4px solid #c2185b;
+}
+
+/* ============================= */
+/* ===== BOTÓN VOLVER ========== */
+/* ============================= */
+
+.btn-volver {
+  background: rgba(255,255,255,0.2);
+  border: none;
+  color: white;
+  padding: 6px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: .2s ease;
+}
+
+.btn-volver:hover {
+  background: rgba(255,255,255,0.25);
+  transform: translateY(-1px);
+}
+
+.btn-volver:active {
+  transform: scale(0.96);
+}
+
+/* ============================= */
+/* ===== MODALES =============== */
+/* ============================= */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-box {
+  background: #fff;
+  border-radius: 20px;
+  padding: 30px;
+  width: 360px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0,0,0,.2);
+  animation: modalIn .25s ease;
+}
+
+.modal-icon {
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+.modal-title {
+  color: #c2185b;
+  margin-bottom: 10px;
+}
+
+.modal-text {
+  color: #444;
+  font-size: 15px;
+  margin-bottom: 20px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.modal-actions.center {
+  justify-content: center;
+}
+
+.modal-actions button {
+  flex: 1;
+  padding: 12px;
+  border-radius: 16px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-cancelar {
+  background: #9e9e9e;
+  color: #fff;
+}
+
+.btn-eliminar {
+  background: #c62828;
+  color: #fff;
+}
+
+.btn-aceptar {
+  background: #546e7a;
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 18px;
+  font-weight: 500;
+  font-size: 12px;
+  cursor: pointer;
+  min-width: 140px;
+}
+
+.btn-aceptar:hover {
+  background: #455a64;
+}
+
+/* ============================= */
+/* ===== MENSAJES ============== */
+/* ============================= */
+
+.aviso-tabla {
+  margin: 8px 0 12px;
+  font-size: 14px;
+  color: #c2185b;
+  font-weight: 500;
+}
+
+.hidden {
+  display: none;
+}
+
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  font-size: 14px;
+  color: #555;
+  cursor: pointer;
+}
+
+.check-row input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  position: relative;
+  top: 3px;  
+}
+
+.tabla-row.inactivo {
+  opacity: 0.55;
+  filter: grayscale(1);
+}
+/* ============================= */
+/* ===== ANIMACIÓN MODAL ======= */
+/* ============================= */
+
+@keyframes modalIn {
+  from {
+    transform: scale(.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+
+.modal-actions button:focus {
+  outline: 3px solid #000;
+  outline-offset: 2px;
+}
+
+/* ============================= */
+/* MODO SELECCIÓN */
+/* ============================= */
+
+.cliente-layout.modo-seleccion {
+  display: flex;
+  justify-content: center;
+}
+
+.cliente-layout.modo-seleccion .lista-panel {
+  width: 70%;
+  max-width: 900px;
+}
+
+.cliente-layout.modo-seleccion .tabla-clientes {
+  width: 100%;
+}
+/* =========================
+   RESPONSIVE VENDEDOR UNIFICADO
+========================= */
+@media (min-width: 701px) and (max-width: 1024px) {
+  .cliente-layout {
+    grid-template-columns: 320px minmax(0, 1fr);
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .panel {
+    padding: 14px;
+    border-radius: 14px;
+  }
+
+  .acciones button {
+    min-height: 42px;
+    font-size: 13px;
+  }
+
+  .lista-panel input {
+    width: 100%;
+    margin: 0 0 12px;
+    padding: 10px 12px;
+    font-size: 14px;
+    border-radius: 12px;
+  }
+
+  .tabla-body {
+    max-height: 54dvh;
+  }
+}
+
+@media (max-width: 768px) {
+  .cliente-layout {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .panel {
+    padding: 12px;
+    border-radius: 14px;
+  }
+
+  .acciones {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  .acciones button {
+    min-height: 40px;
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  .acciones button img {
+    width: 18px;
+    height: 18px;
+  }
+
+  .lista-panel {
+    min-height: auto;
+  }
+
+  .lista-panel input {
+    width: 100%;
+    margin: 0 0 10px;
+    padding: 10px 12px;
+    font-size: 14px;
+    border-radius: 12px;
+  }
+
+  .tabla-clientes {
+    overflow: hidden;
+  }
+
+  .tabla-body {
+    max-height: 44dvh;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .tabla-header,
+  .tabla-row {
+    grid-template-columns: 46px minmax(120px, 1fr);
+    min-width: 0;
+    gap: 6px;
+    padding-inline: 8px;
+  }
+
+  .tabla-header {
+    padding-block: 10px;
+    font-size: 11px;
+  }
+
+  .tabla-row {
+    padding-block: 8px;
+    font-size: 11px;
+  }
+
+  .cliente-layout.modo-seleccion {
+    display: block;
+  }
+
+  .cliente-layout.modo-seleccion .lista-panel {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+@media (max-width: 768px) and (orientation: landscape) {
+  .cliente-layout {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .acciones {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .tabla-body {
+    max-height: 38dvh;
+  }
+
+  .tabla-header,
+  .tabla-row {
+    grid-template-columns: 42px minmax(100px, 1fr);
+    gap: 5px;
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) and (orientation: portrait) {
+  .acciones {
+    grid-template-columns: 1fr;
+  }
+
+  .tabla-header,
+  .tabla-row {
+    grid-template-columns: 38px minmax(90px, 1fr);
+    gap: 4px;
+    padding-inline: 6px;
+    font-size: 10px;
+  }
+
+  .tabla-body {
+    max-height: 48dvh;
+  }
+}

@@ -1,0 +1,646 @@
+﻿:root {
+  --cp-bg: #f4f4f4;
+  --cp-card: #ffffff;
+  --cp-dark: #1f1f1f;
+  --cp-accent: #4d6f91;
+  --cp-accent-dark: #38556f;
+  --cp-border: #cdd3d9;
+  --cp-muted: #6b7280;
+  --cp-danger: #8f3c3c;
+  --cp-value-positive-text: #1f6a36;
+  --cp-value-negative-text: #9b1c1c;
+}
+
+* {
+  box-sizing: border-box;
+  touch-action: manipulation;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", sans-serif;
+  background: var(--cp-bg);
+  color: #222;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.cp-topbar {
+  display: grid;
+  grid-template-columns: 140px 1fr 140px;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--cp-card);
+  border-bottom: 1px solid var(--cp-border);
+}
+
+.cp-topbar h1 {
+  margin: 0;
+  text-align: center;
+  font-size: 18px;
+  color: var(--cp-dark);
+}
+
+.btn-volver {
+  background: var(--cp-accent-dark);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cp-main {
+  height: calc(100vh - 60px);
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 8px;
+  padding: 8px;
+}
+
+.cp-filtros {
+  background: var(--cp-card);
+  border: 1px solid var(--cp-border);
+  border-radius: 12px;
+  padding: 8px 10px;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-areas:
+    "empresa busqueda busqueda busqueda barra codigo categoria categoria saldo valor moneda insumo"
+    "pair pair pair pair pair pair pair pair pair pair acciones acciones";
+  gap: 8px;
+  align-items: end;
+}
+
+.cp-filtros > div {
+  min-width: 0;
+}
+
+.cp-f-empresa { grid-area: empresa; }
+.cp-f-busqueda { grid-area: busqueda; }
+.cp-f-barra { grid-area: barra; }
+.cp-f-codigo { grid-area: codigo; }
+.cp-f-categoria { grid-area: categoria; }
+.cp-f-saldo { grid-area: saldo; }
+.cp-f-valor { grid-area: valor; }
+.cp-f-moneda { grid-area: moneda; }
+.cp-f-insumo { grid-area: insumo; }
+.cp-f-pair { grid-area: pair; }
+.cp-f-acciones { grid-area: acciones; }
+
+.cp-filtros label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 3px;
+  color: #2f3a45;
+}
+
+.cp-filtros input:not([type="checkbox"]),
+.cp-filtros select {
+  width: 100%;
+  border: 1px solid #cfd8e3;
+  border-radius: 8px;
+  padding: 7px 8px;
+  font-size: 13px;
+  height: 34px;
+}
+
+.cp-filtros input:not([type="checkbox"]):focus,
+.cp-filtros select:focus {
+  outline: none;
+  border-color: var(--cp-accent);
+  box-shadow: 0 0 0 2px rgba(77, 111, 145, .2);
+}
+
+.cp-col-span-2 {
+  grid-column: span 2;
+}
+
+.cp-emp-field input {
+  min-width: 0;
+}
+
+.cp-quick-search input {
+  border-width: 2px;
+}
+
+.cp-inline-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+.cp-inline-field label {
+  margin-bottom: 0;
+  white-space: nowrap;
+  flex: 0 0 auto;
+  max-width: 96px;
+}
+
+.cp-inline-field select,
+.cp-inline-field input:not([type="checkbox"]) {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto;
+}
+
+.cp-inline-field-right {
+  justify-self: end;
+}
+
+.cp-pair-fields {
+  display: grid;
+  grid-template-columns: minmax(185px, 1fr) minmax(128px, 148px) auto;
+  gap: 6px;
+  align-items: end;
+  min-width: 0;
+}
+
+.cp-pair-fields .cp-inline-field {
+  max-width: none;
+}
+
+.cp-inline-factura {
+  max-width: 170px;
+}
+
+.cp-pair-fields .cp-inline-factura {
+  max-width: 170px;
+}
+
+.cp-inline-factura label {
+  max-width: 74px;
+}
+
+.cp-inline-factura select {
+  flex: 0 0 92px;
+  min-width: 92px;
+}
+
+.cp-inline-limit {
+  max-width: 138px;
+}
+
+.cp-inline-limit input:not([type="checkbox"]) {
+  flex: 0 0 84px;
+  min-width: 84px;
+}
+
+.cp-toggle-row {
+  display: flex;
+  align-items: center;
+  min-height: 34px;
+}
+
+.cp-toggle-inline {
+  justify-self: start;
+  padding-left: 2px;
+}
+
+.cp-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.cp-toggle input[type="checkbox"] {
+  width: 14px;
+  min-width: 14px;
+  max-width: 14px;
+  height: 14px;
+  margin: 0;
+  border-radius: 4px;
+}
+
+.cp-toggle span {
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.cp-input-lupa {
+  display: grid;
+  grid-template-columns: 1fr 62px;
+  gap: 6px;
+  align-items: center;
+}
+
+.cp-input-lupa button {
+  height: 34px;
+  border: 1px solid #cfd8e3;
+  border-radius: 8px;
+  background: #e8edf3;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.cp-acciones {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-self: end;
+  align-self: end;
+}
+
+.cp-acciones button {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 11px;
+  font-weight: 700;
+  cursor: pointer;
+  height: 34px;
+}
+
+.btn-buscar {
+  background: var(--cp-accent);
+  color: #fff;
+}
+
+.btn-limpiar {
+  background: #e8edf3;
+  color: #29313a;
+}
+
+.cp-resultados {
+  background: var(--cp-card);
+  border: 1px solid var(--cp-border);
+  border-radius: 12px;
+  display: grid;
+  grid-template-rows: auto 1fr auto auto;
+  min-height: 0;
+}
+
+.cp-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--cp-border);
+  font-size: 12px;
+  color: #334155;
+}
+
+.cp-tabla-wrap {
+  min-height: 0;
+  overflow: auto;
+}
+
+.cp-tabla {
+  width: max(1720px, 100%);
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.cp-tabla th,
+.cp-tabla td {
+  border-bottom: 1px solid #edf1f5;
+  padding: 7px 8px;
+  white-space: nowrap;
+}
+
+.cp-tabla thead th {
+  position: sticky;
+  top: 0;
+  background: var(--cp-dark);
+  color: #fff;
+  font-weight: 700;
+  z-index: 2;
+  text-align: left;
+}
+
+.cp-tabla th.cp-sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.cp-tabla th.cp-sortable::after {
+  content: " ↕";
+  font-size: 10px;
+  color: #b6c2cf;
+}
+
+.cp-tabla th.cp-sortable.is-active.is-asc::after {
+  content: " ↑";
+  color: #fff;
+}
+
+.cp-tabla th.cp-sortable.is-active.is-desc::after {
+  content: " ↓";
+  color: #fff;
+}
+
+.cp-tabla tbody tr {
+  cursor: pointer;
+}
+
+.cp-tabla tbody tr:hover {
+  background: #f6f9fc;
+}
+
+.cp-tabla tr.fila-seleccionada {
+  background: #e9f2fb !important;
+  border-left: 3px solid #3a678f;
+}
+
+.cp-tabla tbody tr.cp-row-stock-positive td {
+  color: var(--cp-value-positive-text);
+  font-weight: 700;
+}
+
+.cp-tabla tbody tr.cp-row-stock-negative td {
+  color: var(--cp-value-negative-text);
+  font-weight: 700;
+}
+
+.cp-tabla td.col-stock {
+  font-weight: 700;
+  text-align: center;
+}
+
+.cp-tabla td.col-costo,
+.cp-tabla td.col-minorista,
+.cp-tabla td.col-mayorista,
+.cp-tabla td.col-minimo,
+.cp-tabla td.col-promocional {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.cp-tabla td.col-moneda {
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.cp-value-positive {
+  color: var(--cp-value-positive-text);
+  font-weight: 700;
+}
+
+.cp-value-negative,
+.cp-value-zero {
+  color: var(--cp-value-negative-text);
+  font-weight: 700;
+}
+
+.cp-estado-inactivo {
+  font-weight: 700;
+  text-decoration: underline dotted;
+}
+
+.cp-vacio {
+  text-align: center;
+  color: var(--cp-muted);
+  padding: 20px !important;
+}
+
+.cp-color-config {
+  padding: 7px 10px;
+}
+
+.cp-color-config-footer {
+  border-top: 1px solid var(--cp-border);
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cp-color-config-footer > label {
+  font-size: 11px;
+  color: #3b4a57;
+  font-weight: 700;
+}
+
+.cp-color-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cp-color-row span {
+  font-size: 11px;
+  color: #3b4a57;
+  font-weight: 700;
+}
+
+.cp-color-row input[type="color"] {
+  width: 42px;
+  min-width: 42px;
+  height: 30px;
+  border: 1px solid #cfd8e3;
+  border-radius: 6px;
+  padding: 2px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.cp-color-row .btn-limpiar {
+  padding: 7px 10px;
+  font-size: 12px;
+  height: 30px;
+}
+
+.cp-detalle-panel {
+  border-top: 1px solid var(--cp-border);
+  background: #f5f8fb;
+  color: #314557;
+  padding: 8px 10px;
+}
+
+.cp-detalle-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(150px, 1fr));
+  gap: 6px 10px;
+  align-items: center;
+}
+
+.cp-det-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.cp-det-label {
+  font-size: 11px;
+  color: #5b6f81;
+  font-weight: 700;
+}
+
+.cp-det-item span:last-child {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1f2f3d;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cp-det-item-wide {
+  grid-column: span 2;
+}
+
+.col-landscape,
+.col-tablet,
+.col-code,
+.col-desc,
+.col-stock,
+.col-categoria,
+.col-barra,
+.col-costo,
+.col-minorista,
+.col-mayorista,
+.col-minimo,
+.col-promocional,
+.col-moneda,
+.col-estado,
+.col-destino {
+  display: table-cell;
+}
+
+@media (max-width: 1500px) {
+  .cp-filtros {
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+    grid-template-areas:
+      "empresa busqueda busqueda busqueda barra codigo categoria categoria acciones acciones"
+      "saldo valor moneda insumo pair pair pair pair pair pair";
+  }
+
+  .cp-pair-fields {
+    grid-template-columns: minmax(170px, 1fr) minmax(118px, 138px) auto;
+  }
+
+  .cp-detalle-grid {
+    grid-template-columns: repeat(4, minmax(140px, 1fr));
+  }
+
+  .cp-det-item-wide {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 1200px) {
+  .cp-filtros {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    grid-template-areas:
+      "empresa busqueda busqueda barra codigo categoria categoria acciones"
+      "saldo valor moneda insumo pair pair pair pair";
+  }
+
+  .cp-pair-fields {
+    grid-template-columns: minmax(165px, 1fr) minmax(110px, 130px) auto;
+  }
+
+  .cp-detalle-grid {
+    grid-template-columns: repeat(3, minmax(130px, 1fr));
+  }
+}
+
+@media (max-width: 1100px) and (orientation: portrait) {
+  .cp-filtros {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-areas:
+      "empresa busqueda busqueda acciones"
+      "barra codigo categoria categoria"
+      "saldo valor moneda insumo"
+      "pair pair pair pair";
+  }
+
+  .cp-acciones {
+    justify-self: end;
+  }
+
+  .cp-pair-fields {
+    grid-template-columns: minmax(150px, 1fr) minmax(108px, 126px) auto;
+  }
+}
+
+@media (max-width: 680px) and (orientation: portrait) {
+  body {
+    overflow: auto;
+  }
+
+  .cp-main {
+    height: auto;
+    grid-template-rows: auto auto;
+  }
+
+  .cp-topbar {
+    grid-template-columns: 110px 1fr 0;
+  }
+
+  .cp-topbar-spacer {
+    display: none;
+  }
+
+  .cp-filtros {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "empresa"
+      "busqueda"
+      "barra"
+      "codigo"
+      "categoria"
+      "saldo"
+      "valor"
+      "moneda"
+      "insumo"
+      "pair"
+      "acciones";
+  }
+
+  .cp-pair-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .cp-toggle-inline {
+    grid-column: span 1;
+  }
+
+  .cp-resultados {
+    min-height: 60vh;
+  }
+
+  .col-landscape,
+  .col-tablet {
+    display: none;
+  }
+
+  .cp-tabla {
+    width: 100%;
+  }
+
+  .cp-detalle-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cp-det-item-wide {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 980px) and (orientation: landscape) {
+  .cp-filtros {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-areas:
+      "empresa busqueda busqueda barra codigo acciones"
+      "categoria categoria saldo valor moneda insumo"
+      "pair pair pair pair pair pair";
+  }
+
+  .cp-detalle-grid {
+    grid-template-columns: repeat(3, minmax(130px, 1fr));
+  }
+}

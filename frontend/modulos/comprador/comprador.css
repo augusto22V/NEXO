@@ -38,7 +38,7 @@
 
 .form-panel input:focus {
   border-color: #c2185b;
-  outline: none;
+
 }
 
 /* INPUT DESHABILITADO */
@@ -133,7 +133,7 @@
   border-radius: 18px;
   border: 1px solid #5c5656;
   font-size: 16px;
-  outline: none;
+
 }
 
 .lista-panel input::placeholder {
@@ -309,6 +309,28 @@
   display: none;
 }
 
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  font-size: 14px;
+  color: #555;
+  cursor: pointer;
+}
+
+.check-row input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  position: relative;
+  top: 3px;  
+}
+
+.tabla-row.inactivo {
+  opacity: 0.55;
+  filter: grayscale(1);
+}
 /* ============================= */
 /* ===== ANIMACIÓN MODAL ======= */
 /* ============================= */
@@ -321,5 +343,147 @@
   to {
     transform: scale(1);
     opacity: 1;
+  }
+}
+
+
+.modal-actions button:focus {
+  outline: 3px solid #000;
+  outline-offset: 2px;
+}
+/* =========================
+   UNIFICACION RESPONSIVE TOUCH
+========================= */
+@media (min-width: 701px) and (max-width: 1024px) {
+  .cliente-layout {
+    grid-template-columns: 320px minmax(0, 1fr);
+    gap: 14px;
+    padding: 14px;
+  }
+
+  .panel {
+    padding: 16px;
+  }
+
+  .acciones button {
+    min-height: 42px;
+    font-size: 13px;
+  }
+
+  .tabla-body {
+    max-height: 56dvh;
+  }
+}
+
+@media (max-width: 768px) {
+  .cliente-layout {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .panel {
+    padding: 12px;
+    border-radius: 14px;
+  }
+
+  .acciones {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  .acciones button {
+    min-height: 40px;
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  .acciones button img {
+    width: 18px;
+    height: 18px;
+  }
+
+  .lista-panel {
+    min-height: auto;
+  }
+
+  .lista-panel input {
+    width: 100%;
+    margin: 0 0 10px;
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+
+  .tabla-clientes {
+    overflow: hidden;
+  }
+
+  .tabla-body {
+    max-height: 44dvh;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .tabla-header,
+  .tabla-row {
+    grid-template-columns: 52px minmax(120px, 1fr);
+    min-width: 0;
+    gap: 6px;
+    padding-inline: 8px;
+  }
+
+  .tabla-header {
+    font-size: 11px;
+    padding-block: 10px;
+  }
+
+  .tabla-row {
+    font-size: 11px;
+    padding-block: 8px;
+  }
+}
+
+@media (max-width: 768px) and (orientation: landscape) {
+  .cliente-layout {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .acciones {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .tabla-body {
+    max-height: 40dvh;
+  }
+
+  .tabla-header,
+  .tabla-row {
+    grid-template-columns: 46px minmax(100px, 1fr);
+    gap: 5px;
+  }
+
+  .tabla-header,
+  .tabla-row {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) and (orientation: portrait) {
+  .acciones {
+    grid-template-columns: 1fr;
+  }
+
+  .tabla-header,
+  .tabla-row {
+    grid-template-columns: 40px minmax(92px, 1fr);
+    gap: 4px;
+    padding-inline: 6px;
+    font-size: 10px;
+  }
+
+  .tabla-body {
+    max-height: 48dvh;
   }
 }

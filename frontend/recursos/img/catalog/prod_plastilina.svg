@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" rx="16" fill="#ecfccb"/>
+  <circle cx="76" cy="100" r="28" fill="#f472b6"/>
+  <circle cx="124" cy="88" r="26" fill="#22d3ee"/>
+  <circle cx="100" cy="128" r="24" fill="#facc15"/>
+  <text x="100" y="188" text-anchor="middle" font-family="Segoe UI,system-ui,sans-serif" font-size="11" fill="#3f6212">Plastilina / masa</text>
+</svg>

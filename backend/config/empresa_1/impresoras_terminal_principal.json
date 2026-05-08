@@ -1,0 +1,18 @@
+{
+  "cocina": {
+    "tipo": "red",
+    "nombre": "Cocina",
+    "ip": "192.168.123.100",
+    "puerto": 9100
+  },
+  "venta": {
+    "tipo": "usb",
+    "nombre": "Lucas"
+  },
+  "cafeteria": {
+    "tipo": "usb",
+    "nombre": "Barra",
+    "ip": "",
+    "puerto": 9100
+  }
+}

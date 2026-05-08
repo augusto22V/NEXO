@@ -1,0 +1,110 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Movimiento Facturas</title>
+
+    <link rel="stylesheet" href="../../compartido/css/panelAuditoria.css">
+    <link rel="stylesheet" href="movimientoFactura.css">
+</head>
+
+<body>
+
+    <div class="mv-topbar">
+        <button class="btn-volver" onclick="salir()">← Volver </button>
+    </div>
+
+    <div class="mv-container">
+
+        <!-- ================= FILTROS ================= -->
+        <div class="mv-filtros">
+
+            <div>
+                <label>Fecha Desde</label>
+                <input type="date" id="fechaDesde">
+            </div>
+
+            <div>
+                <label>Fecha Hasta</label>
+                <input type="date" id="fechaHasta">
+            </div>
+
+            <!-- TIPO -->
+            <div>
+                <label>Tipo</label>
+                <select id="tipo">
+                    <option value="">Todos</option>
+                    <option value="FACTURA">Factura</option>
+                    <option value="TICKET">Ticket</option>
+                </select>
+            </div>
+
+            <!-- ESTADO -->
+            <div>
+                <label>Estado</label>
+                <select id="estado">
+                    <option value="">Todos</option>
+                    <option value="EMITIDO" selected>Emitido</option>
+                    <option value="ANULADO">Anulado</option>
+                </select>
+            </div>
+
+            <div>
+                <label>N° Factura</label>
+                <input type="text" id="numeroFactura">
+            </div>
+
+            <div class="input-busqueda-mini">
+                <input type="text" id="clienteFiltro" placeholder="Cliente">
+                <button onclick="abrirBusquedaCliente()">🔍</button>
+            </div>
+
+            <button onclick="buscarFacturas()">Buscar</button>
+
+        </div>
+
+        <!-- ================= LISTADO ================= -->
+        <div class="mv-listado">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Pedido</th>
+                        <th>N°</th>
+                        <th>Cliente</th>
+                        <th>RUC</th>
+                        <th>Tipo</th>
+                        <th>Estado</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+
+                <tbody id="tablaFacturas"></tbody>
+            </table>
+        </div>
+
+        <!-- ================= DETALLE ================= -->
+        <div class="mv-detalle">
+            <h3>Detalle Factura</h3>
+            <input type="hidden" id="facturaIdActual">
+            <div id="detalleFactura"></div>
+            <panel-auditoria id="auditMovimientoFactura" data-tabla="factura" data-id-input="facturaIdActual"></panel-auditoria>
+        </div>
+
+        <!-- ================= ACCIONES ================= -->
+      <div class="mv-acciones">
+    <button onclick="reimprimir()">REIMPRIMIR</button>
+    <button onclick="anularFactura()" style="background:#dc3545;">ANULAR</button>
+    <button onclick="verFacturaPDF()" style="background:#25D366;">VERFACTURA</button>
+  </div>
+
+    </div>
+
+    <script src="movimientoFactura.js"></script>
+    <script src="../../compartido/js/panelAuditoria.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" rx="16" fill="#fff1f2"/>
+  <ellipse cx="100" cy="104" rx="44" ry="52" fill="#fecdd3"/>
+  <rect x="88" y="48" width="24" height="28" rx="4" fill="#fb7185"/>
+  <text x="100" y="178" text-anchor="middle" font-family="Segoe UI,system-ui,sans-serif" font-size="12" fill="#be123c">Pintura</text>
+</svg>

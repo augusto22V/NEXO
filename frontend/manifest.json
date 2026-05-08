@@ -1,0 +1,23 @@
+﻿{
+  "name": "LibreríaSys",
+  "short_name": "LibreríaSys",
+  "description": "Ventas, stock y catálogo para librerías",
+  "start_url": "/modulos/venta/venta_rapida.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#f4f1ea",
+  "theme_color": "#1F1F1F",
+  "icons": [
+    {
+      "src": "/recursos/img/icono.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/recursos/img/icono.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#102532">
+  <link rel="manifest" href="/manifest.json?v=2026.04.17.03">
+  <title>LibreríaSys | Administracion</title>
+
+  <link rel="stylesheet" href="/compartido/css/base.css?v=2026.04.17.03">
+  <link rel="stylesheet" href="/compartido/css/admin.css?v=2026.04.17.03">
+  <link rel="stylesheet" href="/recursos/css/all.min.css?v=2026.04.17.03">
+
+  <script defer src="/compartido/js/app.config.js?v=2026.04.17.03"></script>
+  <script defer src="/compartido/js/session.manager.js?v=2026.04.17.03"></script>
+  <script defer src="/compartido/js/cache.bootstrap.js?v=2026.04.17.03"></script>
+  <script defer src="/compartido/js/seguridad.js?v=2026.04.17.03"></script>
+  <script defer src="/compartido/js/programas.acceso.js?v=2026.04.17.03"></script>
+  <script defer src="/compartido/js/admin.js?v=2026.04.17.03"></script>
+</head>
+<body>
+  <header class="admin-header">
+    <div class="admin-brand">
+      <img src="/recursos/img/default.png?v=2026.04.17.03" alt="LibreríaSys">
+      <div>
+        <h1>Panel administrativo</h1>
+        <p>Configuración de la librería: usuarios, permisos y parámetros de venta</p>
+      </div>
+    </div>
+
+    <div class="admin-user">
+      <span id="adminUsuario">-</span>
+      <span id="adminRol" class="rol-badge">-</span>
+      <span id="adminEmpresa">-</span>
+      <button type="button" class="btn-outline" onclick="window.location.href='/home.html'">Operativo</button>
+      <button type="button" class="btn-outline" onclick="cerrarSesionAdmin()">Salir</button>
+    </div>
+  </header>
+
+  <main class="admin-main">
+    <section class="admin-hero">
+      <h2>Menú administrativo</h2>
+      <p>Usuarios, programas, empresa, terminales y facturación para el punto de venta de la librería.</p>
+    </section>
+
+    <section id="adminGrid" class="admin-grid"></section>
+
+    <section class="admin-section">
+      <article class="admin-download-card">
+        <div class="admin-card-head">
+          <i class="fa-solid fa-download"></i>
+          <div>
+            <h3>Descargar Aplicacion</h3>
+            <p class="admin-download-text">Descarga directa de las APK desde este mismo servidor para instalar en tablets o celulares de la red.</p>
+          </div>
+        </div>
+
+        <div class="admin-download-actions">
+          <button type="button" class="admin-download-btn" data-apk-file="SoftSys.apk" data-apk-label="LibreríaSys Local">
+            <i class="fa-solid fa-mobile-screen-button"></i>
+            Descargar LibreríaSys Local
+          </button>
+          <button type="button" class="admin-download-btn" data-apk-file="SoftSysCasa.apk" data-apk-label="LibreríaSys Casa">
+            <i class="fa-solid fa-cloud-arrow-down"></i>
+            Descargar LibreríaSys Casa
+          </button>
+        </div>
+
+        <p class="admin-download-hint">La descarga usa la direccion actual del panel: <span id="adminServerOrigin">-</span></p>
+        <p id="adminDownloadStatus" class="admin-download-status" aria-live="polite"></p>
+      </article>
+    </section>
+  </main>
+
+  <footer class="admin-footer">LibreríaSys · Administración</footer>
+  <iframe id="adminDownloadFrame" class="admin-download-frame" title="Descarga de APK" hidden></iframe>
+</body>
+</html>

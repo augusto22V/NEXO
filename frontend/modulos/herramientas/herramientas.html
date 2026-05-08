@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <title>LibreríaSys | Herramientas</title>
+
+  <link rel="stylesheet" href="/compartido/css/base.css">
+  <link rel="stylesheet" href="/compartido/css/home.css">
+  <link rel="stylesheet" href="/compartido/css/panelAuditoria.css">
+  <link rel="stylesheet" href="/modulos/herramientas/herramientas.css">
+</head>
+
+<body>
+
+  <div class="topbar">
+    <button class="btn-volver" onclick="window.location.href='../../home.html'">← Volver</button>
+    <div class="titulo">
+      <span id="moduloTitulo">Herramientas</span>
+    </div>
+  </div>
+
+  <div class="herr-container">
+
+    <!-- 🔥 COLUMNA IZQUIERDA -->
+    <div class="columna">
+
+      <!-- NUMERACION DE PEDIDOS -->
+      <div class="panel">
+        <h2>🔢 Numeración de Pedidos</h2>
+
+        <p class="panel-desc">
+          Permite reiniciar el conteo de pedidos automáticamente o manualmente.
+        </p>
+
+        <div class="form-row">
+          <label>
+            <input type="checkbox" id="autoResetPedidos">
+            Reinicio automático cada día
+          </label>
+        </div>
+
+        <div class="form-row">
+          <label>Hora de reinicio</label>
+          <input type="time" id="horaResetPedidos" value="00:00" class="input-config" style="width:120px">
+        </div>
+
+        <div class="config-acciones">
+          <button class="btn-guardar" onclick="guardarConfigPedidos()">
+            💾 Guardar configuración
+          </button>
+
+          <button class="btn-probar" onclick="reiniciarPedidos()">
+            🔄 Reiniciar numeración ahora
+          </button>
+        </div>
+
+        <div id="estadoPedidos" class="estado-msg"></div>
+        <input type="hidden" id="configuracionIdActual" value="1">
+        <panel-auditoria id="auditConfigPedidos" data-tabla="configuracion" data-id-input="configuracionIdActual"></panel-auditoria>
+      </div>
+
+      <!-- IMPRESORA VENTA -->
+      <div class="panel">
+        <h2>🖨 Impresora Venta (USB)</h2>
+        <p class="panel-desc">
+          Imprime los tickets de venta. Conectada por USB.
+        </p>
+
+        <div class="form-row">
+          <label>Nombre en Windows</label>
+          <input type="text" id="ventaNombre" placeholder="POS_80C" class="input-config">
+        </div>
+
+        <div class="config-acciones">
+          <button class="btn-guardar" onclick="guardarConfig()">💾 Guardar</button>
+          <button class="btn-probar" onclick="probarUSB()">🖨 Imprimir prueba</button>
+        </div>
+
+        <div id="estadoUSB" class="estado-msg"></div>
+      </div>
+
+    </div>
+
+
+    <!-- 🔥 COLUMNA DERECHA -->
+    <div class="columna">
+
+      <!-- IMPRESORAS DINÁMICAS -->
+      <div class="panel">
+
+        <h2>🖨 Impresoras de Preparación</h2>
+
+        <p class="panel-desc">
+          Configurá destinos como cocina, barra, cafetería, etc.
+        </p>
+
+        <div id="listaImpresoras"></div>
+
+        <div class="config-acciones">
+          <button onclick="agregarImpresora()" class="btn-guardar">
+            ➕ Agregar destino
+          </button>
+
+          <button class="btn-guardar" onclick="guardarConfig()">
+            💾 Guardar configuración
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script src="herramientas.js"></script>
+  <script src="/compartido/js/panelAuditoria.js"></script>
+  <script src="/compartido/js/seguridad.js"></script>
+
+</body>
+
+</html>

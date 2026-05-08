@@ -1,225 +1,273 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
   <meta charset="UTF-8">
-  <title>Stop Top | Compra</title>
-
-  <!-- estilos base del sistema -->
-  <link rel="stylesheet" href="../../compartido/css/base.css">
-
-  <!-- estilos globales -->
-  <link rel="stylesheet" href="../../css/home.css">
-
-  <!-- estilos específicos del módulo -->
-  <link rel="stylesheet" href="compra.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LibreríaSys | Compras</title>
+  <link rel="stylesheet" href="../../compartido/css/base.css?v=2026.04.18.04">
+  <link rel="stylesheet" href="../../compartido/css/panelAuditoria.css?v=2026.04.18.04">
+  <link rel="stylesheet" href="compra.css?v=2026.04.18.07">
 </head>
-
 <body>
+  <input type="hidden" id="compraId">
+  <input type="hidden" id="estadoCompra" value="1">
 
-  <!-- ===== TOPBAR ===== -->
   <div class="topbar">
-
-    <button class="btn-volver" onclick="volver()">
-      <img src="../../recursos/img/volver.png">
-      Volver
-    </button>
-
+    <button type="button" class="btn-top" id="btnVolver">Volver</button>
     <div class="titulo">
-      <h1>Stop Top</h1>
-      <span id="moduloTitulo">Compra</span>
+      <span>Compra</span>
     </div>
-
   </div>
 
-  <!-- ===== CONTENEDOR PRINCIPAL ===== -->
-  <div class="admin-container">
+  <main class="compra-shell">
+    <section class="panel panel-cabecera">
+      <div class="panel-head">
+        <h1>Cabecera de Compra</h1>
+        <div id="estadoVisual" class="estado estado-pendiente">PENDIENTE</div>
+      </div>
+      <panel-auditoria id="auditCompra" data-tabla="compra" data-id-input="compraId"></panel-auditoria>
 
-    <!-- ===== PANEL IZQUIERDO ===== -->
-    <div class="panel panel-form">
-
-      <h2>Datos de Compra</h2>
-
-      <form id="formCompra">
-
-        <!-- ===== FECHA ===== -->
-        <div class="cab-row">
-          <label>Fecha</label>
-          <input type="date" id="fecha">
+      <div class="cabecera-grid">
+        <div class="field field-empresa">
+          <label for="empresaId">Empresa</label>
+          <select id="empresaId"></select>
         </div>
 
-        <!-- ===== PROVEEDOR ===== -->
-        <div class="cab-row">
-          <label>Proveedor</label>
+        <div class="field field-fecha">
+          <label for="fechaCompra">Fecha</label>
+          <input type="date" id="fechaCompra">
+        </div>
 
-          <div class="input-dual">
-
-            <input type="text"
-                   id="proveedorCodigo"
-                   placeholder="Código"
-                   class="input-codigo">
-
-            <input type="text"
-                   id="proveedorNombre"
-                   placeholder="Nombre proveedor"
-                   readonly>
-
-            <button type="button"
-                    class="btn-mini"
-                    onclick="buscarProveedor()">
-              <img src="../../recursos/img/buscar.png">
+        <div class="field field-numero">
+          <label for="numeroCompra">Nro Compra</label>
+          <div class="campo-con-lupa">
+            <input type="number" id="numeroCompra" min="1" step="1" inputmode="numeric" autocomplete="off">
+            <button type="button" id="btnBuscarCompra" class="btn-icono" title="Buscar compra">
+              <img src="/recursos/img/buscar.png" alt="Buscar compra">
             </button>
+          </div>
+        </div>
+        <div class="field field-operacion">
+          <label for="tipoOperacionCodigo">Operacion</label>
+          <div class="lookup lookup-operacion">
+            <input type="text" id="tipoOperacionCodigo" class="codigo" autocomplete="off" inputmode="numeric">
+            <input type="text" id="tipoOperacionDescripcion" class="texto" autocomplete="off" readonly>
+            <button type="button" id="btnBuscarTipoOperacion" class="btn-icono" title="Buscar operacion">
+              <img src="/recursos/img/buscar.png" alt="Buscar operacion">
+            </button>
+          </div>
+          <select id="tipoOperacion" hidden></select>
+        </div>
 
+        <div class="field field-forma-pago">
+          <label for="condicionPago">Forma Pago</label>
+          <select id="condicionPago"></select>
+        </div>
 
+        <div class="field field-moneda">
+          <label for="monedaId">Moneda</label>
+          <select id="monedaId"></select>
+        </div>
+
+        <div class="field field-emision">
+          <label for="fechaEmision">Emision</label>
+          <input type="date" id="fechaEmision">
+        </div>
+
+        <div class="field field-proveedor">
+          <label for="proveedorCodigo">Proveedor</label>
+          <div class="lookup">
+            <input type="text" id="proveedorCodigo" class="codigo" autocomplete="off">
+            <input type="hidden" id="proveedorId">
+            <input type="text" id="proveedorNombre" class="texto" autocomplete="off" readonly>
+            <button type="button" id="btnBuscarProveedor" class="btn-icono" title="Buscar proveedor">
+              <img src="/recursos/img/buscar.png" alt="Buscar proveedor">
+            </button>
           </div>
         </div>
 
-        <!-- ===== COMPRADOR ===== -->
-        <div class="cab-row">
-          <label>Comprador</label>
-
-          <div class="input-dual">
-
-            <input type="text"
-                   id="compradorCodigo"
-                   placeholder="Código"
-                   class="input-codigo">
-
-            <input type="text"
-                   id="compradorNombre"
-                   placeholder="Nombre comprador"
-                   readonly>
-
-            <button type="button"
-                    class="btn-mini"
-                    onclick="buscarComprador()">
-              <img src="../../recursos/img/buscar.png">
+        <div class="field field-comprador">
+          <label for="compradorCodigo">Comprador</label>
+          <div class="lookup">
+            <input type="text" id="compradorCodigo" class="codigo" autocomplete="off">
+            <input type="hidden" id="compradorId">
+            <input type="text" id="compradorNombre" class="texto" autocomplete="off" readonly>
+            <button type="button" id="btnBuscarComprador" class="btn-icono" title="Buscar comprador">
+              <img src="/recursos/img/buscar.png" alt="Buscar comprador">
             </button>
-
-           
-
           </div>
         </div>
 
-        <!-- ===== ESTADO ===== -->
-        <div class="cab-row">
-          <label>Estado</label>
-          <div class="estado-badge">ABIERTA</div>
+        <div class="field field-comprobante">
+          <label for="nroComprobante">Comprobante</label>
+          <input type="text" id="nroComprobante" autocomplete="off">
         </div>
 
-        <!-- ===== ACCIONES ===== -->
-        <div class="acciones">
-
-          <button type="button" id="btnNuevo" onclick="nuevaCompra()">
-            <img src="../../recursos/img/nueva.png">
-            <span>Nuevo</span>
-          </button>
-
-          <button type="button" id="btnGuardar" onclick="guardarCompra()">
-            <img src="../../recursos/img/guardar.png">
-            <span>Guardar</span>
-          </button>
-
-          <button type="button" id="btnEfectivar" onclick="efectivar()">
-            <img src="../../recursos/img/efectivizar.png">
-            <span>Efectivar</span>
-          </button>
-
-          <button type="button" id="btnCancelar" onclick="cancelarCompra()">
-            <img src="../../recursos/img/cancelar.png">
-            <span>Cancelar</span>
-          </button>
-
+        <div class="field field-timbrado">
+          <label for="timbradoCompra">Timbrado</label>
+          <input type="text" id="timbradoCompra" autocomplete="off">
         </div>
+      </div>
+    </section>
 
-      </form>
-
-    </div>
-
-    <!-- ===== PANEL DERECHO ===== -->
-    <div class="panel panel-lista">
-
-      <h2>Detalle de Productos</h2>
-      
-     <!-- CARGA PRODUCTO -->
-    <div class="detalle-bar">
-
-  <div class="producto-dual">
-
-    <input type="text"
-           id="productoCodigo"
-           class="input-codigo"
-           placeholder="Código">
-
-    <input type="text"
-           id="productoDescripcion"
-           placeholder="Descripción del producto"
-           readonly>
-
-    <button type="button"
-            class="btn-mini"
-            onclick="buscarProducto()">
-      <img src="../../recursos/img/buscar.png">
-    </button>
-
-  </div>
-
-  <input type="number"
-         id="cantidad"
-         class="input-cant"
-         placeholder="Cant">
-
-  <div class="costo-box">
-    <select id="moneda">
-      <option value="PYG">Gs</option>
-      <option value="BRL">R$</option>
-      <option value="USD">$</option>
-    </select>
-
-    <input type="number"
-           id="costo"
-           class="input-costo"
-           placeholder="Costo">
-  </div>
-
-</div>
-
-  
-      <!-- TABLA -->
-      <div class="tabla-compra">
-
-        <div class="tabla-header">
-          <span>#</span>
-          <span>Producto</span>
-          <span>Cantidad</span>
-          <span>Costo</span>
-          <span>Total</span>
-          <span></span>
+    <section class="panel panel-detalle">
+      <div class="panel-head">
+        <h2>Detalle de Items</h2>
+        <div class="resumen">
+          <span id="cantidadItems">0 items</span>
+          <strong id="totalCompra">0</strong>
         </div>
-
-        <div id="detalleBody" class="tabla-body"></div>
-
-  
-      <!-- TOTAL -->
-      <div class="compra-total">
-        TOTAL: <span id="totalCompra">Gs 0</span>
       </div>
 
-    </div>
-    </div>
+      <div class="detalle-editor">
+        <input type="hidden" id="detalleId">
+        <input type="hidden" id="productoId">
+
+        <div class="campo-detalle">
+          <label for="itemCantidad">Cant.</label>
+          <input type="number" id="itemCantidad" min="0" step="0.01">
+        </div>
+
+        <div class="campo-detalle">
+          <label for="productoCodigo">Cod./Barra</label>
+          <input type="text" id="productoCodigo" autocomplete="off">
+        </div>
+
+        <div class="campo-detalle campo-detalle-producto">
+          <label for="productoNombre">Producto</label>
+          <div class="lookup lookup-producto">
+            <input type="text" id="productoNombre" class="texto" autocomplete="off">
+            <button type="button" id="btnBuscarProducto" class="btn-icono" title="Buscar producto">
+              <img src="/recursos/img/buscar.png" alt="Buscar producto">
+            </button>
+          </div>
+        </div>
+
+        <div class="campo-detalle">
+          <label for="productoCodigoBarra">Codigo Barra</label>
+          <input type="text" id="productoCodigoBarra" readonly value="-">
+        </div>
+
+        <div class="campo-detalle">
+          <label for="itemCostoMedio">Costo Medio</label>
+          <input type="text" id="itemCostoMedio" readonly value="0">
+        </div>
+
+        <div class="campo-detalle">
+          <label for="itemPrecio">Costo Unit.</label>
+          <input type="number" id="itemPrecio" min="0" step="0.01">
+        </div>
+
+        <div class="campo-detalle">
+          <label for="itemSubtotal">Subtotal</label>
+          <input type="text" id="itemSubtotal" readonly value="0">
+        </div>
+
+        <div class="campo-detalle campo-detalle-lotes">
+          <label for="itemLotesResumen">Lotes / Vencimientos</label>
+          <div class="lotes-inline">
+            <input type="text" id="itemLotesResumen" value="Sin lotes cargados" readonly>
+            <button type="button" id="btnGestionarLotes" class="btn-secundario">Gestionar</button>
+          </div>
+          <input type="hidden" id="itemLote" autocomplete="off">
+          <input type="hidden" id="itemVencimiento">
+        </div>
+
+        <div class="acciones-item">
+          <button type="button" id="btnAgregarItem">Agregar</button>
+          <button type="button" id="btnLimpiarItem">Limpiar</button>
+        </div>
+      </div>
+
+      <div class="detalle-grid-wrap">
+        <table class="detalle-grid">
+          <thead>
+            <tr>
+              <th class="col-nro">#</th>
+              <th class="col-codigo">Codigo</th>
+              <th class="col-barra">Cod. Barra</th>
+              <th class="col-producto">Producto</th>
+              <th class="col-cantidad">Cant.</th>
+              <th class="col-costo-medio">C. Medio</th>
+              <th class="col-precio">Precio</th>
+              <th class="col-subtotal">Subtotal</th>
+              <th class="col-lote" data-col-lote>Lote(s)</th>
+              <th class="col-venc" data-col-lote>Vence(n)</th>
+              <th class="col-acciones">Accion</th>
+            </tr>
+          </thead>
+          <tbody id="detalleBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="barra-acciones">
+    <button type="button" id="btnNuevaCompra" class="btn-accion btn-neutral">Nuevo</button>
+    <button type="button" id="btnGuardarCompra" class="btn-accion btn-ok">Guardar</button>
+    <button type="button" id="btnConcluirCompra" class="btn-accion btn-warn">Concluir</button>
+    <button type="button" id="btnEfectivizarCompra" class="btn-accion btn-primary">Efectivizar</button>
+    <button type="button" id="btnCancelarCompra" class="btn-accion btn-danger">Cancelar</button>
+    <button type="button" id="btnSalirCompra">Salir</button>
+  </footer>
+
+  <div id="modalLotesItem" class="cp-modal" hidden>
+    <div class="cp-modal-backdrop" data-close-lotes></div>
+    <div class="cp-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="tituloModalLotes">
+      <div class="cp-modal-head">
+        <h3 id="tituloModalLotes">Gestionar Lotes del Item</h3>
+        <button type="button" id="btnCerrarModalLotes" class="cp-modal-close" title="Cerrar">✕</button>
+      </div>
+
+      <div class="cp-modal-grid">
+        <div class="cp-modal-field">
+          <label for="mlCantidad">Cantidad</label>
+          <input type="number" id="mlCantidad" min="0" step="0.01">
+        </div>
+        <div class="cp-modal-field">
+          <label for="mlLote">Lote</label>
+          <input type="text" id="mlLote" maxlength="80" autocomplete="off">
+        </div>
+        <div class="cp-modal-field">
+          <label for="mlVence">Vencimiento</label>
+          <input type="date" id="mlVence">
+        </div>
+        <div class="cp-modal-field cp-modal-action">
+          <button type="button" id="btnAgregarLoteModal" class="btn-modal-add">Agregar Lote</button>
+        </div>
+      </div>
+
+      <div class="cp-modal-list-wrap">
+        <table class="cp-modal-list">
+          <thead>
+            <tr>
+              <th>Cant.</th>
+              <th>Lote</th>
+              <th>Vence</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="mlBody">
+            <tr><td colspan="4" class="cp-modal-empty">Sin lotes cargados</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="cp-modal-foot">
+        <span id="mlResumen">Total lotes: 0</span>
+        <div class="cp-modal-buttons">
+          <button type="button" id="btnAplicarLotesModal" class="btn-modal-ok">Aplicar</button>
+          <button type="button" id="btnCancelarLotesModal" class="btn-modal-cancel">Cancelar</button>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- ===== SCRIPTS ===== -->
-  <script src="compra.js"></script>
-
-  <script>
-    function volver() {
-      window.location.href = "../../home.html";
-    }
-
-    document.getElementById("moduloTitulo").textContent = "Compra";
-  </script>
-
+  <script src="../../compartido/js/panelAuditoria.js?v=2026.04.18.04"></script>
+  <script src="/compartido/js/app.config.js?v=2026.04.18.04"></script>
+  <script src="/compartido/js/session.manager.js?v=2026.04.18.04"></script>
+  <script src="/compartido/js/cache.bootstrap.js?v=2026.04.18.04"></script>
+  <script src="compra.js?v=2026.04.18.07"></script>
+  <script src="/compartido/js/seguridad.js?v=2026.04.18.04"></script>
 </body>
 </html>

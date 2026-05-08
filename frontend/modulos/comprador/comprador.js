@@ -3,22 +3,29 @@ const API = "/api/comprador";
 let compradores = [];
 let sortField = "id";
 let sortDir = "desc";
+let _dirty = false;
+let _loading = false;
+let isSelectionMode = false;
+let compradorSeleccionadoTemp = null;
 
 // ===== DOM =====
 const compradorId = document.getElementById("compradorId");
 const codigoComprador = document.getElementById("codigoComprador");
 const nombre = document.getElementById("nombre");
+const activo = document.getElementById("activo"); 
 const buscar = document.getElementById("buscarComprador");
-
 const btnNuevo = document.getElementById("btnNuevo");
 const btnGuardar = document.getElementById("btnGuardar");
 const btnEliminar = document.getElementById("btnEliminar");
 const btnCancelar = document.getElementById("btnCancelar");
-
+const btnSeleccionar = document.getElementById("btnSeleccionar");
 const tablaCompradores = document.getElementById("tablaCompradores");
 
 // ===== LOAD =====
 async function cargar() {
+
+  _loading = true;
+
   try {
     const res = await fetch(API);
     if (!res.ok) throw new Error();
@@ -29,8 +36,86 @@ async function cargar() {
   } catch {
     tablaCompradores.innerHTML =
       "<div style='padding:10px;color:red'>Error cargando datos</div>";
+  } finally {
+    _loading = false;
   }
 }
+
+function soloDigitos(valor) {
+  return (valor || "").replace(/\D/g, "");
+}
+
+codigoComprador.addEventListener("input", () => {
+  const limpio = soloDigitos(codigoComprador.value);
+  if (codigoComprador.value !== limpio) codigoComprador.value = limpio;
+});
+
+codigoComprador.addEventListener("keydown", async (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+
+    const id = Number(codigoComprador.value);
+    if (!id) {
+      await nuevo(); // si está vacío, sí crea secuencia
+      return;
+    }
+
+    await buscarPorId(id); 
+  }
+});
+
+const thId = document.getElementById("thId");
+
+if (thId) {
+  thId.style.cursor = "pointer";
+  thId.addEventListener("click", () => {
+    if (sortField !== "id") {
+      sortField = "id";
+      sortDir = "asc";
+    } else {
+      sortDir = (sortDir === "asc") ? "desc" : "asc";
+    }
+    thId.textContent = `ID ${sortDir === "asc" ? "▲" : "▼"}`;
+    render(compradores);
+  });
+}
+
+async function buscarPorId(id) {
+
+  _loading = true;
+
+  try {
+    const res = await fetch(`${API}/${id}`);
+    if (!res.ok) {
+      mostrarAdvertencia("No existe comprador con ese código");
+      return;
+    }
+
+    const c = await res.json();
+    seleccionar(c);
+
+    document.querySelectorAll(".tabla-row")
+      .forEach(r => r.classList.remove("activo"));
+
+    const rows = [...document.querySelectorAll(".tabla-row")];
+    const row = rows.find(r => r.firstElementChild?.textContent == String(c.id));
+    if (row) row.classList.add("activo");
+
+    setTimeout(() => nombre.focus(), 50);
+
+  } catch {
+    mostrarAdvertencia("Error buscando comprador");
+  } finally {
+    _loading = false;
+  }
+}
+
+//funcion para que le pregunte si quiere salir con Esc o volver cuando este cargado algop 
+function hayCambiosSinGuardar() {
+  return _dirty || _loading;
+}
+//funcion para que no salga si algo esta cargado ojo con esto 
+
 
 // ===== RENDER =====
 function render(data) {
@@ -54,10 +139,16 @@ function render(data) {
     const row = document.createElement("div");
     row.className = "tabla-row";
 
-    row.innerHTML = `
-      <span>${c.id}</span>
-      <span>${c.nombre}</span>
-    `;
+   const estadoTxt = (c.activo === false) ? " (INACTIVO)" : "";
+
+row.innerHTML = `
+  <span>${c.id}</span>
+  <span>${c.nombre}${estadoTxt}</span>
+`;
+
+if (c.activo === false) {
+  row.classList.add("inactivo");
+}
 
     row.onclick = () => {
       document.querySelectorAll(".tabla-row")
@@ -67,38 +158,89 @@ function render(data) {
       seleccionar(c);
     };
 
+    row.ondblclick = () => {
+      if (isSelectionMode) {
+        seleccionarCompradorDirecto(c);
+      } else {
+        seleccionar(c);
+      }
+    };
+
     tablaCompradores.appendChild(row);
   });
 }
 
+
+
 // ===== SELECT =====
 function seleccionar(c) {
+  compradorSeleccionadoTemp = c;
 
   compradorId.value = c.id;
   codigoComprador.value = c.id;
   nombre.value = c.nombre;
+  if (activo) activo.checked = (c.activo !== false); 
 
   habilitarFormulario();
 
   btnGuardar.disabled = false;
   btnEliminar.disabled = false;
   btnCancelar.disabled = false;
+
+  if (isSelectionMode) {
+    btnSeleccionar.disabled = false;
+  }
+
+  _dirty = false;
+}
+
+function seleccionarCompradorDirecto(c) {
+  const compradorSeleccionado = {
+    id: c.id,
+    nombre: c.nombre
+  };
+
+  if (window.opener && !window.opener.closed && typeof window.opener.recibirComprador === "function") {
+    try {
+      window.opener.recibirComprador(compradorSeleccionado);
+      window.opener.focus();
+      window.close();
+      return;
+    } catch {
+      // fallback localStorage
+    }
+  }
+
+  localStorage.setItem("softsysCompradorSeleccionado", JSON.stringify(compradorSeleccionado));
+  window.close();
+}
+
+function seleccionarComprador() {
+  if (!compradorSeleccionadoTemp) {
+    mostrarAdvertencia("Seleccione un comprador primero");
+    return;
+  }
+  seleccionarCompradorDirecto(compradorSeleccionadoTemp);
 }
 
 // ===== BLOQUEAR / HABILITAR =====
 function bloquearFormulario() {
   nombre.disabled = true;
+  if (activo) activo.disabled = true;
 }
 
 function habilitarFormulario() {
   nombre.disabled = false;
+  if (activo) activo.disabled = false;
 }
 
 // ===== NUEVO =====
 async function nuevo() {
+  compradorSeleccionadoTemp = null;
 
   compradorId.value = "";
   nombre.value = "";
+  if (activo) activo.checked = true;
 
   const nextId = await obtenerProximoId();
   codigoComprador.value = nextId;
@@ -108,16 +250,19 @@ async function nuevo() {
   btnGuardar.disabled = false;
   btnEliminar.disabled = true;
   btnCancelar.disabled = false;
+  
 
   setTimeout(() => nombre.focus(), 50);
 }
 
 // ===== CANCELAR =====
 function cancelar() {
+  compradorSeleccionadoTemp = null;
 
   compradorId.value = "";
   codigoComprador.value = "";
   nombre.value = "";
+  if (activo) activo.checked = true;
 
   document.querySelectorAll(".tabla-row")
     .forEach(r => r.classList.remove("activo"));
@@ -125,6 +270,7 @@ function cancelar() {
   btnGuardar.disabled = true;
   btnEliminar.disabled = true;
   btnCancelar.disabled = true;
+  _dirty = false;
 
   bloquearFormulario();
 
@@ -140,8 +286,11 @@ async function guardar() {
     return;
   }
 
+  _loading = true;
+
   const payload = {
-    nombre: nombre.value.trim()
+    nombre: nombre.value.trim(),
+    activo: activo ? !!activo.checked : true
   };
 
   try {
@@ -162,73 +311,93 @@ async function guardar() {
       });
     }
 
-    cancelar();
-    cargar();
+    await cargar();
+    await nuevo();
+
+    _dirty = false;
+    codigoComprador.focus();
 
   } catch {
     mostrarAdvertencia("Error al guardar");
+  } finally {
+    _loading = false;
   }
 }
 
-// ===== ELIMINAR =====
-let compradorAEliminar = null;
 
 function eliminar() {
+
   if (!compradorId.value) return;
 
-  compradorAEliminar = compradorId.value;
-  document.getElementById("modalNombreComprador").textContent = nombre.value;
-  document.getElementById("modalEliminar").classList.remove("hidden");
-}
+  baseModalOpenConfirm({
+    titulo: "Eliminar comprador",
+    mensaje: "¿Desea eliminar el comprador?",
+    detalle: nombre.value,
+    confirmText: "Eliminar",
+    cancelText: "Cancelar",
+    onConfirm: async () => {
 
-function cerrarModalEliminar() {
-  compradorAEliminar = null;
-  document.getElementById("modalEliminar").classList.add("hidden");
-}
+      _loading = true;
 
-async function confirmarEliminar() {
+      try {
+        await fetch(`${API}/${compradorId.value}`, {
+          method: "DELETE"
+        });
 
-  if (!compradorAEliminar) return;
+        await cargar();
+        cancelar();
 
-  await fetch(`${API}/${compradorAEliminar}`, {
-    method: "DELETE"
+      } finally {
+        _loading = false;
+      }
+    }
   });
-
-  cerrarModalEliminar();
-  cancelar();
-  cargar();
 }
 
-// ===== FILTRO =====
+// FILTRO 
 function filtrar() {
   const t = buscar.value.toLowerCase().trim();
 
   render(
-    compradores.filter(c =>
-      (c.nombre || "").toLowerCase().includes(t)
-    )
+    compradores.filter(c => {
+      const nom = (c.nombre || "").toLowerCase();
+      const idtxt = String(c.id ?? "");
+      return nom.includes(t) || idtxt.includes(t);
+    })
   );
 }
 
-// ===== PROXIMO ID =====
-async function obtenerProximoId() {
-  const res = await fetch(API);
-  const data = await res.json();
+// ===== VOLVER SEGURO =====
+function volverSeguro() {
+  if (isSelectionMode) {
+    // En modo selección, volver a la compra cambiando la URL de la ventana padre
+    if (window.opener && !window.opener.closed) window.opener.focus();
+    window.close();
+    return;
+  }
 
-  if (!data.length) return 1;
-
-  const maxId = Math.max(...data.map(c => c.id));
-  return maxId + 1;
+  // Para modo normal, usar la protección de salida estándar
+  if (hayCambiosSinGuardar()) {
+    baseModalOpenConfirm({
+      titulo: "Salir",
+      mensaje: "¿Desea salir sin guardar los cambios?",
+      confirmText: "Salir",
+      cancelText: "Cancelar",
+      onConfirm: () => {
+        window.location.href = "../../home.html";
+      }
+    });
+  } else {
+    window.location.href = "../../home.html";
+  }
 }
 
 // ===== MODAL ADVERTENCIA =====
 function mostrarAdvertencia(texto) {
-  document.getElementById("modalAdvertenciaTexto").textContent = texto;
-  document.getElementById("modalAdvertencia").classList.remove("hidden");
-}
-
-function cerrarAdvertencia() {
-  document.getElementById("modalAdvertencia").classList.add("hidden");
+  baseModalOpenInfo({
+    titulo: "Atención",
+    mensaje: texto
+  });
 }
 
 // ===== ATAJOS =====
@@ -238,25 +407,66 @@ document.addEventListener("keydown", e => {
     e.preventDefault();
     nuevo();
   }
+if (e.key === "F3") {
+  e.preventDefault();
+  if (!btnGuardar.disabled) guardar();
+}
 
-  if (e.key === "F3") {
-    e.preventDefault();
-    guardar();
-  }
+  if (e.key === "F4") {
+  e.preventDefault();
+  if (!btnCancelar.disabled) cancelar();
+ }
 
   if (e.key === "Delete") {
     e.preventDefault();
     if (!btnEliminar.disabled) eliminar();
   }
 
-  if (e.key === "Escape") {
+
+});
+
+nombre.addEventListener("input", () => {
+  if (!btnGuardar.disabled) _dirty = true;
+});
+
+if (activo) {
+  activo.addEventListener("change", () => {
+    if (!btnGuardar.disabled) _dirty = true;
+  });
+}
+
+nombre.addEventListener("keydown", async (e) => {
+  if (e.key === "Enter") {
     e.preventDefault();
-    volver();
+    if (!btnGuardar.disabled) {
+      await guardar();
+      // Después de guardar, listo para el siguiente
+      codigoComprador.focus();
+    }
   }
 });
 
+
 // ===== INIT =====
 window.onload = () => {
+
+  // Detectar modo selección
+  const urlParams = new URLSearchParams(window.location.search);
+  const searchParam = urlParams.get('search');
+  const modoSeleccion = urlParams.get("modo") === "seleccion";
+  isSelectionMode = Boolean(window.opener) || searchParam !== null || modoSeleccion;
+
+  if (isSelectionMode) {
+    document.getElementById("moduloTitulo").textContent = "Seleccionar Comprador";
+    btnSeleccionar.style.display = "inline-flex";
+    btnSeleccionar.disabled = true;
+    // Mantener todos los botones visibles en modo selección
+
+    if (searchParam) {
+      buscar.value = searchParam;
+      filtrar();
+    }
+  }
 
   bloquearFormulario();
   btnGuardar.disabled = true;
@@ -265,7 +475,20 @@ window.onload = () => {
 
   cargar();
 
+  baseModalEnableExitProtection({
+    hayCambios: hayCambiosSinGuardar
+  });
+
   setTimeout(() => {
     codigoComprador.focus();
   }, 100);
 };
+
+// Exponer funciones para HTML
+window.nuevo = nuevo;
+window.guardar = guardar;
+window.eliminar = eliminar;
+window.cancelar = cancelar;
+window.filtrar = filtrar;
+window.seleccionarComprador = seleccionarComprador;
+window.volverSeguro = volverSeguro;

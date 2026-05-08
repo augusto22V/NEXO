@@ -1,0 +1,525 @@
+﻿/* =========================
+   HEADER ULTRA COMPACTO
+========================= */
+
+.pedido-header {
+  flex-shrink: 0; 
+  background: #f8f9fa;
+  padding: 4px 6px;
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+
+/* FILA SUPERIOR */
+.pedido-row-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start; 
+}
+
+#fechaPedido {
+  height: 22px;
+  font-size: 12px;
+  padding: 2px 4px;
+}
+
+
+.mesa-tipo-group {
+  display: flex;
+  gap: 12px;
+  align-items: end;
+  margin-left: 6px; 
+}
+/* =========================
+   INPUTS
+========================= */
+
+.pedido-header input {
+  height: 18px;
+  font-size: 13px;
+  padding: 2px 5px;
+}
+
+/* VENDEDOR / CLIENTE */
+.pedido-row-mid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 4px;
+}
+
+.campo-busqueda label {
+  font-size: 11px;
+}
+
+/* INPUTS INTERNOS */
+.input-busqueda {
+  display: flex;
+  gap: 4px;
+}
+
+.input-busqueda input:first-child {
+  width: 60px;
+  font-weight: bold;
+}
+
+.input-busqueda input:nth-child(2) {
+  flex: 1;
+}
+
+/* =========================
+   BOTONES TOP
+========================= */
+
+.pedido-botones-top {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.pedido-botones-top button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 12px;
+  font-size: 14px;
+  border-radius: 8px;
+}
+
+.tipo-pedido-box select:active {
+  transform: scale(0.97);
+}
+/* =========================
+   COLUMNAS
+========================= */
+
+.pedido-columnas,
+.item-mini {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  column-gap: 13px;
+  font-size: 14px;
+  display: grid;
+  grid-template-columns: 35px minmax(0, 1fr) 70px 55px;
+  align-items: center;
+}
+
+/* ENCABEZADO (Cant / DescripciÃ³n / Precio / Acciones) */
+.pedido-columnas {
+    background: #f1f3f5; /* gris suave elegante */
+  border-radius: 6px;
+  font-weight: 700;
+  padding: 4px 2px;
+}
+
+/* ITEMS */
+.item-mini {
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  padding: 6px 2px;
+}
+
+/* DESCRIPCIÃ“N */
+.col-descripcion {
+  padding-left: 0 !important;
+  margin-left: 0 !important;
+  min-width: 0;
+}
+
+.observacion {
+  font-size: 11.5px;
+  color: #51575c;
+  margin: 0;
+}
+
+/* =========================
+   LISTA
+========================= */
+
+.pedido-lista {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+/* ALINEACIÃ“N INTERNA */
+.pedido-columnas > div,
+.item-mini > div {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0;
+  min-width: 0;
+}
+
+/* TEXTO DESCRIPCIÃ“N */
+.item-mini .col-descripcion {
+  display: flex;
+  flex-direction: column;   /* ðŸ”¥ clave */
+  align-items: flex-start;
+  gap: 2px;                /* espacio entre nombre y observaciÃ³n */
+  min-width: 0;
+}
+
+
+/* PRECIO */
+.col-precio {
+  text-align: right;
+  padding-right: 2px;
+  font-size: 12px;
+}
+
+.item-mini:hover {
+  background: rgba(44, 43, 43, 0.04);
+}
+/* =========================
+   ACCIONES (X y âœ”)
+========================= */
+
+.col-acciones {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  padding-left: 0;
+}
+
+.col-acciones button {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* =========================
+   ITEM CONFIRMADO
+========================= */
+
+.item-mini.confirmado {
+  background: rgba(0, 123, 255, 0.15);
+  border-radius: 8px;
+  border-left: 4px solid #46709c;
+}
+
+/* =========================
+   FOOTER
+========================= */
+
+.pedido-footer {
+  flex-shrink: 0;  
+  background: #fff;
+  padding: 6px 4px 10px 4px; 
+  border-top: 1px solid rgba(0,0,0,0.08);
+}
+
+.mesa-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.mesa-box label {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.mesa-box input {
+  width: 70px; 
+  text-align: center;
+}
+
+.tipo-pedido-box {
+  padding: 2px 6px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.tipo-pedido-box label {
+  font-size: 10px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.tipo-pedido-box select {
+  height: 26px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  padding: 4px 8px;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  background: #ffffff;
+  cursor: pointer;
+
+  transition: all 0.15s ease;
+}
+
+
+.tipo-pedido-box select:hover {
+  border-color: #999;
+}
+
+.tipo-pedido-box select:focus {
+  outline: none;
+  border-color: #28a745;
+  box-shadow: 0 0 0 2px rgba(40,167,69,0.15);
+}
+
+
+#pedidoNumero {
+  width: 100px;
+}
+/* =========================
+   TOTALES
+========================= */
+.totales {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  font-size: 18px;
+  font-weight: 500;
+}
+
+/* izquierda (items) */
+.totales-left {
+  font-size: 15px;
+}
+
+/* derecha */
+.totales-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* "Total:" */
+.total-label {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* monedas en lÃ­nea */
+.totales-monedas {
+  display: flex;
+  gap: 18px;
+}
+
+/* cada moneda */
+.moneda {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+/* etiqueta Gs, USD */
+.moneda {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.moneda .valor {
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.moneda .label {
+  font-size: 18px;  
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+.totales-right {
+  gap: 14px;
+}
+
+.moneda:nth-child(1) .valor { color: #416e4c; } /* Gs */
+.moneda:nth-child(2) .valor { color: #807e21; } /* BRL */
+.moneda:nth-child(3) .valor { color: #2e4966; } /* USD */
+/* =========================
+   BOTONES GRANDES
+========================= */
+
+.acciones {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.acciones button {
+  flex: 1;
+  height: 60px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 800;
+  position: relative;
+}
+
+.acciones button.btn-procesando {
+  pointer-events: none;
+  opacity: 0.82;
+}
+
+.acciones button.btn-procesando::after {
+  content: "";
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  border-top-color: #ffffff;
+  animation: pos-spin 0.7s linear infinite;
+}
+
+.preparo-feedback {
+  display: flex;
+  align-items: center;
+  min-height: 26px;
+  margin-top: 8px;
+}
+
+.estado-preparo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.estado-preparo::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.estado-preparo-idle {
+  background: #eef1f4;
+  color: #57636f;
+}
+
+.estado-preparo-procesando {
+  background: #fff3cd;
+  color: #8a6d3b;
+}
+
+.estado-preparo-procesando::before {
+  width: 10px;
+  height: 10px;
+  background: transparent;
+  border: 2px solid rgba(138, 109, 59, 0.35);
+  border-top-color: currentColor;
+  animation: pos-spin 0.7s linear infinite;
+}
+
+.estado-preparo-pendiente {
+  background: #e9ecef;
+  color: #6c757d;
+}
+
+.estado-preparo-enviado {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+@keyframes pos-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* =========================
+   AJUSTE HEADER PEDIDO
+========================= */
+
+/* contenedor principal */
+.pedido-left-top {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* lÃ­nea Pedido + NÂ° + input + lupa */
+.pedido-numero-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* quitar espacios raros del h3 */
+.pedido-numero-line h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+/* NÂ° */
+.pedido-numero-line span {
+  font-weight: 700;
+}
+
+/* input mÃ¡s prolijo */
+#pedidoNumero {
+  width: 130px;
+}
+
+/* botÃ³n lupa alineado */
+.btn-buscar-pedido {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+}
+
+#modalEditarItem .modal-content {
+  width: 420px !important;
+  max-width: 90%;
+}
+
+
+/* =========================
+   ESTADOS DE PEDIDO
+========================= */
+
+.estado {
+  font-size: 14px;
+  font-weight: 800;
+  padding: 4px 12px;
+  border-radius: 20px;
+  color: #fff;
+
+  display: inline-flex;     /* ðŸ”¥ mejor que inline-block */
+  align-items: center;
+
+  width: fit-content;       /* ðŸ”¥ CLAVE */
+  max-width: max-content;   /* ðŸ”¥ evita que se estire */
+
+  white-space: nowrap;      /* ðŸ”¥ no romper texto */
+}
+
+/* ðŸŸ¡ PENDIENTE */
+.estado-pendiente {
+  background: #f0ad4e;
+}
+
+/* ðŸ”µ CONCLUIDO (cocina) */
+.estado-concluido {
+  background: #007bff;
+}
+
+/* ðŸŸ¢ EFECTIVADO (pagado) */
+.estado-efectivado {
+  background: #28a745;
+}
+
+/* ðŸ”´ CANCELADO */
+.estado-cancelado {
+  background: #dc3545;
+}
+
+

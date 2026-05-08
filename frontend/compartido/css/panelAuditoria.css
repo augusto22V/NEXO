@@ -1,0 +1,20 @@
+.panel-auditoria {
+  margin-top: 10px;
+  padding: 6px 10px;
+  border: 1px solid #d8dde3;
+  border-radius: 6px;
+  background: #f7f9fc;
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+}
+
+.panel-auditoria-status {
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

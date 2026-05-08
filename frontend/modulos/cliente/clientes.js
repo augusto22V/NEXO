@@ -1,11 +1,18 @@
-const API = "/api/clientes";
+﻿const API = "/api/clientes";
 
 let clientes = [];
 let cargandoCliente = false;
 let formDirty = false;
-
 let sortField = "id";
 let sortDir = "desc";
+let _warnListener = null;
+let _warnFocusEl = null;
+let permitirSalida = false;
+let offset = 0;
+const limit = 20;
+let cargandoScroll = false;
+let finDatos = false;
+
 
 // ===== DOM =====
 const clienteId = document.getElementById('clienteId');
@@ -13,6 +20,45 @@ const codigoCliente = document.getElementById('codigoCliente');
 const nombre = document.getElementById('nombre');
 const razon = document.getElementById('razon');
 const ruc = document.getElementById('ci-ruc');
+
+ruc.addEventListener("keydown", async (e) => {
+
+  if (e.key !== "Enter") return;
+
+  const valor = ruc.value.trim();
+
+  if (!valor) return;
+
+  try {
+
+    const res = await fetch(`/api/clientes/ruc/${valor}`);
+    const data = await res.json();
+
+    if (data) {
+
+      // ðŸ”¥ IMPORTANTE
+      ruc.value = data.ruc; // reemplaza con DV correcto
+
+      razon.value = data.razon_social || '';
+      nombre.value = data.nombre || data.razon_social || '';
+
+      telefono.focus();
+
+    } else {
+
+      mostrarAdvertencia("RUC no encontrado", razon);
+
+    }
+
+  } catch (err) {
+
+    console.error(err);
+    mostrarAdvertencia("Error consultando RUC");
+
+  }
+
+});
+
 const telefono = document.getElementById('telefono');
 const direccion = document.getElementById('direccion');
 const email = document.getElementById('email');
@@ -24,24 +70,56 @@ const btnEliminar = document.getElementById('btnEliminar');
 const btnCancelar = document.getElementById('btnCancelar');
 
 const tablaClientes = document.getElementById('tablaClientes');
+const thId = document.getElementById("thId");
 
 // ===== PARAMS =====
 const params = new URLSearchParams(window.location.search);
-const mode = params.get("mode");
+const modoSeleccion = params.get("modo") === "seleccion";
+const permitirAltaSeleccion = params.get("permitir_alta") === "1";
 const from = params.get("from");
+const volver = params.get("volver");
 
 // ===== LOAD =====
 async function cargar() {
-try {
-const res = await fetch(API);
-if (!res.ok) throw new Error();
-clientes = await res.json();
-render(clientes);
-} catch {
-console.error("Error cargando clientes");
-tablaClientes.innerHTML = "<div style='padding:10px;color:red'>Error cargando datos</div>";
+
+  if (cargandoScroll || finDatos) return;
+
+  cargandoScroll = true;
+
+  try {
+
+    const res = await fetch(`${API}?limit=${limit}&offset=${offset}`);
+    const data = await res.json();
+
+    if (data.length < limit) {
+      finDatos = true;
+    }
+
+    clientes = [...clientes, ...data];
+
+    render(clientes);
+
+    offset += limit;
+
+  } catch (err) {
+    console.error(err);
+  }
+
+  cargandoScroll = false;
 }
-}
+
+tablaClientes.addEventListener("scroll", () => {
+
+  const scrollTop = tablaClientes.scrollTop;
+  const scrollHeight = tablaClientes.scrollHeight;
+  const clientHeight = tablaClientes.clientHeight;
+
+  if (scrollTop + clientHeight >= scrollHeight - 50) {
+    cargar();
+  }
+
+});
+
 
 function bloquearFormulario() {
 
@@ -65,132 +143,247 @@ function habilitarFormulario() {
 
 }
 
-// ===== RENDER =====
-function render(data) {
+function hayCambiosSinGuardar() {
 
-data = [...data].sort((a, b) => {
-const av = a[sortField] ?? 0;
-const bv = b[sortField] ?? 0;
-return sortDir === "asc" ? av - bv : bv - av;
-});
+  if (modoSeleccion) return false;
 
-tablaClientes.innerHTML = '';
+  if (cargandoCliente) return true;
 
-if (!data.length) {
-tablaClientes.innerHTML = '<div style="padding:15px;color:#999">Sin clientes</div>';
-return;
+  return formDirty === true;
+
 }
 
-data.forEach(c => {
+function volverSeguro() {
+  if (hayCambiosSinGuardar()) {
 
-const row = document.createElement('div');
-row.className = 'tabla-row';
+    baseModalOpenConfirmGeneric({
+      titulo: "Salir",
+      mensaje: "Hay cambios sin guardar. Â¿Desea salir?",
+      onConfirm: () => {
+        permitirSalida = true;
+        history.back();
+      }
+    });
 
-row.innerHTML = `
-  <span>${c.id}</span>
-  <span>${c.nombre}</span>
-  <span>${c.razon_social || '-'}</span>
-  <span>${c.ruc || '-'}</span>
-  <span>${c.telefono || '-'}</span>
-  <span>${c.direccion || '-'}</span>
-  <span>${c.email || '-'}</span>
-`;
+  } else {
+    permitirSalida = true;
+    history.back();
+  }
+}
 
-row.onclick = () => {
+// ===== RENDER =====
+// ===== RENDER =====
+function render(data, append = false) {
 
-  if (mode === "select" && from === "venta") {
-    document.querySelectorAll('.tabla-row').forEach(r => r.classList.remove('activo'));
-    row.classList.add('activo');
-    return;
+  //  ordenar SOLO lo nuevo (evita reordenar todo y romper scroll)
+  const ordenados = [...data].sort((a, b) => {
+    const av = a[sortField] ?? 0;
+    const bv = b[sortField] ?? 0;
+    return sortDir === "asc" ? av - bv : bv - av;
+  });
+
+  //  SOLO limpiar si NO es append
+  if (!append) {
+    tablaClientes.innerHTML = '';
+
+    if (!ordenados.length) {
+      tablaClientes.innerHTML = '<div style="padding:15px;color:#999">Sin clientes</div>';
+      return;
+    }
   }
 
-  if (formDirty) {
-    mostrarAdvertencia('Finalice la carga o cancele');
-    return;
-  }
+  ordenados.forEach(c => {
 
-  document.querySelectorAll('.tabla-row').forEach(r => r.classList.remove('activo'));
-  row.classList.add('activo');
+    const row = document.createElement('div');
+    row.className = 'tabla-row';
 
-  seleccionar(c);
-};
+    row.innerHTML = `
+      <span>${c.id}</span>
+      <span>${c.nombre}</span>
+      <span>${c.razon_social || '-'}</span>
+      <span>${c.ruc || '-'}</span>
+      <span>${c.telefono || '-'}</span>
+      <span>${c.direccion || '-'}</span>
+      <span>${c.email || '-'}</span>
+    `;
 
-row.ondblclick = () => {
-  if (mode === "select" && from === "venta") {
-    seleccionarClienteParaVenta(c);
-    return;
-  }
-  seleccionar(c);
-};
+    row.onclick = () => {
 
-tablaClientes.appendChild(row);
+      if (modoSeleccion) {
 
+        if (volver === "informe" && window.opener && !window.opener.closed) {
+          const inputCliente = window.opener.document.getElementById("filtroCliente");
+          if (inputCliente) {
+            inputCliente.value = c.nombre || "";
+            if (typeof inputCliente.focus === "function") {
+              inputCliente.focus();
+            }
+          }
 
-});
+          window.close();
+          return;
+        }
+
+        localStorage.setItem(
+          "clienteSeleccionado",
+          JSON.stringify({
+            id: c.id,
+            nombre: c.nombre,
+            ruc: c.ruc,
+            direccion: c.direccion
+          })
+        );
+
+        window.close();
+        return;
+      }
+
+      if (formDirty) {
+        mostrarAdvertencia('Finalice la carga o cancele');
+        return;
+      }
+
+      document.querySelectorAll('.tabla-row')
+        .forEach(r => r.classList.remove('activo'));
+
+      row.classList.add('activo');
+
+      seleccionar(c);
+    };
+
+    row.ondblclick = () => {
+      seleccionar(c);
+    };
+
+    tablaClientes.appendChild(row);
+
+  });
+
 }
 
 async function obtenerProximoId() {
-  const res = await fetch(API);
+
+  const res = await fetch(API + "/next-id");
   const data = await res.json();
 
-  if (!data.length) return 1;
+  return data.id;
 
-  const maxId = Math.max(...data.map(c => c.id));
-  return maxId + 1;
 }
 
 codigoCliente.addEventListener("keydown", async (e) => {
 
   if (e.key !== "Enter") return;
-  e.preventDefault();
 
   const valor = codigoCliente.value.trim();
 
-  // ENTER vacío → nuevo
+  // ENTER vacÃ­o  nuevo
   if (!valor) {
+
+    e.preventDefault();
+
     const nextId = await obtenerProximoId();
+
+    if (!nextId) {
+      mostrarAdvertencia("No se pudo obtener el cÃ³digo");
+      return;
+    }
+
     codigoCliente.value = nextId;
-    modoNuevo();
+
+    habilitarFormulario();
+
+    btnGuardar.disabled = false;
+    btnCancelar.disabled = false;
+
     setTimeout(() => nombre.focus(), 50);
+
     return;
   }
 
-  const id = parseInt(valor);
+  const id = Number(valor);
 
   const encontrado = clientes.find(c => Number(c.id) === id);
 
   if (encontrado) {
+    e.preventDefault();
     seleccionar(encontrado);
     return;
   }
 
-  mostrarAdvertencia(`No existe cliente con código ${id}`);
+  //  SOLO acÃ¡ prevenimos y cortamos todo
+  e.preventDefault();
+  e.stopImmediatePropagation();
+
+  mostrarAdvertencia(`No existe cliente con cÃ³digo ${id}`, codigoCliente);
 });
 
 // ===== SELECT =====
 function seleccionar(c) {
 
-codigoCliente.value = c.id;
+  codigoCliente.value = c.id;
 
-clienteId.value = c.id;
-nombre.value = c.nombre;
-razon.value = c.razon_social || '';
-ruc.value = c.ruc || '';
-telefono.value = c.telefono || '';
-direccion.value = c.direccion || '';
-email.value = c.email || '';
+  clienteId.value = c.id;
+  nombre.value = c.nombre;
+  razon.value = c.razon_social || '';
+  ruc.value = c.ruc || '';
+  telefono.value = c.telefono || '';
+  direccion.value = c.direccion || '';
+  email.value = c.email || '';
 
-habilitarFormulario();
+  habilitarFormulario();
 
-btnGuardar.disabled = false;
-btnEliminar.disabled = false;
-btnCancelar.disabled = false;
-
+  btnGuardar.disabled = false;
+  btnEliminar.disabled = false;
+  btnCancelar.disabled = false;
+  formDirty = false;
 }
 
 // ===== NUEVO =====
-function nuevo() {
-modoNuevo();
+async function nuevo() {
+
+  formDirty = false;
+  cargandoCliente = false;
+
+  // limpiar id interno
+  clienteId.value = '';
+
+  // limpiar campos
+  nombre.value = '';
+  razon.value = '';
+  ruc.value = '';
+  telefono.value = '';
+  direccion.value = '';
+  email.value = 'sincorreo@gmail.com';
+
+  // quitar selecciÃ³n de tabla
+  document.querySelectorAll('.tabla-row')
+    .forEach(r => r.classList.remove('activo'));
+
+  habilitarFormulario();
+
+  btnGuardar.disabled = false;
+  btnEliminar.disabled = true;
+  btnCancelar.disabled = false;
+
+  try {
+
+    const nextId = await obtenerProximoId();
+
+    if (!nextId) {
+      mostrarAdvertencia("No se pudo obtener el cÃ³digo");
+      return;
+    }
+
+    codigoCliente.value = nextId;
+
+  } catch {
+    mostrarAdvertencia("Error obteniendo cÃ³digo");
+  }
+
+  setTimeout(() => {
+    nombre.focus();
+  }, 50);
+
 }
 
 function cancelar() {
@@ -209,7 +402,7 @@ function cancelar() {
   direccion.value = '';
   email.value = 'sincorreo@gmail.com';
 
-  // quitar selección de tabla
+  // quitar selecciÃ³n de tabla
   document.querySelectorAll('.tabla-row').forEach(r => r.classList.remove('activo'));
 
   // botones
@@ -217,11 +410,11 @@ function cancelar() {
   btnEliminar.disabled = true;
   btnCancelar.disabled = true;
   actualizarEstadoTabla();
-bloquearFormulario();
-codigoCliente.focus();
-codigoCliente.select();
+  bloquearFormulario();
+  codigoCliente.focus();
+  codigoCliente.select();
 
-  // foco en código
+  // foco en cÃ³digo
   setTimeout(() => {
     codigoCliente.focus();
     codigoCliente.select();
@@ -232,185 +425,239 @@ codigoCliente.select();
 // ===== GUARDAR =====
 async function guardar() {
 
-if (!nombre.value.trim()) {
-mostrarAdvertencia("Ingrese nombre");
-nombre.focus();
-return;
-}
-
-const payload = {
-id: codigoCliente.value ? Number(codigoCliente.value) : undefined,
-nombre: nombre.value.trim(),
-razon_social: razon.value.trim(),
-ruc: ruc.value.trim(),
-telefono: telefono.value.trim(),
-direccion: direccion.value.trim(),
-email: email.value.trim() || 'sincorreo@gmail.com'
-};
-
-try {
-
-
-if (!clienteId.value) {
-  const r = await fetch(API, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  });
-
-  if (!r.ok) throw new Error();
-
-  const clienteCreado = await r.json();
-
-  if (mode === "create" && from === "venta") {
-    seleccionarClienteParaVenta(clienteCreado);
+  if (!nombre.value.trim()) {
+    marcarCampoError(nombre);
     return;
   }
 
-} else {
+  const payload = {
+    nombre: nombre.value.trim(),
+    razon_social: razon.value.trim(),
+    ruc: ruc.value.trim(),
+    telefono: telefono.value.trim(),
+    direccion: direccion.value.trim(),
+    email: email.value.trim() || 'sincorreo@gmail.com'
+  };
 
-  await fetch(`${API}/${clienteId.value}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
+  try {
+
+    let r;
+
+    if (!clienteId.value) {
+
+      r = await fetch(API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+    } else {
+
+      r = await fetch(`${API}/${clienteId.value}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+    }
+
+    if (!r.ok) {
+      throw new Error("Error servidor");
+    }
+
+    bloquearFormulario();
+    codigoCliente.focus();
+    codigoCliente.select();
+
+
+clientes = [];
+offset = 0;
+finDatos = false;
+await cargar();
+cancelar();
+
+  } catch (err) {
+
+    console.error(err);
+    mostrarAdvertencia("Error al guardar");
+
+  }
+
+}
+
+function marcarCampoError(campo) {
+  campo.classList.add("campo-error");
+  campo.focus();
+
+  // quitar error cuando el usuario empiece a escribir
+  campo.addEventListener("input", function limpiar() {
+    campo.classList.remove("campo-error");
+    campo.removeEventListener("input", limpiar);
   });
-
-}
-
-bloquearFormulario();
-codigoCliente.focus();
-codigoCliente.select();
-modoNuevo();
-cargar();
-
-
-} catch {
-mostrarAdvertencia("Error al guardar");
-}
 }
 
 // ===== ELIMINAR =====
 let clienteAEliminar = null;
 
 function eliminar() {
-if (!clienteId.value) return;
-clienteAEliminar = clienteId.value;
-document.getElementById('modalNombreCliente').textContent = nombre.value;
-document.getElementById('modalEliminar').classList.remove('hidden');
+  if (!clienteId.value) return;
+  clienteAEliminar = clienteId.value;
+  document.getElementById('modalNombreCliente').textContent = nombre.value;
+  document.getElementById('modalEliminar').classList.remove('hidden');
 }
 
 function cerrarModalEliminar() {
-clienteAEliminar = null;
-document.getElementById('modalEliminar').classList.add('hidden');
+  clienteAEliminar = null;
+  document.getElementById('modalEliminar').classList.add('hidden');
 }
 
 async function confirmarEliminar() {
-if (!clienteAEliminar) return;
-await fetch(`${API}/${clienteAEliminar}`, { method: 'DELETE' });
-cerrarModalEliminar();
-modoNuevo();
-cargar();
-}
+  if (!clienteAEliminar) return;
 
-async function modoNuevo() {
+  try {
 
-clienteId.value = '';
+    const res = await fetch(`${API}/${clienteAEliminar}`, {
+      method: 'DELETE'
+    });
 
-nombre.value = '';
-razon.value = '';
-ruc.value = '';
-telefono.value = '';
-direccion.value = '';
-email.value = 'sincorreo@gmail.com';
+    const data = await res.json();
 
-const nextId = await obtenerProximoId();
-codigoCliente.value = nextId;
+    if (!res.ok) {
+      mostrarAdvertencia(data.mensaje || "No se pudo eliminar");
+      return;
+    }
 
-habilitarFormulario();
+    cerrarModalEliminar();
+    cargar();
 
-btnGuardar.disabled = false;
-btnEliminar.disabled = true;
-btnCancelar.disabled = false;   // 👈 ESTE ES EL FIX
-
-setTimeout(() => nombre.focus(), 50);
-
+  } catch (err) {
+    console.error(err);
+    mostrarAdvertencia("Error al eliminar cliente");
+  }
 }
 
 // ===== FILTRO =====
 function filtrar() {
-const t = buscar.value.toLowerCase().trim();
-render(clientes.filter(c =>
-(c.nombre || '').toLowerCase().includes(t) ||
-(c.ruc || '').toLowerCase().includes(t) ||
-(c.telefono || '').toLowerCase().includes(t)
-));
+  const t = buscar.value.toLowerCase().trim();
+  render(clientes.filter(c =>
+    (c.nombre || '').toLowerCase().includes(t) ||
+    (c.ruc || '').toLowerCase().includes(t) ||
+    (c.telefono || '').toLowerCase().includes(t)
+  ));
 }
 
 // ===== MODOS =====
 function modoInicial() {
 
-clienteId.value = '';
+  clienteId.value = '';
+  codigoCliente.value = '';
+  nombre.value = '';
+  razon.value = '';
+  ruc.value = '';
+  telefono.value = '';
+  direccion.value = '';
+  email.value = 'sincorreo@gmail.com';
+  btnGuardar.disabled = true;
+  btnEliminar.disabled = true;
+  btnCancelar.disabled = true;   // ðŸ‘ˆ importante
 
-codigoCliente.value = '';
-nombre.value = '';
-razon.value = '';
-ruc.value = '';
-telefono.value = '';
-direccion.value = '';
-email.value = 'sincorreo@gmail.com';
-
-btnGuardar.disabled = true;
-btnEliminar.disabled = true;
-btnCancelar.disabled = true;   // 👈 importante
-
-bloquearFormulario();
+  bloquearFormulario();
 
 }
 
 
 // ===== ADVERTENCIA =====
-function mostrarAdvertencia(texto) {
-document.getElementById('modalAdvertenciaTexto').textContent = texto;
-document.getElementById('modalAdvertencia').classList.remove('hidden');
+function mostrarAdvertencia(texto, focusEl = codigoCliente) {
+
+  const modal = document.getElementById('modalAdvertencia');
+  const txt = document.getElementById('modalAdvertenciaTexto');
+  const btn = modal?.querySelector('.btn-aceptar');
+
+  if (!modal || !txt || !btn) return;
+
+  txt.textContent = texto;
+  _warnFocusEl = focusEl || codigoCliente;
+
+  modal.classList.remove('hidden');
+  setTimeout(() => btn.focus(), 30);
+  if (_warnListener) document.removeEventListener('keydown', _warnListener);
+  _warnListener = function (e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      e.stopPropagation();
+      cerrarAdvertencia(true);
+      return;
+    }
+
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      e.stopPropagation();
+      cerrarAdvertencia(true);
+      return;
+    }
+  };
+
+  document.addEventListener('keydown', _warnListener);
 }
 
-function cerrarAdvertencia() {
-document.getElementById('modalAdvertencia').classList.add('hidden');
-}
+function cerrarAdvertencia(refocus = false) {
 
+  const modal = document.getElementById('modalAdvertencia');
+  if (modal) modal.classList.add('hidden');
+
+  if (_warnListener) {
+    document.removeEventListener('keydown', _warnListener);
+    _warnListener = null;
+  }
+
+  if (refocus && _warnFocusEl && typeof _warnFocusEl.focus === "function") {
+    setTimeout(() => {
+      _warnFocusEl.focus();
+      if (typeof _warnFocusEl.select === "function") {
+        _warnFocusEl.select();
+      }
+    }, 30);
+  }
+
+}
 // ===== TABLA BLOQUEO =====
 function actualizarEstadoTabla() {
-const tabla = document.querySelector('.tabla-clientes');
-const aviso = document.getElementById('avisoTabla');
+  const tabla = document.querySelector('.tabla-clientes');
+  const aviso = document.getElementById('avisoTabla');
 
-if (!tabla || !aviso) return;
+  if (!tabla || !aviso) return;
 
-if (cargandoCliente) {
-tabla.classList.add('bloqueada');
-aviso.classList.remove('hidden');
-} else {
-tabla.classList.remove('bloqueada');
-aviso.classList.add('hidden');
+  if (cargandoCliente) {
+    tabla.classList.add('bloqueada');
+    aviso.classList.remove('hidden');
+  } else {
+    tabla.classList.remove('bloqueada');
+    aviso.classList.add('hidden');
+  }
 }
-}
 
+
+[nombre, razon, ruc, telefono, direccion, email].forEach(input => {
+  input.addEventListener("input", () => {
+    formDirty = true;
+  });
+});
 
 // ===== EVENTOS =====
 telefono?.addEventListener('input', () => {
-telefono.value = telefono.value.replace(/[^0-9]/g, '');
+  telefono.value = telefono.value.replace(/[^0-9]/g, '');
 });
 
 ruc?.addEventListener('input', () => {
-ruc.value = ruc.value.replace(/[^0-9-]/g, '');
+  ruc.value = ruc.value.replace(/[^0-9-]/g, '');
 });
 
-
-// ===== ENTER NAVEGACIÓN ENTRE CAMPOS =====
+// ===== ENTER NAVEGACIÃ“N ENTRE CAMPOS =====
 document.querySelector('.form-panel').addEventListener("keydown", (e) => {
 
   if (e.key !== "Enter") return;
 
-  // si está en código no intervenir
+  // si estÃ¡ en cÃ³digo no intervenir
   if (document.activeElement.id === "codigoCliente") return;
 
   e.preventDefault();
@@ -434,47 +681,113 @@ document.querySelector('.form-panel').addEventListener("keydown", (e) => {
 
 });
 
+codigoCliente.addEventListener('input', () => {
+  codigoCliente.value = codigoCliente.value.replace(/\D/g, '');
+});
+
+
+// MAYUSCULAS
+[nombre, razon, direccion].forEach(input => {
+  input.addEventListener("input", () => {
+
+    //  convierte automÃ¡ticamente a MAYÃšSCULAS
+    input.value = input.value.toUpperCase();
+
+    formDirty = true;
+  });
+});
+
+[nombre, razon, direccion].forEach(input => {
+  input.addEventListener("paste", (e) => {
+    e.preventDefault();
+
+    const texto = (e.clipboardData || window.clipboardData)
+      .getData("text")
+      .toUpperCase();
+
+    document.execCommand("insertText", false, texto);
+  });
+});
+
 
 // ===== ATAJOS =====
 document.addEventListener('keydown', e => {
 
-  // F2 → Nuevo
+  // F2 â†’ Nuevo
   if (e.key === 'F2') {
     e.preventDefault();
     nuevo();
   }
 
-  // F3 → Guardar
+  // F3 â†’ Guardar
   if (e.key === 'F3') {
     e.preventDefault();
     guardar();
   }
 
-  // DELETE → Eliminar
+  if (e.key === "F4") {
+    e.preventDefault();
+    if (!btnCancelar.disabled) cancelar();
+  }
+
+  // DELETE â†’ Eliminar
   if (e.key === 'Delete') {
     e.preventDefault();
     if (!btnEliminar.disabled) eliminar();
   }
 
-  // ESC → Volver
-  if (e.key === 'Escape') {
-    e.preventDefault();
-    volver();
-  }
 
 });
+
+thId.addEventListener("click", () => {
+
+  if (sortField === "id") {
+    sortDir = sortDir === "asc" ? "desc" : "asc";
+  } else {
+    sortField = "id";
+    sortDir = "asc";
+  }
+
+  thId.textContent = sortDir === "asc" ? "ID â–²" : "ID â–¼";
+
+  render(clientes);
+
+});
+
+
 
 // ===== INIT =====
 window.onload = () => {
 
-modoInicial();
-cargar();
+  modoInicial();
+  clientes = [];
+  offset = 0;
+  finDatos = false;
+  cargar();
 
-bloquearFormulario();
+  bloquearFormulario();
 
-setTimeout(() => {
-  codigoCliente.focus();
-  codigoCliente.select();
-}, 100);
+  if (modoSeleccion) {
+    if (!permitirAltaSeleccion) {
+      document.querySelector(".form-panel").style.display = "none";
+    }
+    document.querySelector(".cliente-layout").classList.add("modo-seleccion");
+
+    document.getElementById("moduloTitulo").innerText = "Seleccionar Cliente";
+
+    formDirty = false;
+    cargandoCliente = false;
+  }
+
+  baseModalEnableExitProtection({
+    hayCambios: hayCambiosSinGuardar
+  });
+
+  setTimeout(() => {
+    codigoCliente.focus();
+    codigoCliente.select();
+  }, 100);
 
 };
+
+

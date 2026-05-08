@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Calculadora</title>
+   <link rel="stylesheet" href="/compartido/css/style.css">
+<link rel="stylesheet" href="/compartido/css/base.css">
+  <link rel="stylesheet" href="calculadora.css">
+</head>
+<body>
+
+<div class="contenedor">
+
+  <div class="panel">
+
+    <div class="header">
+      <h3>🧮 Calculadora</h3>
+    </div>
+
+    <!-- DISPLAY -->
+    <div class="full">
+      <input type="text" id="display" readonly placeholder="0">
+    </div>
+
+    <!-- BOTONES -->
+    <div class="calc-grid full">
+
+      <button class="num" onclick="presionar('7')">7</button>
+      <button class="num" onclick="presionar('8')">8</button>
+      <button class="num" onclick="presionar('9')">9</button>
+      <button class="op" onclick="presionar('/')">÷</button>
+
+      <button class="num" onclick="presionar('4')">4</button>
+      <button class="num" onclick="presionar('5')">5</button>
+      <button class="num" onclick="presionar('6')">6</button>
+      <button class="op" onclick="presionar('*')">×</button>
+
+      <button class="num" onclick="presionar('1')">1</button>
+      <button class="num" onclick="presionar('2')">2</button>
+      <button class="num" onclick="presionar('3')">3</button>
+      <button class="op" onclick="presionar('-')">−</button>
+
+      <button class="num" onclick="presionar('0')">0</button>
+      <button class="num" onclick="presionar('.')">.</button>
+      <button class="igual" onclick="calcular()">=</button>
+      <button class="op" onclick="presionar('+')">+</button>
+
+      <button class="btn-clear" onclick="limpiar()">C</button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script src="calculadora.js"></script>
+</body>
+</html>

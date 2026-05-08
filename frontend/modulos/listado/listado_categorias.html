@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>LibreríaSys | Listado de géneros y secciones</title>
+  <link rel="stylesheet" href="../../compartido/css/base.css">
+  <link rel="stylesheet" href="../../compartido/css/informes.css">
+</head>
+<body>
+<div class="topbar no-print">
+  <button class="btn-volver" onclick="history.back()"> Volver</button>
+  <div class="titulo"><h1>LibreríaSys</h1><span>Listado de géneros y secciones</span></div>
+  <div class="topbar-acciones">
+    <button class="btn-accion btn-imprimir" onclick="window.print()"> Imprimir</button>
+  </div>
+</div>
+<div class="informe-wrap">
+<div class="informe-container">
+  <div class="informe-header">
+    <div class="informe-empresa"><h2>LibreríaSys</h2><p>Ventas y stock para librerías</p></div>
+    <div class="informe-titulo-doc"><h3>LISTADO DE GÉNEROS Y SECCIONES</h3></div>
+  </div>
+  <hr class="informe-divider">
+  <div class="filtro-fecha-wrap no-print">
+    <div class="filtro-fecha-inputs">
+      <div class="filtro-fecha-campo" style="flex:1">
+        <label>Buscar</label>
+        <input type="text" id="buscador" placeholder="Nombre de categorÃ­a..." oninput="filtrar()">
+      </div>
+    </div>
+  </div>
+  <table class="informe-tabla">
+    <thead>
+      <tr><th>#</th><th>Nombre</th><th>Descripcion</th></tr>
+    </thead>
+    <tbody id="cuerpo">
+      <tr><td colspan="3" class="inf-cargando">Cargando...</td></tr>
+    </tbody>
+  </table>
+  <div class="informe-pie">
+    <span>Generado el <span id="fecha"></span></span>
+    <span>LibreríaSys © Ventas y stock para librerías</span>
+  </div>
+</div>
+</div>
+<div id="spinnerOverlay" class="spinner-overlay hidden">
+  <div class="spinner-box"><div class="spinner"></div><span>Cargando...</span></div>
+</div>
+<script>
+document.getElementById("fecha").textContent = new Date().toLocaleString("es-PY");
+let todos = [];
+async function cargar() {
+  document.getElementById("spinnerOverlay").classList.remove("hidden");
+  try {
+    const res = await fetch("/api/categorias");
+    todos = await res.json();
+    renderizar(todos);
+  } catch {
+    document.getElementById("cuerpo").innerHTML = '<tr><td colspan="3" class="inf-cargando" style="color:#DC2626">Error al cargar</td></tr>';
+  } finally {
+    document.getElementById("spinnerOverlay").classList.add("hidden");
+  }
+}
+function filtrar() {
+  const q = document.getElementById("buscador").value.toLowerCase();
+  renderizar(todos.filter(c =>
+    (c.nombre||"").toLowerCase().includes(q) ||
+    (c.descripcion||"").toLowerCase().includes(q)
+  ));
+}
+function renderizar(data) {
+  const tbody = document.getElementById("cuerpo");
+  if (!data.length) { tbody.innerHTML = '<tr><td colspan="3" class="inf-cargando">Sin registros</td></tr>'; return; }
+  tbody.innerHTML = data.map((c,i) => `<tr>
+    <td>${i+1}</td><td>${c.nombre||"-"}</td><td>${c.descripcion||"-"}</td>
+  </tr>`).join("");
+}
+cargar();
+</script>
+<script src="/compartido/js/seguridad.js"></script>
+</body>
+</html>
+

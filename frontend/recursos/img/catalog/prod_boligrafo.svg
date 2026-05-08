@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" rx="16" fill="#eff6ff"/>
+  <rect x="118" y="36" width="22" height="120" rx="6" transform="rotate(18 129 96)" fill="#2563eb"/>
+  <polygon points="132,150 124,168 140,162" fill="#1e40af" transform="rotate(18 129 96)"/>
+  <text x="56" y="118" font-family="Segoe UI,system-ui,sans-serif" font-size="14" fill="#1e40af">Bol�grafo</text>
+</svg>

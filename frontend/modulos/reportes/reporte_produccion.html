@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="manifest" href="/manifest.json" />
+  <title>LibreríaSys | Inventario y servicios</title>
+
+  <link rel="stylesheet" href="../../compartido/css/base.css" />
+  <link rel="stylesheet" href="reporte_produccion.css" />
+</head>
+<body>
+  <div class="topbar">
+    <button class="btn-volver" onclick="window.location.href='/home.html'">← Volver</button>
+    <div class="titulo"><span>Inventario y servicios</span></div>
+  </div>
+
+  <main class="rep-layout">
+    <section class="panel filtros-panel">
+      <div class="filtros-row">
+        <div class="field">
+          <label>Desde</label>
+          <input type="date" id="fDesde" />
+        </div>
+        <div class="field">
+          <label>Hasta</label>
+          <input type="date" id="fHasta" />
+        </div>
+        <div class="field field-btn">
+          <button id="btnBuscar" class="btn btn-primary" type="button">Generar</button>
+        </div>
+      </div>
+      <div id="statusReporte" class="status"></div>
+    </section>
+
+    <section class="panel kpi-panel" id="kpiPanel"></section>
+
+    <section class="panel">
+      <h3>Movimientos por fecha</h3>
+      <div class="tabla-wrap">
+        <table>
+          <thead><tr><th>Fecha</th><th>Movimientos</th><th>Cantidad total</th></tr></thead>
+          <tbody id="tbFecha"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h3>Uso interno de artículos</h3>
+      <div class="tabla-wrap">
+        <table>
+          <thead><tr><th>Artículo / servicio</th><th>Total</th><th>Unidad</th></tr></thead>
+          <tbody id="tbConsumo"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel detalle-panel">
+      <h3>Detalle de movimientos</h3>
+      <div class="tabla-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th><th>Fecha</th><th>Referencia</th><th>Producto / servicio</th><th>Cantidad</th><th>Uso interno</th><th>Total</th>
+            </tr>
+          </thead>
+          <tbody id="tbDetalle"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="reporte_produccion.js"></script>
+  <script src="/compartido/js/seguridad.js"></script>
+</body>
+</html>

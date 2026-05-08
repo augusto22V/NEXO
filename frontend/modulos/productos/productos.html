@@ -1,200 +1,310 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
-  <title>Stop Top | Productos</title>
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="/manifest.json?v=2026.04.17.03">
+  <title>LibreríaSys | Libros y artículos</title>
 
-  <link rel="stylesheet" href="../../compartido/css/base.css">
-  <link rel="stylesheet" href="productos.css">
+  <link rel="stylesheet" href="../../compartido/css/base.css?v=2026.04.17.03">
+  <link rel="stylesheet" href="../../compartido/css/style.css?v=2026.04.17.03">
+  <link rel="stylesheet" href="../../compartido/css/panelAuditoria.css?v=2026.04.17.03">
+  <link rel="stylesheet" href="productos.css?v=2026.04.19.06">
 </head>
+
 <body>
 
-<!-- TOP BAR -->
-<div class="topbar">
-  <button class="btn-volver" onclick="volver()">← Volver</button>
-
-  <div class="titulo">
-    <h1>Stop Top</h1>
-    <span id="moduloTitulo">Producto</span>
+  <div class="topbar">
+    <button class="btn-volver" onclick="volverSeguro()">← Volver</button>
+    <h1 class="titulo" id="moduloTitulo">Alta de libro o artículo</h1>
+    <div></div>
   </div>
-</div>
 
-<div class="admin-container">
+  <div class="admin-container">
 
-  <!-- PANEL IZQUIERDO / FORM -->
-  <div class="panel panel-form">
-    <h2>Producto</h2>
+    <!-- FORM -->
+    <div class="panel panel-form">
+      <h2>Ficha de libro / artículo</h2>
 
-    <form id="formProducto" enctype="multipart/form-data">
+      <form id="formProducto" enctype="multipart/form-data">
 
-      <!-- ID interno (por si querés usar luego) -->
-      <input type="hidden" id="productoId">
+        <input type="hidden" id="productoId">
 
-      <div class="form-grid">
+        <div class="form-grid">
 
-        <!-- COLUMNA CAMPOS -->
-        <div class="form-fields">
+          <div class="form-fields">
 
-          <label>Código</label>
-         <input type="text" id="codigoProducto" inputmode="numeric" pattern="[0-9]*">
+            <label>Código</label>
+            <div class="codigo-preview-row">
 
-          <label>Nombre</label>
-          <input type="text" name="nombre" id="nombreProducto" required>
+              <input type="text" id="codigoProducto" inputmode="numeric" pattern="[0-9]*">
 
-          <label>Descripción</label>
-          <textarea name="descripcion" id="descripcionProducto"></textarea>
+              <div class="preview-wrapper">
+                <div class="preview-box">
+                  <img id="previewImagen" src="">
+                  <span id="previewPlaceholder">Sin imagen</span>
+                </div>
+              </div>
 
-          <label>Precio de venta</label>
-          <div class="precio-row">
-            <input type="text" id="precioVenta" name="precio_venta" placeholder="Definir precio"> 
-            <button type="button" class="btn-precio" onclick="irAPrecio()" title="Definir / modificar precio">💲</button>
-          </div>
+            </div>
 
-          <label>IVA</label>
-          <select name="iva_tipo" id="ivaProducto" required>
-            <option value="10">IVA 10%</option>
-            <option value="5">IVA 5%</option>
-            <option value="0">Exento</option>
-          </select>
+            <label>Título o nombre comercial</label>
+            <input type="text" name="nombre" id="nombreProducto" required>
 
-       
-          <label>Categoría</label>
-          <div class="categoria-row">
-            <input
-              type="number"
-              id="categoriaIdInput"
-              placeholder="ID"
-              min="1"
-              class="categoria-id"
-            >
-            <select name="categoria_id" id="categoriaSelect" ></select>
-            <button type="button" class="btn-add" onclick="irACategorias()" title="Ir a categorías">+</button>
-          </div>
+            <label>Descripción / sinopsis</label>
+            <textarea name="descripcion" id="descripcionProducto"></textarea>
 
-          <label>Imagen</label>
-          <input type="file" id="imagenProducto" name="imagen" accept="image/*">
+            <!-- FILA COMPACTA -->
+            <div class="row-mini">
 
-          <!-- ACCIONES (ESTILO CATEGORÍAS) -->
-          <div class="acciones acciones-iconos">
+              <div>
+                <label>Unidad de venta</label>
+                <select id="unidadProducto">
+                  <option value="unidad">Ejemplar</option>
+                  <option value="porcion">Pack / conjunto</option>
+                  <option value="litro">Metro / rollo</option>
+                  <option value="gramo">Gramo / peso</option>
+                </select>
+              </div>
 
-            <button type="button" id="btnNuevo" onclick="nuevoProducto()" title="Nuevo">
-              <img src="../../recursos/img/nueva.png" alt="">
-              <span>Nuevo</span>
-              <small>F2</small>
-            </button>
+              <div>
+                <label>Plazo reposición (días)</label>
+                <input type="number" id="tiempoPreparacion" title="Referencia interna; el valor se guarda en el mismo campo que antes">
+              </div>
 
-            <button type="submit" id="btnGuardar" title="Guardar" disabled>
-              <img src="../../recursos/img/guardar.png" alt="">
-              <span>Guardar</span>
-              <small>F3</small>
-            </button>
+            </div>
 
-            <button type="button" id="btnEliminar" onclick="eliminarProducto()" title="Eliminar" disabled>
-              <img src="../../recursos/img/limpiar.png" alt="">
-              <span>Eliminar</span>
-              <small>Del</small>
-            </button>
+            <!-- CODIGO BARRA / ISBN -->
+            <label>Código de barras / ISBN</label>
+            <div class="codigo-barra-row">
+              <input type="text" id="codigoBarra">
+              <button type="button" class="btn-barcode" onclick="generarCodigoBarra()">⚡</button>
+            </div>
 
-            <button type="button" id="btnCancelar" onclick="cancelarProducto()" title="Cancelar" disabled>
-              <img src="../../recursos/img/cancelar.png" alt="">
-              <span>Cancelar</span>
-              <small>F4</small>
-            </button>
+            <!-- CHECKS -->
+            <div class="check-inline">
+
+              <div class="check-item">
+                <span>Destino</span>
+                <select id="destinoProducto"></select>
+              </div>
+
+              <div class="check-item">
+                <span>Efectivizar Directo</span>
+                <input type="checkbox" id="efectivacionDirecta">
+              </div>
+
+              <div class="check-item">
+                <span>No controlar stock</span>
+                <input type="checkbox" id="noControlStock">
+              </div>
+
+              <div class="check-item">
+                <span>Varios formatos (tapa, bolsillo…)</span>
+                <input type="checkbox" id="permiteMultiSabor" onchange="toggleSabores()">
+              </div>
+
+              <div class="check-item">
+                <span>Cant. formatos</span>
+                <input type="number" id="maxSabores" min="1" max="4" value="1" disabled style="width:60px;">
+              </div>
+
+              <div class="check-item">
+                <span>Facturación directa</span>
+                <input type="checkbox" id="facturacionDirecta">
+             </div>
+
+              <div class="check-item">
+                <span>Mostrar en VentaMedio</span>
+                <input type="checkbox" id="mostrarVentaMedioProducto">
+              </div>
+
+              <div class="check-item">
+                <span>Mostrar en catálogo QR / vitrina</span>
+                <input type="checkbox" id="mostrarMenuDigitalProducto">
+              </div>
+
+              <div class="check-item">
+                <span>Uso interno (oculto en caja)</span>
+                <input type="checkbox" id="esInsumo">
+              </div>
+
+              <div class="check-item">
+                <span>Es servicio (encuadernación, curso…)</span>
+                <input type="checkbox" id="esServicio">
+              </div>
+
+            </div>
+
+            <!-- PRECIO + IVA -->
+            <div class="row-mini">
+
+              <div>
+                <label>Precio de venta</label>
+                <div class="precio-row">
+                  <input type="text" id="precioVenta" name="precio_venta" placeholder="Definir precio">
+                  <button type="button" class="btn-precio" onclick="irAPrecio()">💲</button>
+                </div>
+              </div>
+
+              <div>
+                <label>IVA</label>
+                <select name="iva_tipo" id="ivaProducto" required>
+                  <option value="10">IVA 10%</option>
+                  <option value="5">IVA 5%</option>
+                  <option value="0">Exento</option>
+                </select>
+              </div>
+
+            </div>
+
+            <!-- CATEGORIA -->
+            <label>Género o sección</label>
+            <div class="categoria-row">
+              <input type="number" id="categoriaIdInput" placeholder="ID" min="1" class="categoria-id">
+              <select name="categoria_id" id="categoriaSelect"></select>
+              <button type="button" class="btn-add" onclick="irACategorias()">+</button>
+            </div>
+
+            <!-- IMAGEN -->
+            <label>Portada / imagen</label>
+            <input type="file" id="imagenProducto" name="imagen" accept="image/*">
+
+            <panel-auditoria id="auditProducto" data-tabla="producto" data-id-input="productoId"></panel-auditoria>
+            <!-- BOTONES -->
+            <div class="acciones acciones-iconos">
+
+              <button type="button" id="btnNuevo" onclick="nuevoProducto()">
+                <img src="../../recursos/img/nueva.png">
+                <span>Nuevo</span>
+                <small>F2</small>
+              </button>
+
+              <button type="submit" id="btnGuardar" disabled>
+                <img src="../../recursos/img/guardar.png">
+                <span>Guardar</span>
+                <small>F3</small>
+              </button>
+
+              <button type="button" id="btnEliminar" onclick="eliminarProducto()" disabled>
+                <img src="../../recursos/img/limpiar.png">
+                <span>Eliminar</span>
+                <small>Del</small>
+              </button>
+
+              <button type="button" id="btnCancelar" onclick="cancelarProducto()" disabled>
+                <img src="../../recursos/img/cancelar.png">
+                <span>Cancelar</span>
+                <small>F4</small>
+              </button>
+
+            </div>
 
           </div>
 
         </div>
+      </form>
+    </div>
 
-        <!-- COLUMNA PREVIEW -->
-        <div class="preview-wrapper">
-          <div class="preview-title">Vista previa</div>
+    <!-- LISTA -->
+    <div class="panel panel-lista">
+      <div class="buscador-container">
+        <span class="icono-buscar">🔍</span>
+        <input type="text" id="buscadorProductos" placeholder="Buscar por título, autor o código…" class="buscador">
+      </div>
 
-          <div class="preview-box">
-            <img id="previewImagen" src="" alt="">
-            <span id="previewPlaceholder">Sin imagen</span>
-          </div>
+      <div class="filtros-row">
+        <input type="text" id="filtroCategoria" class="filtro-categoria-id" placeholder="ID" inputmode="numeric" pattern="[0-9]*">
+        <input type="text" id="filtroCategoriaNombre" class="filtro-categoria-nombre" placeholder="Categoría" readonly>
+        <button type="button" id="btnBuscarFiltroCategoria" class="btn-filtro-lupa" title="Seleccionar categoría" aria-label="Seleccionar categoría">🔍</button>
+        <button type="button" id="btnLimpiarFiltroCategoria" class="btn-filtro-clear" title="Limpiar categoría" aria-label="Limpiar categoría">✕</button>
+        <input type="text" id="filtroDestino" class="filtro-destino" placeholder="Destino">
+        <select id="filtroMoneda" class="filtro-moneda">
+          <option value="">Moneda: Todas</option>
+          <option value="1">Guaraní</option>
+          <option value="2">Real</option>
+          <option value="3">Dólar</option>
+        </select>
+        <select id="filtroEsInsumo">
+          <option value="">Todos</option>
+          <option value="true">Solo uso interno</option>
+          <option value="false">Solo para venta</option>
+        </select>
+      </div>
+
+      <div class="tabla-productos">
+
+        <div class="tabla-header">
+          <span id="thId" class="th-orden">ID ▼</span>
+          <span>Nombre</span>
+          <span>Costo Total</span>
+          <span>Minorista</span>
+          <span>Stock</span>
+          <span>Destino</span>
+          <span>Categoría</span>
+          <span>Uso interno</span>
         </div>
+
+        <div id="listaProductos" class="tabla-body"></div>
 
       </div>
-    </form>
-  </div>
 
-
-<!-- PANEL LISTA -->
-<div class="panel panel-lista">
-
-  <input
-    type="text"
-    id="buscadorProductos"
-    placeholder=" Buscar producto..."
-    class="buscador"
-  >
-
-  <div class="tabla-productos">
-
-    <div class="tabla-header">
-      <span>ID</span>
-      <span>Nombre</span>
-      <span>Precio Costo</span>
-      <span>Precio Venta</span>
-      <span>Stock</span>
-      <span>Categoría</span>
     </div>
 
-    <div id="listaProductos" class="tabla-body"></div>
-
   </div>
 
-</div>
-
-</div>
-
-<!-- MODAL CONFIRMACION GLOBAL -->
-<div id="modalEliminar" class="modal-overlay hidden">
-  <div class="modal-box">
-    <div class="modal-icon">🗑️</div>
-
-    <h3 class="modal-title">Confirmar eliminación</h3>
-
-    <p class="modal-text"></p>
-
-    <p class="modal-nombre hidden"></p>
-
-    <div class="modal-actions">
-      <button class="btn-cancelar" onclick="cerrarModalEliminar()">Cancelar</button>
-      <button class="btn-eliminar">Eliminar</button>
+  <!-- MODALES -->
+  <div id="modalEliminar" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-icon">⚠️</div>
+      <h3 class="modal-title">Confirmar eliminación</h3>
+      <p class="modal-text">¿Desea eliminar el producto?</p>
+      <p class="modal-nombre" id="modalNombreProducto"></p>
+      <div class="modal-actions">
+        <button class="btn-cancelar" onclick="cerrarModalEliminar()">Cancelar</button>
+        <button class="btn-eliminar" onclick="confirmarEliminar()">Eliminar</button>
+      </div>
     </div>
   </div>
-</div>
-<!-- MODAL ADVERTENCIA GLOBAL -->
-<div id="modalAdvertencia" class="modal-overlay hidden">
-  <div class="modal-box">
-    <div class="modal-icon">⚠️</div>
 
-    <h3 class="modal-title">Atención</h3>
-
-    <p class="modal-text"></p>
-
-    <div class="modal-actions center">
-      <button class="btn-aceptar" onclick="cerrarAdvertencia()">Aceptar</button>
+  <div id="modalAdvertencia" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-icon">⚠️</div>
+      <h3 class="modal-title">Atención</h3>
+      <p class="modal-text" id="modalAdvertenciaTexto"></p>
+      <div class="modal-actions center">
+        <button class="btn-aceptar" onclick="cerrarAdvertencia(true)">Aceptar</button>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- modal compartido -->
-<script src="../../compartido/js/baseModal.js"></script>
-<script src="productos.js"></script>
+  <script src="/compartido/js/app.config.js?v=2026.04.17.03"></script>
+  <script src="/compartido/js/session.manager.js?v=2026.04.17.03"></script>
+  <script src="/compartido/js/cache.bootstrap.js?v=2026.04.17.03"></script>
+  <script src="../../compartido/js/baseModal.js?v=2026.04.17.03"></script>
+  <script src="../../compartido/js/panelAuditoria.js?v=2026.04.17.03"></script>
+  <script src="productos.js?v=2026.04.21.01"></script>
+  <script src="/compartido/js/seguridad.js?v=2026.04.17.03"></script>
 
-<script>
-function volver() {
-  window.location.href = "../../home.html";
-}
+  <script>
+    function volver() {
+      window.location.href = "../../home.html";
+    }
 
-function irACategorias() {
-  location.href = "../categorias/categorias.html?from=producto";
-
-}
-</script>
+    function irACategorias() {
+      location.href = "../categorias/categorias.html?from=producto";
+    }
+  </script>
 
 </body>
+
 </html>
+
+
+
+
+
+

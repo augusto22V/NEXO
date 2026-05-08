@@ -1,0 +1,130 @@
+/* CONTENEDOR */
+.contenedor{
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* PANEL */
+.panel{
+  background: #fff;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* TITULO */
+.panel-title{
+  font-weight: bold;
+  margin-bottom: 15px;
+  font-size: 16px;
+}
+
+/* GRID FORM */
+.form-grid{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px 20px;
+}
+
+.form-group{
+  display: flex;
+  flex-direction: column;
+}
+
+.full{
+  grid-column: span 2;
+}
+
+/* INPUTS */
+input, select{
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-family: 'Inter', sans-serif;
+}
+
+/* CHECK */
+.check-inline{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* BOTONES */
+.form-actions{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.btn{
+  padding: 10px 15px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* COLORES */
+.btn-primary{
+  background: #1f6f82;
+  color: white;
+}
+
+.btn-primary:hover{
+  background: #185a68;
+}
+
+.btn-secondary{
+  background: #6c757d;
+  color: white;
+}
+
+.btn-warning{
+  background: #f0ad4e;
+  color: white;
+}
+
+.btn-danger{
+  background: #d9534f;
+  color: white;
+}
+
+/* TABLA */
+.tabla{
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabla th{
+  text-align: left;
+  padding: 10px;
+  background: #f0f0f0;
+  font-size: 14px;
+}
+
+.tabla td{
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+}
+
+/* BUSCADOR */
+.list-toolbar{
+  margin-bottom: 10px;
+}
+
+.list-toolbar input{
+  width: 100%;
+}
+
+/* MENSAJES */
+.msg-box{
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 14px;
+}

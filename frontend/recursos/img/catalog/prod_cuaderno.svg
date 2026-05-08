@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" rx="16" fill="#eff6ff"/>
+  <rect x="56" y="48" width="88" height="108" rx="4" fill="#3b82f6"/>
+  <line x1="64" y1="64" x2="136" y2="64" stroke="#bfdbfe" stroke-width="2"/>
+  <line x1="64" y1="76" x2="136" y2="76" stroke="#bfdbfe" stroke-width="2"/>
+  <line x1="64" y1="88" x2="120" y2="88" stroke="#bfdbfe" stroke-width="2"/>
+  <text x="100" y="178" text-anchor="middle" font-family="Segoe UI,system-ui,sans-serif" font-size="12" fill="#1e40af">Cuaderno</text>
+</svg>

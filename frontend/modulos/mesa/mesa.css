@@ -1,0 +1,448 @@
+:root {
+  --mesa-bg: #eef3f8;
+  --mesa-panel: #ffffff;
+  --mesa-border: #d5dde7;
+  --mesa-text: #1f2937;
+  --mesa-muted: #5b6472;
+  --mesa-primary: #2563eb;
+  --mesa-success: #16a34a;
+  --mesa-warning: #d97706;
+  --mesa-danger: #dc2626;
+}
+
+body {
+  margin: 0;
+  color: var(--mesa-text);
+  background:
+    radial-gradient(circle at top right, rgba(37, 99, 235, 0.13), transparent 42%),
+    radial-gradient(circle at bottom left, rgba(22, 163, 74, 0.12), transparent 42%),
+    var(--mesa-bg);
+}
+
+.mesa-topbar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.mesa-topbar-title h1 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.mesa-topbar-title p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #dbeafe;
+}
+
+.mesa-contexto {
+  justify-self: end;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fef3c7;
+  background: rgba(15, 23, 42, 0.45);
+  border: 1px solid rgba(251, 191, 36, 0.45);
+  border-radius: 999px;
+  padding: 7px 12px;
+}
+
+.mesa-layout {
+  min-height: calc(100dvh - 76px);
+  padding: 12px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 12px;
+}
+
+.mesa-board-panel,
+.mesa-box {
+  background: var(--mesa-panel);
+  border: 1px solid var(--mesa-border);
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.mesa-board-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 12px;
+  gap: 10px;
+}
+
+.mesa-panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.mesa-panel-head h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.mesa-panel-head p {
+  margin: 2px 0 0;
+  color: var(--mesa-muted);
+  font-size: 13px;
+}
+
+.mesa-panel-head-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.mesa-board {
+  flex: 1;
+  min-height: 420px;
+  border: 1px solid var(--mesa-border);
+  border-radius: 12px;
+  overflow: auto;
+  background:
+    linear-gradient(90deg, rgba(15, 23, 42, 0.05) 1px, transparent 1px),
+    linear-gradient(rgba(15, 23, 42, 0.05) 1px, transparent 1px),
+    #f8fafc;
+  background-size: 30px 30px;
+}
+
+.mesa-board-canvas {
+  position: relative;
+  min-width: 100%;
+  min-height: 100%;
+}
+
+.mesa-card {
+  position: absolute;
+  width: 106px;
+  min-height: 102px;
+  border-radius: 12px;
+  border: 2px solid #cbd5e1;
+  background: #ffffff;
+  color: var(--mesa-text);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.13);
+  cursor: pointer;
+  user-select: none;
+  touch-action: none;
+  padding: 10px 8px;
+}
+
+.mesa-card.dragging {
+  opacity: 0.88;
+  cursor: grabbing;
+}
+
+.mesa-card.mover-on {
+  cursor: grab;
+}
+
+.mesa-card.selected {
+  outline: 3px solid rgba(37, 99, 235, 0.7);
+}
+
+.mesa-card.estado-libre {
+  border-color: var(--mesa-success);
+  background: #f0fdf4;
+}
+
+.mesa-card.estado-ocupada {
+  border-color: var(--mesa-warning);
+  background: #fff7ed;
+}
+
+.mesa-card.estado-reservada {
+  border-color: #7c3aed;
+  background: #f5f3ff;
+}
+
+.mesa-card.estado-inactiva {
+  border-color: #64748b;
+  background: #f1f5f9;
+}
+
+.mesa-card-numero {
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.mesa-card-meta {
+  font-size: 11px;
+  font-weight: 700;
+  color: #334155;
+  text-align: center;
+  line-height: 1.2;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mesa-board-empty {
+  margin: 18px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+  padding: 14px;
+  color: #475569;
+  background: #ffffff;
+}
+
+.mesa-legend {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.mesa-tag {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.mesa-tag.libre {
+  background: #dcfce7;
+  color: #166534;
+  border-color: #16a34a;
+}
+
+.mesa-tag.ocupada {
+  background: #ffedd5;
+  color: #9a3412;
+  border-color: #f59e0b;
+}
+
+.mesa-tag.reservada {
+  background: #ede9fe;
+  color: #5b21b6;
+  border-color: #8b5cf6;
+}
+
+.mesa-tag.inactiva {
+  background: #e2e8f0;
+  color: #334155;
+  border-color: #64748b;
+}
+
+.mesa-tag.seleccionada {
+  background: #dbeafe;
+  color: #1e3a8a;
+  border-color: #2563eb;
+}
+
+.mesa-side-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mesa-box {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.mesa-box h3 {
+  margin: 0 0 2px;
+  font-size: 16px;
+}
+
+.mesa-box label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.mesa-box input,
+.mesa-box select {
+  height: 38px;
+  border-radius: 9px;
+  border: 1px solid #cbd5e1;
+  padding: 0 10px;
+  font-size: 14px;
+}
+
+.mesa-check-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #334155;
+  min-height: 36px;
+}
+
+.mesa-check-inline input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+.mesa-empty-info {
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 13px;
+  color: #64748b;
+  background: #f8fafc;
+}
+
+.mesa-detalle {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mesa-auditoria-detalle {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mesa-detalle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #334155;
+}
+
+.mesa-detalle-row strong {
+  color: #0f172a;
+  text-align: right;
+  max-width: 58%;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.mesa-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.mesa-mensaje {
+  min-height: 42px;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  color: #334155;
+}
+
+.mesa-mensaje[data-tipo="ok"] {
+  background: #ecfdf3;
+  border-color: #22c55e;
+  color: #166534;
+}
+
+.mesa-mensaje[data-tipo="error"] {
+  background: #fef2f2;
+  border-color: #ef4444;
+  color: #991b1b;
+}
+
+.mesa-mensaje[data-tipo="aviso"] {
+  background: #fff7ed;
+  border-color: #f97316;
+  color: #9a3412;
+}
+
+button {
+  border: none;
+  border-radius: 9px;
+  min-height: 38px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: filter 0.15s ease, transform 0.05s ease;
+}
+
+button:hover {
+  filter: brightness(1.06);
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+.btn-primary {
+  background: var(--mesa-primary);
+  color: #ffffff;
+}
+
+.btn-success {
+  background: var(--mesa-success);
+  color: #ffffff;
+}
+
+.btn-danger {
+  background: var(--mesa-danger);
+  color: #ffffff;
+}
+
+.btn-neutral {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+@media (max-width: 1120px) {
+  .mesa-layout {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  .mesa-board {
+    min-height: 360px;
+  }
+
+  .mesa-side-panel {
+    margin-bottom: 12px;
+  }
+}
+
+@media (max-width: 720px) {
+  .mesa-topbar {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .mesa-contexto {
+    justify-self: start;
+  }
+
+  .mesa-layout {
+    padding: 9px;
+    gap: 9px;
+  }
+
+  .mesa-card {
+    width: 94px;
+    min-height: 92px;
+  }
+
+  .mesa-card-numero {
+    font-size: 22px;
+  }
+
+  .mesa-actions-grid {
+    grid-template-columns: 1fr;
+  }
+}

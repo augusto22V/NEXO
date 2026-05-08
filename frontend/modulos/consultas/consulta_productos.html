@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="/manifest.json">
+  <title>LibreríaSys | Consulta de productos y servicios</title>
+  <link rel="stylesheet" href="consulta_productos.css?v=2026.04.19.12">
+</head>
+<body>
+  <div class="cp-topbar">
+    <button class="btn-volver" onclick="volverHome()"> Volver</button>
+    <h1 id="cpTitulo">Consulta de productos y servicios</h1>
+    <div class="cp-topbar-spacer"></div>
+  </div>
+
+  <main class="cp-main">
+    <section class="cp-filtros" id="filtrosForm">
+      <div class="cp-emp-field cp-f-empresa">
+        <label for="fEmpresa">Emp.</label>
+        <input id="fEmpresa" type="number" min="1" inputmode="numeric" placeholder="Emp">
+      </div>
+
+      <div class="cp-quick-search cp-f-busqueda">
+        <label for="fBusquedaRapida">Título / descripción</label>
+        <input id="fBusquedaRapida" type="text" placeholder="Título, autor o descripción">
+      </div>
+
+      <div class="cp-f-barra">
+        <label for="fCodigoBarra">Código de barras / ISBN</label>
+        <input id="fCodigoBarra" type="text" placeholder="ISBN o EAN">
+      </div>
+
+      <div class="cp-f-codigo">
+        <label for="fCodigoProducto">Código interno</label>
+        <input id="fCodigoProducto" type="text" inputmode="numeric" placeholder="Ej: 125">
+      </div>
+
+      <div class="cp-f-categoria">
+        <label for="fCategoriaDisplay">Género o sección</label>
+        <div class="cp-input-lupa">
+          <input id="fCategoriaDisplay" type="text" placeholder="Todas" readonly>
+          <button id="btnCategoriaBuscar" type="button" title="Buscar género o sección">Buscar</button>
+        </div>
+        <input id="fCategoriaId" type="hidden">
+      </div>
+
+      <div class="cp-f-saldo">
+        <label for="fTipoSaldo">Tipo de saldo</label>
+        <select id="fTipoSaldo">
+          <option value="todos">Todo tipo de saldo</option>
+          <option value="mayor_0">Saldo mayor que cero</option>
+          <option value="igual_0">Saldo igual a cero</option>
+        </select>
+      </div>
+
+      <div class="cp-f-valor">
+        <label for="fTipoValor">Tipo de valores</label>
+        <select id="fTipoValor">
+          <option value="todos">Todos</option>
+          <option value="costo">Costo mayor que cero</option>
+          <option value="minorista">Minorista mayor que cero</option>
+          <option value="mayorista">Mayorista mayor que cero</option>
+          <option value="promocional">Promocional mayor que cero</option>
+          <option value="minimo">Minimo mayor que cero</option>
+        </select>
+      </div>
+
+      <div class="cp-f-moneda">
+        <label for="fMonedaCompra">Moneda compra</label>
+        <select id="fMonedaCompra">
+          <option value="">Todos</option>
+          <option value="1">Guarani</option>
+          <option value="3">Dolar</option>
+          <option value="2">Real</option>
+        </select>
+      </div>
+
+      <div class="cp-f-insumo">
+        <label for="fEsInsumo">Uso interno</label>
+        <select id="fEsInsumo">
+          <option value="">Todos</option>
+          <option value="true">Si</option>
+          <option value="false">No, se vende</option>
+        </select>
+      </div>
+
+      <div class="cp-pair-fields cp-f-pair">
+        <div class="cp-inline-field cp-inline-factura">
+          <label for="fFacturacionDirecta">Factura directa</label>
+          <select id="fFacturacionDirecta">
+            <option value="">Todos</option>
+            <option value="true">Si</option>
+            <option value="false">No</option>
+          </select>
+        </div>
+
+        <div class="cp-inline-field cp-inline-limit">
+          <label for="fLimit">Limite</label>
+          <input id="fLimit" type="number" min="1" max="2000" value="300">
+        </div>
+
+        <div class="cp-toggle-row cp-toggle-inline">
+          <label class="cp-toggle">
+            <input id="fMostrarInactivos" type="checkbox">
+            <span>Mostrar inactivos</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="cp-acciones cp-f-acciones">
+        <button id="btnBuscar" type="button" class="btn-buscar">Buscar</button>
+        <button id="btnLimpiar" type="button" class="btn-limpiar">Limpiar</button>
+      </div>
+    </section>
+
+    <section class="cp-resultados">
+      <div class="cp-meta">
+        <span id="cpInfo">Cargando consulta inicial...</span>
+        <span id="cpSeleccion"></span>
+      </div>
+
+      <div class="cp-tabla-wrap">
+        <table class="cp-tabla">
+          <thead>
+            <tr>
+              <th class="col-code cp-sortable" data-sort-key="id">Codigo</th>
+              <th class="col-desc cp-sortable" data-sort-key="nombre">Descripcion</th>
+              <th class="col-stock cp-sortable" data-sort-key="stock">Stock</th>
+              <th class="col-barra col-tablet">Codigo barras</th>
+              <th class="col-categoria col-tablet">Categoria</th>
+              <th class="col-costo col-landscape">Costo</th>
+              <th class="col-minorista col-landscape">Minorista</th>
+              <th class="col-mayorista col-landscape">Mayorista</th>
+              <th class="col-minimo col-landscape">Minimo</th>
+              <th class="col-promocional col-landscape">Promocional</th>
+              <th class="col-moneda col-landscape">Moneda compra</th>
+              <th class="col-estado col-landscape">Estado</th>
+              <th class="col-destino col-landscape">Destino</th>
+            </tr>
+          </thead>
+          <tbody id="cpTablaBody">
+            <tr><td colspan="13" class="cp-vacio">Cargando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="cp-color-config cp-color-config-footer">
+        <label>Color Fuentes</label>
+        <div class="cp-color-row">
+          <span>Positivo</span>
+          <input id="fColorPositivo" type="color" value="#1f6a36" aria-label="Color positivo">
+          <span>Negativo</span>
+          <input id="fColorNegativo" type="color" value="#9b1c1c" aria-label="Color negativo">
+          <button id="btnColorReset" type="button" class="btn-limpiar">Restaurar</button>
+        </div>
+      </div>
+
+      <div class="cp-detalle-panel" id="cpDetallePanel">
+        <div class="cp-detalle-grid">
+          <div class="cp-det-item"><span class="cp-det-label">Fecha ult. compra</span><span id="dFechaUltCompra">-</span></div>
+          <div class="cp-det-item"><span class="cp-det-label">Ult. Proveedor</span><span id="dUltProveedor">-</span></div>
+          <div class="cp-det-item"><span class="cp-det-label">Nr. Ultimo Movto.</span><span id="dUltMovto">-</span></div>
+          <div class="cp-det-item"><span class="cp-det-label">Ult. Compra</span><span id="dUltCompra">-</span></div>
+          <div class="cp-det-item"><span class="cp-det-label">Costo Final</span><span id="dCostoFinal">-</span></div>
+          <div class="cp-det-item"><span class="cp-det-label">Moneda</span><span id="dMoneda">-</span></div>
+          <div class="cp-det-item cp-det-item-wide"><span class="cp-det-label">Localizacion del Producto</span><span id="dLocalizacion"></span></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="consulta_productos.js?v=2026.04.19.08"></script>
+  <script src="/compartido/js/seguridad.js?v=2026.04.18.03"></script>
+</body>
+</html>

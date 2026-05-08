@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>LibreríaSys | Mostrador y pedidos</title>
+
+  <link rel="stylesheet" href="../../compartido/css/base.css">
+  <link rel="stylesheet" href="../../compartido/css/panelAuditoria.css">
+  <link rel="stylesheet" href="mesa.css">
+</head>
+<body>
+  <header class="topbar mesa-topbar">
+    <button class="btn-volver" type="button" onclick="volverMesas()">Volver</button>
+    <div class="mesa-topbar-title">
+      <h1>Mostrador</h1>
+      <p>Pedidos en curso y atención en el salón</p>
+    </div>
+    <div id="mesaContexto" class="mesa-contexto">Empresa - / Terminal -</div>
+  </header>
+
+  <main class="mesa-layout">
+    <section class="mesa-board-panel">
+      <div class="mesa-panel-head">
+        <div>
+          <h2>Plano de mostrador</h2>
+          <p id="mesaResumen">Cargando ubicaciones...</p>
+        </div>
+        <div class="mesa-panel-head-actions">
+          <button id="btnMesaMover" type="button" class="btn-neutral">Mover: OFF</button>
+          <button id="btnMesaRefrescar" type="button" class="btn-neutral">Actualizar</button>
+        </div>
+      </div>
+
+      <div id="mesaBoard" class="mesa-board"></div>
+
+      <div class="mesa-legend">
+        <span class="mesa-tag libre">LIBRE</span>
+        <span class="mesa-tag ocupada">OCUPADA</span>
+        <span class="mesa-tag reservada">RESERVADA</span>
+        <span class="mesa-tag inactiva">INACTIVA</span>
+        <span class="mesa-tag seleccionada">SELECCIONADA</span>
+      </div>
+    </section>
+
+    <aside class="mesa-side-panel">
+      <section class="mesa-box">
+        <h3>Nuevo puesto</h3>
+        <label for="mesaNuevaNumero">Número o nombre</label>
+        <input id="mesaNuevaNumero" type="text" maxlength="20" placeholder="Ej: 12">
+
+        <label for="mesaNuevaEstado">Estado inicial</label>
+        <select id="mesaNuevaEstado">
+          <option value="LIBRE" selected>LIBRE</option>
+          <option value="OCUPADA">OCUPADA</option>
+          <option value="RESERVADA">RESERVADA</option>
+          <option value="INACTIVA">INACTIVA</option>
+        </select>
+
+        <label class="mesa-check-inline" for="mesaNuevaVentaRapida">
+          <input id="mesaNuevaVentaRapida" type="checkbox" checked>
+          Mostrar en venta en caja
+        </label>
+
+        <button id="btnMesaCrear" type="button" class="btn-success">Crear puesto</button>
+      </section>
+
+      <section class="mesa-box">
+        <h3>Apertura de Venta</h3>
+        <label for="mesaTipoPedido">Tipo de pedido</label>
+        <select id="mesaTipoPedido">
+          <option value="1" selected>EN MOSTRADOR</option>
+          <option value="2">ENVÍO / DELIVERY</option>
+          <option value="3">RETIRO EN LOCAL</option>
+        </select>
+
+        <label for="mesaVendedorId">Vendedor</label>
+        <input id="mesaVendedorId" type="text" inputmode="numeric" value="1">
+      </section>
+
+      <section class="mesa-box">
+        <h3>Puesto seleccionado</h3>
+
+        <div id="mesaSeleccionVacia" class="mesa-empty-info">
+          Selecciona un puesto del plano para editarlo.
+        </div>
+
+        <div id="mesaSeleccionDetalle" class="mesa-detalle" hidden>
+          <div class="mesa-detalle-row">
+            <span>ID</span>
+            <strong id="mesaSelId">-</strong>
+          </div>
+
+          <div class="mesa-detalle-row">
+            <span>Venta asociada</span>
+            <strong id="mesaSelVenta">Sin venta</strong>
+          </div>
+
+          <label for="mesaEditNumero">Número o nombre</label>
+          <input id="mesaEditNumero" type="text" maxlength="20">
+
+          <label for="mesaEditEstado">Estado</label>
+          <select id="mesaEditEstado">
+            <option value="LIBRE">LIBRE</option>
+            <option value="OCUPADA">OCUPADA</option>
+            <option value="RESERVADA">RESERVADA</option>
+            <option value="INACTIVA">INACTIVA</option>
+          </select>
+
+          <label class="mesa-check-inline" for="mesaEditVentaRapida">
+            <input id="mesaEditVentaRapida" type="checkbox">
+            Mostrar en venta en caja
+          </label>
+
+          <div class="mesa-actions-grid">
+            <button id="btnMesaGuardar" type="button" class="btn-success">Guardar</button>
+            <button id="btnMesaLiberar" type="button" class="btn-neutral">Liberar</button>
+            <button id="btnMesaAbrirVenta" type="button" class="btn-primary">Abrir Venta</button>
+            <button id="btnMesaEliminar" type="button" class="btn-danger">Eliminar</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="mesa-box">
+        <h3>Auditoría de puesto</h3>
+
+        <input type="hidden" id="mesaAuditId" value="">
+        <panel-auditoria id="auditMesa" data-tabla="mesa" data-id-input="mesaAuditId"></panel-auditoria>
+      </section>
+
+      <div id="mesaMensaje" class="mesa-mensaje" aria-live="polite"></div>
+    </aside>
+  </main>
+
+  <script src="../../compartido/js/panelAuditoria.js"></script>
+  <script src="mesa.js"></script>
+  <script src="/compartido/js/seguridad.js"></script>
+</body>
+</html>

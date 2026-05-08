@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Configuración Facturación</title>
+
+  <link rel="stylesheet" href="../../compartido/css/base.css">
+  <link rel="stylesheet" href="../../compartido/css/panelAuditoria.css">
+  <link rel="stylesheet" href="../../compartido/css/style.css">
+  <link rel="stylesheet" href="modelo_factura.css">
+</head>
+
+<body>
+
+  <header class="topbar">
+    <button class="btn-volver" onclick="volverSeguro()">← Volver</button>
+    <div class="titulo">
+      <span id="moduloTitulo">Modelo de Factura</span>
+    </div>
+  </header>
+
+  <main class="contenedor">
+
+    <section class="panel">
+
+      <h3>Datos Fiscales</h3>
+      <input type="hidden" id="modeloFacturaId">
+
+      <label class="full">Descripción</label>
+      <input id="descripcion" class="full">
+
+      <label>Punto de establecimiento</label>
+      <input id="establecimiento" maxlength="3" placeholder="001">
+
+      <label>Punto de expedición</label>
+      <input id="expedicion" maxlength="3" placeholder="001">
+
+      <label>Timbrado</label>
+      <input id="timbrado">
+
+      <label>Fecha inicio</label>
+      <input type="date" id="inicio">
+
+      <label>Fecha vencimiento</label>
+      <input type="date" id="fin">
+
+      <label class="full">Actividad económica</label>
+      <input id="actividad" class="full">
+
+      <label>Moneda</label>
+      <input id="moneda" value="PYG">
+
+      <div class="checks">
+        <label><input type="checkbox" id="ticket"> Ticket fiscal</label>
+        <label><input type="checkbox" id="auto"> Numeración automática</label>
+      </div>
+
+      <panel-auditoria id="auditModeloFactura" data-tabla="modelo_factura" data-id-input="modeloFacturaId"></panel-auditoria>
+
+      <div class="acciones">
+        <button onclick="guardar()">💾 Guardar</button>
+      </div>
+
+    </section>
+
+  </main>
+
+  <script src="../../compartido/js/panelAuditoria.js"></script>
+  <script src="modelo_factura.js"></script>
+
+</body>
+
+</html>

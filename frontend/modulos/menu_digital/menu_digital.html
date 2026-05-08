@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="/manifest.json">
+  <title>LibreríaSys | Catálogo QR / vitrina</title>
+
+  <link rel="stylesheet" href="/compartido/css/base.css">
+  <link rel="stylesheet" href="/recursos/css/all.min.css">
+  <link rel="stylesheet" href="menu_digital.css">
+</head>
+<body class="md-admin-body">
+  <header class="md-topbar">
+    <div class="md-topbar-main">
+      <button type="button" class="md-back-btn" onclick="volverSeguro()">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>Volver</span>
+      </button>
+
+      <div class="md-title-wrap">
+        <p class="md-kicker">Marketing y vitrina</p>
+        <h1>Catálogo con código QR</h1>
+        <div class="md-topbar-meta">
+          <span id="estadoMenuBadge" class="md-status-badge">BORRADOR</span>
+          <span id="scopeMenuLabel" class="md-scope-pill">Empresa / Terminal</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="md-topbar-actions">
+      <button type="button" class="md-action-btn" onclick="sincronizarFuentes()">
+        <i class="fa-solid fa-arrows-rotate"></i>
+        <span>Sincronizar</span>
+      </button>
+      <button type="button" class="md-action-btn md-action-primary" onclick="abrirMenuPublico()">
+        <i class="fa-solid fa-up-right-from-square"></i>
+        <span>Abrir catálogo</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="md-shell">
+    <aside class="md-sidebar">
+      <div class="md-sidebar-card">
+        <p class="md-sidebar-label">Secciones</p>
+        <div class="md-tab-list">
+          <button type="button" class="md-tab-btn active" data-tab="resumen" onclick="activarTab('resumen')">
+            <i class="fa-solid fa-chart-pie"></i>
+            <span>Resumen</span>
+          </button>
+          <button type="button" class="md-tab-btn" data-tab="categorias" onclick="activarTab('categorias')">
+            <i class="fa-solid fa-tags"></i>
+            <span>Categorías</span>
+          </button>
+          <button type="button" class="md-tab-btn" data-tab="items" onclick="activarTab('items')">
+            <i class="fa-solid fa-burger"></i>
+            <span>Ítems</span>
+          </button>
+          <button type="button" class="md-tab-btn" data-tab="diseno" onclick="activarTab('diseno')">
+            <i class="fa-solid fa-palette"></i>
+            <span>Diseño</span>
+          </button>
+          <button type="button" class="md-tab-btn" data-tab="publicacion" onclick="activarTab('publicacion')">
+            <i class="fa-solid fa-qrcode"></i>
+            <span>Publicación y QR</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="md-sidebar-card md-sidebar-note">
+        <p>Los productos y categorías marcados en sus módulos originales se sincronizan aquí sin mezclar inventario con la experiencia visual del cliente.</p>
+      </div>
+    </aside>
+
+    <section class="md-content">
+      <section class="md-panel active" data-panel="resumen">
+        <div class="md-hero">
+          <div>
+            <p class="md-kicker">Panel principal</p>
+            <h2 id="heroMenuNombre">Tu menú listo para publicar</h2>
+            <p id="heroMenuMensaje" class="md-hero-text">Crea una carta moderna, visual y fácil de compartir con QR.</p>
+          </div>
+
+          <div class="md-hero-actions">
+            <button type="button" class="md-secondary-btn" onclick="activarTab('diseno')">
+              <i class="fa-solid fa-wand-magic-sparkles"></i>
+              <span>Personalizar diseño</span>
+            </button>
+            <button type="button" class="md-primary-btn" onclick="activarTab('publicacion')">
+              <i class="fa-solid fa-share-nodes"></i>
+              <span>Publicar y QR</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="md-stats-grid">
+          <article class="md-stat-card">
+            <span class="md-stat-icon"><i class="fa-solid fa-tags"></i></span>
+            <strong id="statCategorias">0</strong>
+            <small>Categorías</small>
+          </article>
+          <article class="md-stat-card">
+            <span class="md-stat-icon"><i class="fa-solid fa-utensils"></i></span>
+            <strong id="statItems">0</strong>
+            <small>Ítems</small>
+          </article>
+          <article class="md-stat-card">
+            <span class="md-stat-icon"><i class="fa-solid fa-star"></i></span>
+            <strong id="statDestacados">0</strong>
+            <small>Destacados</small>
+          </article>
+          <article class="md-stat-card">
+            <span class="md-stat-icon"><i class="fa-solid fa-link"></i></span>
+            <strong id="statEstado">BORRADOR</strong>
+            <small>Estado público</small>
+          </article>
+        </div>
+
+        <div class="md-dual-grid">
+          <article class="md-card">
+            <div class="md-card-head">
+              <div>
+                <p class="md-card-kicker">Sincronización automática</p>
+                <h3>Contenido traído desde el sistema</h3>
+              </div>
+            </div>
+
+            <div class="md-source-grid">
+              <div class="md-source-box">
+                <span class="md-source-label">Categorías marcadas</span>
+                <strong id="resumenCategoriasMarcadas">0</strong>
+              </div>
+              <div class="md-source-box">
+                <span class="md-source-label">Productos marcados</span>
+                <strong id="resumenProductosMarcados">0</strong>
+              </div>
+            </div>
+
+            <button type="button" class="md-inline-btn" onclick="sincronizarFuentes()">
+              <i class="fa-solid fa-arrows-rotate"></i>
+              <span>Refrescar desde productos y categorías</span>
+            </button>
+          </article>
+
+          <article class="md-card">
+            <div class="md-card-head">
+              <div>
+                <p class="md-card-kicker">Accesos rápidos</p>
+                <h3>Atajos del módulo</h3>
+              </div>
+            </div>
+
+            <div class="md-quick-grid">
+              <button type="button" class="md-quick-btn" onclick="activarTab('categorias')">
+                <i class="fa-solid fa-tags"></i>
+                <span>Categorías</span>
+              </button>
+              <button type="button" class="md-quick-btn" onclick="activarTab('items')">
+                <i class="fa-solid fa-bowl-food"></i>
+                <span>Ítems</span>
+              </button>
+              <button type="button" class="md-quick-btn" onclick="activarTab('diseno')">
+                <i class="fa-solid fa-palette"></i>
+                <span>Diseño</span>
+              </button>
+              <button type="button" class="md-quick-btn" onclick="activarTab('publicacion')">
+                <i class="fa-solid fa-qrcode"></i>
+                <span>QR</span>
+              </button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="md-panel" data-panel="categorias">
+        <div class="md-panel-head">
+          <div>
+            <p class="md-kicker">Pantalla de categorías</p>
+            <h2>Categorías del menú digital</h2>
+          </div>
+          <button type="button" class="md-primary-btn" onclick="nuevoFormularioCategoria()">
+            <i class="fa-solid fa-plus"></i>
+            <span>Nueva categoría</span>
+          </button>
+        </div>
+
+        <div class="md-admin-grid">
+          <form id="formCategoriaMenu" class="md-card md-form-card">
+            <div class="md-card-head">
+              <div>
+                <p class="md-card-kicker">Editor</p>
+                <h3 id="tituloFormCategoria">Crear categoría</h3>
+              </div>
+            </div>
+
+            <input type="hidden" id="categoriaMenuId">
+
+            <label>Nombre</label>
+            <input type="text" id="categoriaMenuNombre" maxlength="140" required>
+
+            <label>Descripción</label>
+            <textarea id="categoriaMenuDescripcion" rows="3" placeholder="Texto corto para la categoría"></textarea>
+
+            <div class="md-form-row">
+              <div>
+                <label>Color</label>
+                <div class="md-color-control">
+                  <input type="color" id="categoriaMenuColor" value="#147696">
+                  <input type="text" id="categoriaMenuColorText" class="md-color-text" maxlength="7" value="#147696" placeholder="#147696">
+                </div>
+                <div class="md-color-presets">
+                  <button type="button" class="md-color-preset" data-target="categoriaMenuColor" data-text-target="categoriaMenuColorText" data-color="#147696" style="--swatch:#147696" aria-label="Azul sistema"></button>
+                  <button type="button" class="md-color-preset" data-target="categoriaMenuColor" data-text-target="categoriaMenuColorText" data-color="#2563EB" style="--swatch:#2563EB" aria-label="Azul intenso"></button>
+                  <button type="button" class="md-color-preset" data-target="categoriaMenuColor" data-text-target="categoriaMenuColorText" data-color="#0F766E" style="--swatch:#0F766E" aria-label="Verde azulado"></button>
+                  <button type="button" class="md-color-preset" data-target="categoriaMenuColor" data-text-target="categoriaMenuColorText" data-color="#64748B" style="--swatch:#64748B" aria-label="Gris azulado"></button>
+                </div>
+              </div>
+              <div>
+                <label>Icono</label>
+                <input type="text" id="categoriaMenuIcono" placeholder="fa-utensils">
+              </div>
+              <div>
+                <label>Orden</label>
+                <input type="number" id="categoriaMenuOrden" min="0" value="0">
+              </div>
+            </div>
+
+            <label>Imagen</label>
+            <input type="file" id="categoriaMenuImagen" accept="image/*">
+
+            <div class="md-check-grid">
+              <label><input type="checkbox" id="categoriaMenuActiva" checked> Activa</label>
+              <label><input type="checkbox" id="categoriaMenuVisible" checked> Visible</label>
+              <label><input type="checkbox" id="categoriaMenuAgotada"> Agotada</label>
+            </div>
+
+            <p id="categoriaMenuOrigen" class="md-origin-badge">Manual</p>
+
+            <div class="md-form-actions">
+              <button type="submit" class="md-primary-btn">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Guardar</span>
+              </button>
+              <button type="button" class="md-secondary-btn" onclick="nuevoFormularioCategoria()">
+                <i class="fa-solid fa-eraser"></i>
+                <span>Limpiar</span>
+              </button>
+            </div>
+            <label>URL base pÃºblica / IP</label>
+            <input type="text" id="configPublicBaseUrl" placeholder="http://192.168.0.3:3000 o https://menu.tunegocio.com">
+            <p id="configPublicBaseHint" class="md-field-help">Si lo dejas vacÃ­o, el sistema usa la detecciÃ³n automÃ¡tica o PUBLIC_BASE_URL.</p>
+            <div id="publicBaseEditorSlot"></div>
+          </form>
+
+          <article class="md-card">
+            <div class="md-card-head">
+              <div>
+                <p class="md-card-kicker">Listado</p>
+                <h3>Categorías existentes</h3>
+              </div>
+            </div>
+
+            <div id="listaCategoriasMenu" class="md-list-wrap"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="md-panel" data-panel="items">
+        <div class="md-panel-head">
+          <div>
+            <p class="md-kicker">Pantalla de ítems</p>
+            <h2>Platos y productos del menú</h2>
+          </div>
+          <button type="button" class="md-primary-btn" onclick="nuevoFormularioItem()">
+            <i class="fa-solid fa-plus"></i>
+            <span>Nuevo ítem</span>
+          </button>
+        </div>
+
+        <div class="md-admin-grid">
+          <form id="formItemMenu" class="md-card md-form-card">
+            <div class="md-card-head">
+              <div>
+                <p class="md-card-kicker">Editor</p>
+                <h3 id="tituloFormItem">Crear ítem</h3>
+              </div>
+            </div>
+
+            <input type="hidden" id="itemMenuId">
+
+            <label>Categoría</label>
+            <select id="itemMenuCategoria"></select>
+
+            <label>Nombre</label>
+            <input type="text" id="itemMenuNombre" maxlength="180" required>
+
+            <label>Descripción</label>
+            <textarea id="itemMenuDescripcion" rows="3" placeholder="Describe el plato o producto"></textarea>
+
+            <div class="md-form-row">
+              <div>
+                <label>Precio</label>
+                <input type="number" id="itemMenuPrecio" min="0" step="0.01" value="0">
+              </div>
+              <div>
+                <label>Orden</label>
+                <input type="number" id="itemMenuOrden" min="0" value="0">
+              </div>
+            </div>
+
+            <label>Imagen</label>
+            <input type="file" id="itemMenuImagen" accept="image/*">
+
+            <div class="md-check-grid">
+              <label><input type="checkbox" id="itemMenuDisponible" checked> Disponible</label>
+              <label><input type="checkbox" id="itemMenuVisible" checked> Visible</label>
+              <label><input type="checkbox" id="itemMenuDestacado"> Destacado</label>
+              <label><input type="checkbox" id="itemMenuAgotado"> Agotado</label>
+            </div>
+
+            <p id="itemMenuOrigen" class="md-origin-badge">Manual</p>
+
+            <div class="md-form-actions">
+              <button type="submit" class="md-primary-btn">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Guardar</span>
+              </button>
+              <button type="button" class="md-secondary-btn" onclick="nuevoFormularioItem()">
+                <i class="fa-solid fa-eraser"></i>
+                <span>Limpiar</span>
+              </button>
+            </div>
+          </form>
+
+          <article class="md-card">
+            <div class="md-card-head">
+              <div>
+                <p class="md-card-kicker">Listado</p>
+                <h3>Ítems del menú</h3>
+              </div>
+            </div>
+
+            <div id="listaItemsMenu" class="md-list-wrap"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="md-panel" data-panel="diseno">
+        <div class="md-panel-head">
+          <div>
+            <p class="md-kicker">Diseño visual</p>
+            <h2>Identidad, colores y presentación</h2>
+          </div>
+          <button type="button" class="md-primary-btn" onclick="guardarConfiguracion()">
+            <i class="fa-solid fa-floppy-disk"></i>
+            <span>Guardar diseño</span>
+          </button>
+        </div>
+
+        <div class="md-admin-grid md-design-grid">
+          <form id="formDisenoMenu" class="md-card md-form-card">
+            <div class="md-card-head">
+              <div>
+                <p class="md-card-kicker">Personalización</p>
+                <h3>Ajustes visuales</h3>
+              </div>
+            </div>
+
+            <label>Usar logo de empresa</label>
+            <label class="md-switch-row">
+              <input type="checkbox" id="configUsarLogoEmpresa" checked>
+              <span>Tomar logo automáticamente desde empresa</span>
+            </label>
+
+            <label>Logo personalizado</label>
+            <input type="file" id="configLogoPersonalizado" accept="image/*">
+
+            <label>Banner de portada</label>
+            <input type="file" id="configBanner" accept="image/*">
+
+            <label>Fondo decorativo</label>
+            <input type="file" id="configFondo" accept="image/*">
+
+            <div class="md-form-row">
+              <div>
+                <label>Color principal</label>
+                <div class="md-color-control">
+                  <input type="color" id="configColorPrincipal" value="#147696">
+                  <input type="text" id="configColorPrincipalText" class="md-color-text" maxlength="7" value="#147696" placeholder="#147696">
+                </div>
+                <div class="md-color-presets">
+                  <button type="button" class="md-color-preset" data-target="configColorPrincipal" data-text-target="configColorPrincipalText" data-color="#147696" style="--swatch:#147696" aria-label="Azul sistema"></button>
+                  <button type="button" class="md-color-preset" data-target="configColorPrincipal" data-text-target="configColorPrincipalText" data-color="#2563EB" style="--swatch:#2563EB" aria-label="Azul intenso"></button>
+                  <button type="button" class="md-color-preset" data-target="configColorPrincipal" data-text-target="configColorPrincipalText" data-color="#0F766E" style="--swatch:#0F766E" aria-label="Verde azulado"></button>
+                  <button type="button" class="md-color-preset" data-target="configColorPrincipal" data-text-target="configColorPrincipalText" data-color="#1D4ED8" style="--swatch:#1D4ED8" aria-label="Azul profundo"></button>
+                </div>
+              </div>
+              <div>
+                <label>Color secundario</label>
+                <div class="md-color-control">
+                  <input type="color" id="configColorSecundario" value="#E6F1F4">
+                  <input type="text" id="configColorSecundarioText" class="md-color-text" maxlength="7" value="#E6F1F4" placeholder="#E6F1F4">
+                </div>
+                <div class="md-color-presets">
+                  <button type="button" class="md-color-preset" data-target="configColorSecundario" data-text-target="configColorSecundarioText" data-color="#E6F1F4" style="--swatch:#E6F1F4" aria-label="Celeste suave"></button>
+                  <button type="button" class="md-color-preset" data-target="configColorSecundario" data-text-target="configColorSecundarioText" data-color="#DBEAFE" style="--swatch:#DBEAFE" aria-label="Azul claro"></button>
+                  <button type="button" class="md-color-preset" data-target="configColorSecundario" data-text-target="configColorSecundarioText" data-color="#F1F5F9" style="--swatch:#F1F5F9" aria-label="Gris claro"></button>
+                  <button type="button" class="md-color-preset" data-target="configColorSecundario" data-text-target="configColorSecundarioText" data-color="#ECFEFF" style="--swatch:#ECFEFF" aria-label="Cian suave"></button>
+                </div>
+              </div>
+            </div>
+
+            <div class="md-form-row">
+              <div>
+                <label>Fondo</label>
+                <select id="configFondoTipo">
+                  <option value="gradient">Gradiente</option>
+                  <option value="solid">Color sólido</option>
+                  <option value="imagen">Imagen</option>
+                </select>
+              </div>
+              <div>
+                <label>Color/gradiente</label>
+                <input type="text" id="configFondoValor" placeholder="linear-gradient(...) o #f5f7f9">
+              </div>
+            </div>
+
+            <label>Presentación de categorías</label>
+            <select id="configLayoutCategorias">
+              <option value="tabs">Pestañas</option>
+              <option value="botones">Botones</option>
+              <option value="lista">Lista</option>
+            </select>
+          </form>
+
+          <article class="md-card md-preview-card">
+            <div class="md-card-head">
+              <div>
+                <p class="md-card-kicker">Vista previa</p>
+                <h3>Cómo se verá el menú público</h3>
+              </div>
+            </div>
+
+            <div id="previewMenuPublico" class="md-preview-surface"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="md-panel" data-panel="publicacion">
+        <div class="md-panel-head">
+          <div>
+            <p class="md-kicker">Publicación y QR</p>
+            <h2>Estado, mensajes y enlace compartible</h2>
+          </div>
+          <button type="button" class="md-primary-btn" onclick="guardarConfiguracion()">
+            <i class="fa-solid fa-floppy-disk"></i>
+            <span>Guardar publicación</span>
+          </button>
+        </div>
+
+        <div class="md-admin-grid md-public-grid">
+          <form id="formPublicacionMenu" class="md-card md-form-card">
+            <div class="md-card-head">
+              <div>
+                <p class="md-card-kicker">Configuración general</p>
+                <h3>Datos visibles al cliente</h3>
+              </div>
+            </div>
+
+            <label>Nombre público</label>
+            <input type="text" id="configNombrePublico" maxlength="180">
+
+            <label>Estado</label>
+            <select id="configEstado">
+              <option value="BORRADOR">Borrador</option>
+              <option value="PUBLICADO">Publicado</option>
+              <option value="OCULTO">Oculto</option>
+            </select>
+
+            <label>Mensaje principal</label>
+            <textarea id="configMensajePrincipal" rows="3"></textarea>
+
+            <label>Mensaje secundario</label>
+            <textarea id="configMensajeSecundario" rows="2"></textarea>
+
+            <label>Horario de atención</label>
+            <input type="text" id="configHorarioAtencion" placeholder="Lun a Dom · 11:00 a 23:00">
+
+            <label>Datos de contacto</label>
+            <textarea id="configDatosContacto" rows="3" placeholder="WhatsApp, dirección, redes sociales"></textarea>
+          </form>
+
+          <article class="md-card">
+            <div class="md-card-head">
+              <div>
+                <p class="md-card-kicker">Publicación</p>
+                <h3>Enlace y código QR</h3>
+              </div>
+            </div>
+
+            <label>Enlace del menú</label>
+            <div class="md-link-row">
+              <input type="text" id="publicMenuLink" placeholder="http://192.168.0.3:3000/menu/menu-1-1">
+              <button type="button" class="md-inline-btn" onclick="copiarEnlaceMenu()">
+                <i class="fa-solid fa-copy"></i>
+              </button>
+            </div>
+            <p id="publicMenuLinkHint" class="md-field-help">Puedes pegar una IP o el enlace completo del menu. El QR usara esa base al guardar.</p>
+
+            <div class="md-qr-box">
+              <img id="qrPreviewImage" alt="QR Menú Digital">
+            </div>
+
+            <div class="md-download-grid">
+              <button type="button" class="md-secondary-btn" onclick="descargarQr('png')">
+                <i class="fa-solid fa-download"></i>
+                <span>PNG</span>
+              </button>
+              <button type="button" class="md-secondary-btn" onclick="descargarQr('jpg')">
+                <i class="fa-solid fa-image"></i>
+                <span>JPG</span>
+              </button>
+              <button type="button" class="md-secondary-btn" onclick="descargarQr('pdf')">
+                <i class="fa-solid fa-file-pdf"></i>
+                <span>PDF</span>
+              </button>
+              <button type="button" class="md-secondary-btn" onclick="imprimirQr()">
+                <i class="fa-solid fa-print"></i>
+                <span>Imprimir</span>
+              </button>
+              <button type="button" class="md-secondary-btn" onclick="compartirEnlaceMenu()">
+                <i class="fa-solid fa-share-nodes"></i>
+                <span>Compartir</span>
+              </button>
+            </div>
+          </article>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script src="menu_digital.js"></script>
+  <script src="/compartido/js/seguridad.js"></script>
+</body>
+</html>

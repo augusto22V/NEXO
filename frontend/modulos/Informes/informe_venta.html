@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="/manifest.json">
+
+<title>LibreríaSys |  Informe de Ventas</title>
+
+<link rel="stylesheet" href="../../compartido/css/base.css">
+<link rel="stylesheet" href="../../compartido/css/home.css">
+<link rel="stylesheet" href="informes.css">
+
+</head>
+
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar no-print">
+
+<button class="btn-volver" onclick="history.back()"> Volver</button>
+
+<div class="titulo">
+<span>Informe de Ventas</span>
+</div>
+
+<div class="topbar-acciones">
+
+<button class="btn-accion btn-imprimir" onclick="imprimir()"> Imprimir</button>
+
+<button class="btn-accion btn-pdf" onclick="exportarPDF()">⬇ Exportar PDF</button>
+<button class="btn-accion btn-excel" onclick="exportarExcel()">⬇ Exportar Excel</button>
+
+</div>
+
+</div>
+
+
+<!-- CONTENEDOR -->
+<div class="informe-wrap">
+
+<div class="informe-container" id="informe">
+
+<hr class="informe-divider">
+
+
+<!-- FILTROS -->
+
+<div class="filtro-fecha-wrap">
+
+<div class="filtro-fecha-titulo"> Filtros de busqueda</div>
+
+<div class="filtro-fecha-inputs">
+
+<!-- DESDE -->
+<div class="filtro-fecha-campo">
+<label>Desde</label>
+<input type="date" id="filtroDesde">
+</div>
+
+<!-- HASTA -->
+<div class="filtro-fecha-campo">
+<label>Hasta</label>
+<input type="date" id="filtroHasta">
+</div>
+
+<!-- CLIENTE -->
+<div class="filtro-fecha-campo">
+<label>Cliente</label>
+
+<div class="input-busqueda">
+
+<input 
+type="text"
+id="filtroCliente"
+placeholder="Nombre cliente"
+>
+
+<button 
+class="btn-lupa"
+onclick="abrirBuscadorCliente()"
+>
+<img src="/recursos/img/buscar.png" alt="Buscar">
+</button>
+
+</div>
+</div>
+
+<!-- PRODUCTO -->
+<div class="filtro-fecha-campo">
+<label>Producto</label>
+
+<div class="input-busqueda">
+
+<input 
+type="text"
+id="filtroProducto"
+placeholder="Nombre producto"
+readonly
+>
+
+<button 
+class="btn-lupa"
+onclick="abrirBuscadorProducto()"
+>
+<img src="/recursos/img/buscar.png" alt="Buscar">
+</button>
+
+</div>
+</div>
+
+
+<!-- NUEVO: TIPO DE INFORME DENTRO DEL FILTRO -->
+<div class="filtro-fecha-campo">
+
+<label>Tipo de informe</label>
+
+<select id="tipoInforme">
+
+<option value="detallado">Ventas Detalladas</option>
+<option value="producto">Total por Producto</option>
+<option value="ganancia">Ganancia</option>
+<option value="categoria">Categoria</option>
+<option value="comision_vendedor">Comisión por Vendedor</option>
+
+</select>
+
+</div>
+
+
+<!-- BOTONES -->
+<div class="filtro-botones">
+
+<button class="btn-filtrar" onclick="buscarVentas()">
+ Filtrar
+</button>
+
+<button class="btn-filtrar btn-limpiar" onclick="limpiarFiltro()">
+Limpiar
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- TABLA -->
+
+<div class="tabla-scroll">
+
+<table class="informe-tabla">
+
+<thead>
+
+<tr>
+
+<th>Fecha</th>
+<th>Nrº Venta</th>
+<th>Cliente</th>
+<th>Vendedor</th>
+<th>Producto</th>
+<th class="text-right">Cant</th>
+<th class="text-right">Costo</th>
+<th class="text-right">Precio Venta</th>
+<th class="text-right">Subtotal</th>
+<th class="text-right">Comisión</th>
+<th class="text-right">Ganancia</th>
+<th class="text-right">% Margen</th>
+<th class="text-right">% Markup</th>
+
+</tr>
+
+</thead>
+
+<tbody id="tablaVentas">
+
+<tr>
+<td colspan="13" class="inf-cargando">
+Seleccione un rango de fechas
+</td>
+</tr>
+
+</tbody>
+
+<tfoot>
+
+<tr class="inf-total-row">
+
+<td colspan="5"><strong>TOTALES</strong></td>
+
+<td class="text-right"></td>
+
+<td class="text-right">
+<strong>T.Costo:</strong> <span id="totalCosto">Gs 0</span>
+</td>
+
+<td class="text-right">
+<strong>T.Venta:</strong> <span id="totalVenta">Gs 0</span>
+</td>
+
+<td class="text-right">
+<strong>T.Comisión:</strong> <span id="totalComision">Gs 0</span>
+</td>
+
+<td class="text-right">
+<strong>T.Ganancia:</strong> <span id="totalGanancia">Gs 0</span>
+</td>
+
+<td class="text-right">
+<strong>Margen:</strong> <span id="totalMargen">0 %</span>
+</td>
+
+<td></td>
+<td></td>
+
+</tr>
+
+</tfoot>
+
+</table>
+
+</div>
+
+
+<!-- PIE -->
+
+<div class="informe-pie">
+
+<span>Generado el <span id="fechaGenerado"></span></span>
+
+<span>SofSys © Ventas y stock para librerías</span>
+
+</div>
+
+
+</div>
+</div>
+
+
+
+<!-- SPINNER -->
+
+<div id="spinnerOverlay" class="spinner-overlay hidden">
+
+<div class="spinner-box">
+
+<div class="spinner"></div>
+
+<span id="spinnerTexto">Cargando...</span>
+
+</div>
+
+</div>
+
+
+
+<!-- TOAST -->
+
+<div id="toastContainer" class="toast-container"></div>
+
+
+
+<script src="informe_venta.js"></script>
+<script src="/compartido/js/seguridad.js"></script>
+
+</body>
+</html>
+
+
+

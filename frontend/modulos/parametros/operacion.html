@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>LibreríaSys | Operaciones</title>
+  <link rel="stylesheet" href="../../compartido/css/base.css" />
+  <link rel="stylesheet" href="../../compartido/css/panelAuditoria.css" />
+  <link rel="stylesheet" href="operacion.css" />
+</head>
+<body>
+  <header class="topbar">
+    <button class="btn-volver" onclick="volverSeguro()">← Volver</button>
+    <div class="titulo">
+      <span>Operaciones</span>
+    </div>
+  </header>
+
+  <main class="admin-container">
+    <section class="panel panel-form">
+      <h2>Operacion</h2>
+      <form autocomplete="off" onsubmit="return false;">
+        <input type="hidden" id="operacionId">
+
+        <label>Codigo</label>
+        <input type="text" id="codigoOperacion" class="input-id" readonly>
+
+        <label>Descripcion *</label>
+        <input type="text" id="descripcionOperacion" maxlength="120">
+
+        <label>Tipo (E/S) *</label>
+        <input type="text" id="tipoOperacion" maxlength="1">
+
+        <div class="form-row">
+          <label for="afectaStock">Afecta stock</label>
+          <input type="checkbox" id="afectaStock" checked>
+        </div>
+
+        <div class="form-row">
+          <label for="requiereConfirmacion">Requiere confirmacion</label>
+          <input type="checkbox" id="requiereConfirmacion">
+        </div>
+
+        <div class="form-row">
+          <label for="permiteCredito">Permite credito</label>
+          <input type="checkbox" id="permiteCredito">
+        </div>
+
+        <div class="form-row">
+          <label for="requiereCredito">Requiere credito</label>
+          <input type="checkbox" id="requiereCredito">
+        </div>
+
+        <div class="form-row">
+          <label for="generaFinanciero">Genera financiero</label>
+          <input type="checkbox" id="generaFinanciero">
+        </div>
+
+        <div class="form-row">
+          <label for="activoOperacion">Activo</label>
+          <input type="checkbox" id="activoOperacion" checked>
+        </div>
+      </form>
+
+      <panel-auditoria id="auditOperacion" data-tabla="tipo_operacion" data-id-input="operacionId"></panel-auditoria>
+      <div class="acciones">
+        <button type="button" id="btnNuevo" onclick="nuevo()" title="Nuevo">
+          <img src="../../recursos/img/nueva.png" />
+          <span>Nuevo</span>
+          <small>F2</small>
+        </button>
+
+        <button type="button" id="btnGuardar" onclick="guardar()" title="Guardar" disabled>
+          <img src="../../recursos/img/guardar.png" />
+          <span>Guardar</span>
+          <small>F3</small>
+        </button>
+
+        <button type="button" id="btnEliminar" onclick="eliminar()" title="Inactivar" disabled>
+          <img src="../../recursos/img/limpiar.png" />
+          <span>Inactivar</span>
+          <small>Del</small>
+        </button>
+
+        <button type="button" id="btnCancelar" onclick="cancelar()" title="Cancelar" disabled>
+          <img src="../../recursos/img/cancelar.png" />
+          <span>Cancelar</span>
+          <small>F4</small>
+        </button>
+      </div>
+    </section>
+
+    <section class="panel panel-lista">
+      <input
+        type="text"
+        id="buscar"
+        placeholder="Buscar operacion por codigo o descripcion..."
+        class="buscador"
+        autocomplete="off"
+        onkeyup="filtrar()"
+      />
+
+      <div class="tabla-proveedores">
+        <div class="tabla-header" style="grid-template-columns:70px 180px 90px 95px 120px 120px 120px 90px;">
+          <span id="thId" class="th-orden" title="Ordenar por ID">ID v</span>
+          <span>Descripcion</span>
+          <span>Tipo</span>
+          <span>Stock</span>
+          <span>Confirma</span>
+          <span>Credito</span>
+          <span>Financiero</span>
+          <span>Estado</span>
+        </div>
+
+        <div id="tablaOperaciones" class="tabla-body"></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="modalAdvertencia" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-icon">!</div>
+      <h3 class="modal-title">Atencion</h3>
+      <p class="modal-text" id="modalAdvertenciaTexto"></p>
+      <div class="modal-actions center">
+        <button class="btn-aceptar" onclick="cerrarAdvertencia(true)">Aceptar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../compartido/js/baseModal.js"></script>
+  <script src="../../compartido/js/panelAuditoria.js"></script>
+  <script src="operacion.js"></script>
+  <script src="/compartido/js/seguridad.js"></script>
+</body>
+</html>
+

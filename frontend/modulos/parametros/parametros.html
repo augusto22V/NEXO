@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>LibreríaSys | Parametros</title>
+  <link rel="stylesheet" href="../../compartido/css/base.css">
+  <link rel="stylesheet" href="../proveedores/proveedores.css">
+</head>
+<body>
+  <header class="topbar">
+    <button class="btn-volver" onclick="window.location.href='../../home.html'">← Volver</button>
+    <div class="titulo">
+      <span>Parametros</span>
+    </div>
+  </header>
+
+  <main class="admin-container">
+    <section class="panel panel-form">
+      <h2>Configuracion</h2>
+      <form autocomplete="off" onsubmit="return false;">
+        <label>Modulo</label>
+        <input type="text" value="PARAMETROS DEL SISTEMA" readonly>
+
+        <label>Descripcion</label>
+        <input type="text" value="Operaciones y formas de pago" readonly>
+      </form>
+
+      <div class="acciones">
+        <button type="button" id="btnNuevo" onclick="window.location.href='./operacion.html'">
+          <img src="../../recursos/img/nueva.png" />
+          <span>Operaciones</span>
+          <small>Alt+O</small>
+        </button>
+
+        <button type="button" id="btnGuardar" onclick="window.location.href='./forma_pago.html'">
+          <img src="../../recursos/img/guardar.png" />
+          <span>Formas Pago</span>
+          <small>Alt+F</small>
+        </button>
+
+        <button type="button" id="btnCancelar" onclick="window.location.href='../../home.html'">
+          <img src="../../recursos/img/cancelar.png" />
+          <span>Salir</span>
+          <small>Esc</small>
+        </button>
+      </div>
+    </section>
+
+    <section class="panel panel-lista">
+      <div class="tabla-proveedores">
+        <div class="tabla-header" style="grid-template-columns: 160px 1fr;">
+          <span>Modulo</span>
+          <span>Detalle</span>
+        </div>
+
+        <div class="tabla-body">
+          <div class="tabla-row" style="grid-template-columns: 160px 1fr; cursor:pointer;" onclick="window.location.href='./operacion.html'">
+            <span>Operaciones</span>
+            <span>Entrada / Salida, stock, credito y generacion financiera</span>
+          </div>
+          <div class="tabla-row" style="grid-template-columns: 160px 1fr; cursor:pointer;" onclick="window.location.href='./forma_pago.html'">
+            <span>Formas de Pago</span>
+            <span>Cuotas, intervalos y configuracion de pagos futuros</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    document.addEventListener("keydown", (e) => {
+      if (e.altKey && e.key.toLowerCase() === "o") {
+        e.preventDefault();
+        window.location.href = "./operacion.html";
+      }
+      if (e.altKey && e.key.toLowerCase() === "f") {
+        e.preventDefault();
+        window.location.href = "./forma_pago.html";
+      }
+      if (e.key === "Escape") {
+        e.preventDefault();
+        window.location.href = "../../home.html";
+      }
+    });
+  </script>
+  <script src="/compartido/js/seguridad.js"></script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" rx="16" fill="#fafafa"/>
+  <rect x="60" y="44" width="80" height="104" rx="2" fill="#ffffff" stroke="#d4d4d8" stroke-width="2"/>
+  <rect x="66" y="52" width="68" height="88" fill="#f4f4f5"/>
+  <text x="100" y="178" text-anchor="middle" font-family="Segoe UI,system-ui,sans-serif" font-size="12" fill="#52525b">Papel / resma</text>
+</svg>

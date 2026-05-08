@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>LibreríaSys | Formas de Pago</title>
+  <link rel="stylesheet" href="../../compartido/css/base.css" />
+  <link rel="stylesheet" href="../../compartido/css/panelAuditoria.css" />
+  <link rel="stylesheet" href="forma_pago.css" />
+</head>
+<body>
+  <header class="topbar">
+    <button class="btn-volver" onclick="volverSeguro()">← Volver</button>
+    <div class="titulo">
+      <span>Formas de Pago</span>
+    </div>
+  </header>
+
+  <main class="admin-container">
+    <section class="panel panel-form">
+      <h2>Forma de Pago</h2>
+      <form autocomplete="off" onsubmit="return false;">
+        <input type="hidden" id="formaPagoId">
+
+        <label>Codigo</label>
+        <input type="text" id="codigoFormaPago" class="input-id" readonly>
+
+        <label>Descripcion *</label>
+        <input type="text" id="descripcionFormaPago" maxlength="120">
+
+        <label>Cantidad cuotas</label>
+        <input type="text" id="cantidadCuotas" inputmode="numeric" pattern="[0-9]*" maxlength="4">
+
+        <label>Dias intervalo</label>
+        <input type="text" id="diasIntervalo" inputmode="numeric" pattern="[0-9]*" maxlength="4">
+
+        <div class="form-row">
+          <label for="activoFormaPago">Activo</label>
+          <input type="checkbox" id="activoFormaPago" checked>
+        </div>
+      </form>
+
+      <panel-auditoria id="auditFormaPago" data-tabla="condicion_pago" data-id-input="formaPagoId"></panel-auditoria>
+
+      <div class="acciones">
+        <button type="button" id="btnNuevo" onclick="nuevo()" title="Nuevo">
+          <img src="../../recursos/img/nueva.png" />
+          <span>Nuevo</span>
+          <small>F2</small>
+        </button>
+
+        <button type="button" id="btnGuardar" onclick="guardar()" title="Guardar" disabled>
+          <img src="../../recursos/img/guardar.png" />
+          <span>Guardar</span>
+          <small>F3</small>
+        </button>
+
+        <button type="button" id="btnEliminar" onclick="eliminar()" title="Eliminar" disabled>
+          <img src="../../recursos/img/limpiar.png" />
+          <span>Eliminar</span>
+          <small>Del</small>
+        </button>
+
+        <button type="button" id="btnCancelar" onclick="cancelar()" title="Cancelar" disabled>
+          <img src="../../recursos/img/cancelar.png" />
+          <span>Cancelar</span>
+          <small>F4</small>
+        </button>
+      </div>
+    </section>
+
+    <section class="panel panel-lista">
+      <input
+        type="text"
+        id="buscar"
+        placeholder="Buscar forma de pago por codigo o descripcion..."
+        class="buscador"
+        autocomplete="off"
+        onkeyup="filtrar()"
+      />
+
+      <div class="tabla-proveedores">
+        <div class="tabla-header" style="grid-template-columns:80px 1fr 120px 120px 100px;">
+          <span id="thId" class="th-orden" title="Ordenar por ID">ID ▼</span>
+          <span>Descripcion</span>
+          <span>Cuotas</span>
+          <span>Intervalo</span>
+          <span>Estado</span>
+        </div>
+
+        <div id="tablaFormasPago" class="tabla-body"></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="modalAdvertencia" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-icon">⚠️</div>
+      <h3 class="modal-title">Atencion</h3>
+      <p class="modal-text" id="modalAdvertenciaTexto"></p>
+      <div class="modal-actions center">
+        <button class="btn-aceptar" onclick="cerrarAdvertencia(true)">Aceptar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../compartido/js/baseModal.js"></script>
+  <script src="../../compartido/js/panelAuditoria.js"></script>
+  <script src="forma_pago.js?v=2026.04.19.02"></script>
+  <script src="/compartido/js/seguridad.js"></script>
+</body>
+</html>

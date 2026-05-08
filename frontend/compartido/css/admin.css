@@ -1,0 +1,269 @@
+:root {
+  --admin-bg: #eef3f7;
+  --admin-surface: #ffffff;
+  --admin-border: #d9e3ec;
+  --admin-text: #102532;
+  --admin-sub: #4d6575;
+  --admin-primary: #0f6780;
+}
+
+body {
+  margin: 0;
+  background: linear-gradient(180deg, #eef4f9 0%, #f8fbfd 100%);
+  color: var(--admin-text);
+  min-height: 100vh;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  padding: 14px 22px;
+  background: #102532;
+  color: #fff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.admin-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.admin-brand img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+}
+
+.admin-brand h1 {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 700;
+}
+
+.admin-brand p {
+  margin: 2px 0 0;
+  font-size: 12px;
+  opacity: 0.88;
+}
+
+.admin-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+#adminUsuario {
+  font-weight: 700;
+}
+
+.rol-badge {
+  background: #1d7d4b;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  color: #fff;
+  border-radius: 20px;
+  padding: 2px 9px;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+#adminEmpresa {
+  opacity: 0.9;
+  font-size: 12px;
+}
+
+.btn-outline {
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  color: #fff;
+  background: transparent;
+  border-radius: 8px;
+  font-size: 12px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.btn-outline:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.admin-main {
+  padding: 20px 24px 30px;
+}
+
+.admin-hero {
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: 14px;
+  padding: 16px 18px;
+  margin-bottom: 16px;
+}
+
+.admin-hero h2 {
+  margin: 0 0 4px;
+  font-size: 22px;
+}
+
+.admin-hero p {
+  margin: 0;
+  color: var(--admin-sub);
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.admin-section {
+  margin-top: 18px;
+}
+
+.admin-card {
+  border: 1px solid var(--admin-border);
+  background: var(--admin-surface);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 158px;
+}
+
+.admin-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-card i {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: #e7f3f7;
+  color: var(--admin-primary);
+}
+
+.admin-card h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.admin-card p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--admin-sub);
+  flex: 1;
+}
+
+.admin-card button {
+  width: 100%;
+  border: none;
+  border-radius: 9px;
+  background: var(--admin-primary);
+  color: #fff;
+  font-weight: 700;
+  padding: 9px 10px;
+  cursor: pointer;
+}
+
+.admin-card button:hover {
+  filter: brightness(0.95);
+}
+
+.admin-download-card {
+  border: 1px solid var(--admin-border);
+  background: linear-gradient(180deg, #ffffff 0%, #f6fbfd 100%);
+  border-radius: 16px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.admin-download-text {
+  margin: 4px 0 0;
+  color: var(--admin-sub);
+  font-size: 13px;
+}
+
+.admin-download-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.admin-download-btn {
+  min-height: 58px;
+  border: none;
+  border-radius: 12px;
+  background: #0f6780;
+  color: #fff;
+  font-weight: 700;
+  font-size: 15px;
+  padding: 12px 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(15, 103, 128, 0.16);
+}
+
+.admin-download-btn:hover {
+  filter: brightness(0.97);
+}
+
+.admin-download-btn:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.admin-download-hint {
+  margin: 0;
+  font-size: 13px;
+  color: var(--admin-sub);
+}
+
+.admin-download-status {
+  margin: 0;
+  min-height: 20px;
+  font-size: 13px;
+  color: var(--admin-sub);
+}
+
+.admin-download-status.is-ok {
+  color: #0f6780;
+}
+
+.admin-download-status.is-error {
+  color: #b43b3b;
+}
+
+.admin-download-frame {
+  display: none;
+}
+
+.admin-footer {
+  text-align: center;
+  padding: 12px;
+  color: #5f7584;
+  font-size: 12px;
+}
+
+@media (max-width: 860px) {
+  .admin-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .admin-user {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}

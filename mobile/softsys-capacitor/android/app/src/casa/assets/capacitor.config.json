@@ -1,0 +1,15 @@
+{
+	"appId": "com.softsys.lanapp.casa",
+	"appName": "SoftSys Casa",
+	"webDir": "www",
+	"server": {
+		"cleartext": true,
+		"errorPath": "index.html?reconnect=1",
+		"allowNavigation": [
+			"*"
+		]
+	},
+	"android": {
+		"allowMixedContent": true
+	}
+}

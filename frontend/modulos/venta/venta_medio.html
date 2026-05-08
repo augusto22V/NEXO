@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="/manifest.json?v=2026.04.18.01">
+  <title>LibreríaSys | VentaMedio</title>
+
+  <link rel="stylesheet" href="/recursos/css/all.min.css?v=2026.04.18.01">
+  <link rel="stylesheet" href="./css/venta.modales.css?v=2026.04.18.01">
+  <link rel="stylesheet" href="./css/venta_medio.css?v=2026.04.19.04">
+</head>
+<body>
+  <div class="vm-app">
+    <section class="vm-cabecera">
+      <div class="vm-cabecera-top">
+        <div class="vm-cabecera-left">
+          <button id="vmVolverBtn" class="vm-btn vm-btn-neutral vm-btn-back" type="button">Volver</button>
+          <div class="vm-tipo-inline" id="vmTipoPedidoBox">
+            <label for="vmTipoPedido">Tipo</label>
+            <select id="vmTipoPedido">
+              <option value="" selected>Cargando...</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="vm-campos-stack vm-campos-col-vc">
+          <div class="vm-field">
+            <label for="vmVendedorCodigo">Vendedor</label>
+            <div class="vm-inline-input">
+              <input id="vmVendedorCodigo" type="text" inputmode="numeric" placeholder="Codigo">
+              <input id="vmVendedorNombre" type="text" placeholder="Nombre" readonly>
+              <button id="vmBuscarVendedorBtn" class="vm-btn-icon" type="button" title="Seleccionar vendedor">
+                <i class="fa-solid fa-user"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="vm-field">
+            <label for="vmClienteCodigo">Cliente</label>
+            <div class="vm-inline-input">
+              <input id="vmClienteCodigo" type="text" inputmode="numeric" placeholder="Codigo">
+              <input id="vmClienteNombre" type="text" placeholder="Nombre">
+              <button id="vmBuscarClienteBtn" class="vm-btn-icon" type="button" title="Seleccionar cliente">
+                <i class="fa-solid fa-address-book"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="vm-campos-stack vm-campos-col-of">
+          <div class="vm-field vm-field-operacion">
+            <label for="vmOperacionCodigo">Operacion</label>
+            <div class="vm-inline-input">
+              <input id="vmOperacionCodigo" type="text" inputmode="numeric" placeholder="Codigo">
+              <input id="vmOperacionNombre" type="text" placeholder="Operacion" readonly>
+              <button id="vmBuscarOperacionBtn" class="vm-btn-icon" type="button" title="Seleccionar operacion">
+                <i class="fa-solid fa-list-check"></i>
+              </button>
+            </div>
+            <select id="vmOperacionSelect" hidden></select>
+          </div>
+
+          <div class="vm-field vm-field-forma-pago">
+            <label for="vmFormaPago">Forma de Pago</label>
+            <select id="vmFormaPago">
+              <option value="">Cargando...</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="vm-campos-row vm-campos-row-second">
+        <div class="vm-field vm-field-pedido">
+          <label for="vmPedidoNumero">Pedido Nro</label>
+          <div class="vm-inline-input">
+            <input id="vmPedidoNumero" type="text" inputmode="numeric" placeholder="Numero">
+            <button id="vmBuscarPedidoBtn" class="vm-btn-icon" type="button" title="Buscar pedido">
+              <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="vm-field vm-field-busqueda">
+          <label class="vm-label-hidden" for="vmBuscarInput">Buscar / Escanear producto</label>
+          <div class="vm-search-wrap">
+            <input
+              id="vmBuscarInput"
+              type="text"
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck="false"
+              placeholder="BUSCAR / ESCANEAR PRODUCTO"
+            >
+            <div id="vmSugerencias" class="vm-sugerencias" hidden></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <main class="vm-main">
+      <section class="vm-panel vm-pedido">
+        <div class="vm-panel-header">
+          <h2><i class="fa-regular fa-rectangle-list"></i> PEDIDO</h2>
+          <span id="vmPedidoEstado">Sin pedido</span>
+        </div>
+
+        <div class="vm-pedido-hint">Toca un item para editar cantidad, precio y observacion</div>
+
+        <div class="vm-tabla-wrap">
+          <table class="vm-tabla">
+            <thead>
+              <tr>
+                <th class="col-cant">Cant</th>
+                <th>Producto</th>
+                <th class="col-precio">Precio</th>
+                <th class="col-subtotal">SubTotal</th>
+                <th class="col-accion"></th>
+              </tr>
+            </thead>
+            <tbody id="vmPedidoBody">
+              <tr>
+                <td colspan="5" class="vm-empty">Sin productos agregados</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="vm-panel vm-rapidos">
+        <div class="vm-panel-header">
+          <h2><i class="fa-solid fa-bolt"></i> ACCESOS RAPIDOS</h2>
+          <span id="vmCategoriaActiva">Categorias</span>
+        </div>
+
+        <div class="vm-rapidos-toolbar">
+          <button id="vmBackCategoriaBtn" class="vm-btn vm-btn-soft vm-btn-mini" type="button">&lt; Categorias</button>
+
+          <div class="vm-mostrar-group">
+            <label>
+              <input id="vmShowCategorias" type="checkbox" checked>
+              Categorias
+            </label>
+            <label>
+              <input id="vmShowProductos" type="checkbox">
+              Productos
+            </label>
+          </div>
+        </div>
+
+        <div id="vmRapidosGrid" class="vm-rapidos-grid"></div>
+      </section>
+    </main>
+
+    <footer class="vm-footer">
+      <div class="vm-resumen">
+        <div class="vm-resumen-row vm-resumen-row-total">
+          <span class="vm-resumen-label">Total</span>
+          <div class="vm-resumen-values">
+            <span id="vmTotalGs">Gs 0</span>
+            <span id="vmTotalBrl">R$ 0,00</span>
+            <span id="vmTotalUsd">US$ 0,00</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="vm-acciones">
+        <div class="vm-metodos" role="group" aria-label="Metodo de pago">
+          <button class="vm-btn vm-btn-pay activo" data-method="EFECTIVO" type="button">
+            <i class="fa-solid fa-money-bill-wave"></i> Efectivo
+          </button>
+          <button class="vm-btn vm-btn-pay" data-method="TRANSFERENCIA" type="button">
+            <i class="fa-solid fa-building-columns"></i> Transferencia
+          </button>
+        </div>
+
+        <div class="vm-acciones-principales">
+          <button id="vmEnEsperaBtn" class="vm-btn vm-btn-soft" type="button">En espera</button>
+          <button id="vmCobroRapidoBtn" class="vm-btn vm-btn-soft" type="button">Cobro rapido</button>
+          <button id="vmCobroRapidoTicketBtn" class="vm-btn vm-btn-soft" type="button">Rapido + ticket</button>
+          <button id="vmEliminarBtn" class="vm-btn vm-btn-danger" type="button">Eliminar</button>
+          <button id="vmCancelarBtn" class="vm-btn vm-btn-neutral" type="button">Cancelar</button>
+          <button id="vmCobrarBtn" class="vm-btn vm-btn-cobrar" type="button">Cobrar</button>
+        </div>
+      </div>
+    </footer>
+
+    <div id="vmMensaje" class="vm-mensaje" hidden></div>
+
+    <div id="vmModalEditarItem" class="modal">
+      <div class="modal-content vm-modal-item-editor">
+        <h3 id="vmEditItemNombre">Editar item</h3>
+
+        <label for="vmEditCantidad">Cantidad</label>
+        <input id="vmEditCantidad" type="number" min="1" step="1" inputmode="numeric">
+
+        <label for="vmEditPrecio">Precio</label>
+        <input id="vmEditPrecio" type="number" min="0" step="1" inputmode="numeric">
+
+        <label for="vmEditObservacion">Observacion</label>
+        <textarea id="vmEditObservacion" placeholder="Ej: sin sal, sin hielo..."></textarea>
+
+        <div class="modal-buttons">
+          <button id="vmEditGuardarBtn" class="btn-success" type="button">Guardar</button>
+          <button id="vmEditCerrarBtn" class="btn-neutral" type="button">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="vmModalConfirmFactura" class="modal no-close">
+      <div class="modal-confirmar-content">
+        <p id="vmConfirmFacturaTexto">¿Desea generar factura?</p>
+        <div class="modal-confirmar-btns">
+          <button id="vmConfirmFacturaSi" class="btn-confirmar-si" type="button">Si</button>
+          <button id="vmConfirmFacturaNo" class="btn-confirmar-no" type="button">No</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="vmModalFactura" class="modal no-close">
+      <div class="modal-content modal-factura">
+        <h3>Generar Factura</h3>
+
+        <label for="vmClienteCodigoFactura">Cliente</label>
+        <div class="input-busqueda">
+          <input id="vmClienteCodigoFactura" type="text" inputmode="numeric">
+          <button id="vmBtnBuscarClienteFactura" type="button">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </button>
+        </div>
+
+        <label for="vmRucFacturaInput">RUC</label>
+        <input id="vmRucFacturaInput" type="text" inputmode="numeric">
+
+        <label for="vmNombreFacturaInput">Nombre</label>
+        <input id="vmNombreFacturaInput" type="text">
+
+        <label for="vmDireccionFacturaInput">Direccion</label>
+        <input id="vmDireccionFacturaInput" type="text">
+
+        <label for="vmCiudadFacturaInput">Ciudad</label>
+        <input id="vmCiudadFacturaInput" type="text">
+
+        <label for="vmNumeroFacturaPreview">Numero</label>
+        <input id="vmNumeroFacturaPreview" type="text" readonly>
+
+        <div class="total-factura">
+          Total: <strong id="vmTotalFacturaPreview"></strong>
+        </div>
+
+        <div class="acciones">
+          <button id="vmCerrarModalFacturaBtn" type="button">Cancelar</button>
+          <button id="vmConfirmarFacturaBtn" type="button">Facturar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.__POS_MODE = window.__POS_MODE || { sinCocina: true, sinTipoPedido: true };
+  </script>
+  <script src="/compartido/js/app.config.js?v=2026.04.18.01"></script>
+  <script src="/compartido/js/session.manager.js?v=2026.04.18.01"></script>
+  <script src="/compartido/js/cache.bootstrap.js?v=2026.04.18.01"></script>
+  <script src="tipo_pedido.shared.js?v=2026.04.19.01"></script>
+  <script src="venta_medio.js?v=2026.04.19.04"></script>
+  <script src="/compartido/js/seguridad.js?v=2026.04.18.01"></script>
+</body>
+</html>
+

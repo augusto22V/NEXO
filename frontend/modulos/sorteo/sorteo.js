@@ -638,6 +638,12 @@ function cerrarModalClientes() {
 }
 
 
+window.addEventListener("beforeunload", function (e) {
+  if (hayCambiosSinGuardar()) {
+    e.preventDefault();
+    e.returnValue = "";
+  }
+});
 
 /* ==========================
    DUPLICADO

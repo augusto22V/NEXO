@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Permisos | Configuracion Funcional</title>
+
+  <link rel="stylesheet" href="/compartido/css/base.css">
+  <link rel="stylesheet" href="/modulos/config/permisos/permisos.css?v=2026.04.18.08">
+  <link rel="stylesheet" href="/recursos/css/all.min.css">
+
+  <script defer src="/compartido/js/seguridad.js"></script>
+  <script defer src="/modulos/config/permisos/permisos.js?v=2026.04.18.08"></script>
+</head>
+<body>
+  <header class="perm-header">
+    <div>
+      <h1>Permisos y Configuracion</h1>
+      <p>Configuracion funcional centralizada por alcance</p>
+    </div>
+    <div class="perm-actions">
+      <button type="button" onclick="window.location.href='/modulos/config/usuarios/usuarios.html'">Ir a Usuarios</button>
+      <button type="button" onclick="window.location.href='/modulos/config/terminal/terminal.html'">Ir a Terminales</button>
+      <button type="button" onclick="window.location.href='/admin.html'">Volver Admin</button>
+    </div>
+  </header>
+
+  <main class="perm-main">
+    <nav class="perm-tabs" role="tablist" aria-label="Secciones de permisos">
+      <button
+        type="button"
+        class="perm-tab is-active"
+        data-scope-tab="usuario"
+        role="tab"
+        aria-selected="true"
+      >
+        Usuario
+      </button>
+      <button
+        type="button"
+        class="perm-tab"
+        data-scope-tab="empresa"
+        role="tab"
+        aria-selected="false"
+      >
+        Empresa
+      </button>
+      <button
+        type="button"
+        class="perm-tab"
+        data-scope-tab="terminal"
+        role="tab"
+        aria-selected="false"
+      >
+        Terminal
+      </button>
+    </nav>
+
+    <div id="permEstado" class="perm-status" aria-live="polite"></div>
+
+    <section class="perm-panel is-active" data-scope-panel="usuario">
+      <div class="perm-panel-head">
+        <h2>Permisos por Usuario</h2>
+        <p>Gestion de acciones de Venta Rapida y Caja por usuario.</p>
+      </div>
+
+      <div class="perm-toolbar">
+        <input id="filtroPermisosUsuario" type="text" placeholder="Buscar por usuario, nombre o rol...">
+        <button type="button" id="btnRecargarPermisosUsuario">Recargar</button>
+      </div>
+
+      <div class="perm-table-wrap">
+        <table class="perm-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Usuario</th>
+              <th>Nombre</th>
+              <th>Rol</th>
+              <th>Modo Factura</th>
+              <th>Modo Impresion</th>
+              <th>Modo Confirmacion</th>
+              <th>VR Ver</th>
+              <th>VR Nueva</th>
+              <th>VR Cancelar</th>
+              <th>VR Preparo</th>
+              <th>VR Efectivizar</th>
+              <th>VR Imprimir</th>
+              <th>Caja Abrir</th>
+              <th>Caja Arqueo</th>
+              <th>Caja Mov.</th>
+              <th>Caja Conferir</th>
+              <th>Caja Cerrar</th>
+              <th>Caja Imprimir</th>
+              <th>Caja Consultas</th>
+              <th>Caja Informes</th>
+              <th>Activo</th>
+              <th>Accion</th>
+            </tr>
+          </thead>
+          <tbody id="tablaPermisosUsuario"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="perm-panel" data-scope-panel="empresa" hidden>
+      <div class="perm-panel-head">
+        <h2>Funciones por Empresa</h2>
+        <p>Seleccione una empresa y active o desactive funciones globales de negocio.</p>
+      </div>
+
+      <div class="perm-toolbar perm-toolbar-compact">
+        <div class="perm-field">
+          <label for="selectEmpresaFeature">Empresa</label>
+          <select id="selectEmpresaFeature"></select>
+        </div>
+        <div class="perm-field perm-field-moneda-base">
+          <label for="selectEmpresaMonedaBase">Moneda Base</label>
+          <select id="selectEmpresaMonedaBase"></select>
+        </div>
+        <button type="button" id="btnRecargarPermisosEmpresa">Recargar</button>
+        <button type="button" id="btnGuardarEmpresaFeatures" class="btn-primary">Guardar Empresa</button>
+      </div>
+
+      <div class="perm-simple-wrap">
+        <table class="perm-simple-table">
+          <thead>
+            <tr>
+              <th>Funcion</th>
+              <th>Activo</th>
+            </tr>
+          </thead>
+          <tbody id="tablaPermisosEmpresaSimple"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="perm-panel" data-scope-panel="terminal" hidden>
+      <div class="perm-panel-head">
+        <h2>Funciones por Terminal</h2>
+        <p>Seleccione una terminal para configurar su comportamiento funcional.</p>
+      </div>
+
+      <div class="perm-toolbar perm-toolbar-compact">
+        <div class="perm-field">
+          <label for="selectTerminalFeature">Terminal</label>
+          <select id="selectTerminalFeature"></select>
+        </div>
+        <button type="button" id="btnRecargarPermisosTerminal">Recargar</button>
+        <button type="button" id="btnGuardarTerminalFeatures" class="btn-primary">Guardar Terminal</button>
+      </div>
+
+      <div class="perm-simple-wrap">
+        <table class="perm-simple-table">
+          <thead>
+            <tr>
+              <th>Funcion</th>
+              <th>Activo</th>
+            </tr>
+          </thead>
+          <tbody id="tablaPermisosTerminalSimple"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

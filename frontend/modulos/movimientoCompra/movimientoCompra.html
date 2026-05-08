@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="/manifest.json?v=2026.04.18.03">
+  <title>LibreríaSys | Movimiento Compra</title>
+  <link rel="stylesheet" href="movimientoCompra.css?v=2026.04.18.03">
+</head>
+<body>
+  <div class="mc-app">
+    <header class="mc-topbar">
+      <button type="button" id="btnVolver" class="mc-btn mc-btn-back">Volver</button>
+      <h1 id="mcTitulo">Movimiento Compra</h1>
+      <span id="mcEmpresaInfo"></span>
+    </header>
+
+    <section class="mc-filtros">
+      <div class="mc-field">
+        <label for="mcFechaDesde">Desde</label>
+        <input type="date" id="mcFechaDesde">
+      </div>
+      <div class="mc-field">
+        <label for="mcFechaHasta">Hasta</label>
+        <input type="date" id="mcFechaHasta">
+      </div>
+      <div class="mc-field">
+        <label for="mcEstado">Estado</label>
+        <select id="mcEstado">
+          <option value="">Todos</option>
+          <option value="PENDIENTE">Pendiente</option>
+          <option value="CONCLUIDO">Concluido</option>
+          <option value="EFECTIVADO">Efectivado</option>
+          <option value="CANCELADO">Cancelado</option>
+        </select>
+      </div>
+      <div class="mc-field">
+        <label for="mcNumero">Nro Compra</label>
+        <input type="text" id="mcNumero" inputmode="numeric" placeholder="Numero">
+      </div>
+      <div class="mc-field mc-field-wide">
+        <label for="mcProveedor">Proveedor</label>
+        <input type="text" id="mcProveedor" placeholder="Nombre proveedor">
+      </div>
+      <div class="mc-actions">
+        <button type="button" id="btnBuscar" class="mc-btn mc-btn-primary">Buscar</button>
+        <button type="button" id="btnLimpiar" class="mc-btn mc-btn-soft">Limpiar</button>
+      </div>
+    </section>
+
+    <section class="mc-tabla-wrap">
+      <table class="mc-tabla">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nro Compra</th>
+            <th>Fecha</th>
+            <th>Proveedor</th>
+            <th>Moneda</th>
+            <th>Estado</th>
+            <th class="text-right">Total</th>
+          </tr>
+        </thead>
+        <tbody id="mcBody">
+          <tr><td colspan="7" class="mc-empty">Cargando movimientos...</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <footer class="mc-footer">
+      <span id="mcContador">0 registros</span>
+      <div class="mc-footer-actions">
+        <button type="button" id="btnAbrir" class="mc-btn mc-btn-soft">Abrir Compra</button>
+        <button type="button" id="btnSeleccionar" class="mc-btn mc-btn-primary">Seleccionar</button>
+      </div>
+    </footer>
+  </div>
+
+  <script src="movimientoCompra.js?v=2026.04.18.03"></script>
+  <script src="/compartido/js/seguridad.js?v=2026.04.18.03"></script>
+</body>
+</html>

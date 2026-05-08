@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" rx="16" fill="#fffbeb"/>
+  <polygon points="42,140 158,56 168,66 52,150" fill="#fbbf24"/>
+  <polygon points="42,140 52,150 38,158 30,148" fill="#92400e"/>
+  <text x="72" y="124" font-family="Segoe UI,system-ui,sans-serif" font-size="14" fill="#b45309">L�piz</text>
+</svg>

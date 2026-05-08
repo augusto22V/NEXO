@@ -1,81 +1,752 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Stop Top | Inicio</title>
+  <meta name="theme-color" content="#1F1F1F">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="/manifest.json?v=2026.04.17.03">
 
-  <link rel="stylesheet" href="compartido/css/base.css">
-  <link rel="stylesheet" href="compartido/css/home.css">
+  <title>LibreríaSys | Inicio</title>
 
-  <link rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <!-- Carga anticipada de recursos importantes -->
+  <link rel="preload" href="/compartido/css/base.css?v=2026.04.17.03" as="style">
+  <link rel="preload" href="/compartido/css/home.css?v=2026.04.17.03" as="style">
+  <link rel="preload" href="/recursos/css/all.min.css?v=2026.04.17.03" as="style">
+  <link rel="preload" href="/compartido/js/home.js?v=2026.04.17.03" as="script">
+
+  <link rel="stylesheet" href="/compartido/css/base.css?v=2026.04.17.03">
+  <link rel="stylesheet" href="/compartido/css/home.css?v=2026.04.17.03">
+  <link rel="stylesheet" href="/recursos/css/all.min.css?v=2026.04.17.03">
+
+  <script src="/compartido/js/app.config.js?v=2026.04.17.03"></script>
+  <script src="/compartido/js/session.manager.js?v=2026.04.17.03"></script>
+  <script src="/compartido/js/cache.bootstrap.js?v=2026.04.17.03"></script>
+  <script src="/compartido/js/programas.acceso.js?v=2026.04.17.03"></script>
+  <script src="/compartido/js/home.js?v=2026.04.17.03"></script>
+
+  <!-- Reglas de prerender -->
+  <script type="speculationrules">
+  {
+    "prerender": [{
+      "where": {
+        "or": [
+          { "href_matches": "/modulos/venta/venta_rapida.html?rapida=true" },
+          { "href_matches": "/modulos/mesa/mesa.html" },
+          { "href_matches": "/modulos/compra/compra.html" },
+          { "href_matches": "/modulos/productos/productos.html" },
+          { "href_matches": "/modulos/cliente/cliente.html" },
+          { "href_matches": "/modulos/gestion_caja/gestion.html" }
+        ]
+      },
+      "eagerness": "moderate"
+    }]
+  }
+  </script>
+
+  <style>
+    /* Para que las cards <a> se vean como tus div actuales */
+    .card-link {
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+  </style>
 </head>
+
 <body>
 
-  <!-- HEADER -->
-  <header class="home-header">
-    <h1>Stop Top</h1>
-    <span>Sistema de Ventas</span>
-  </header>
-
-  <!-- MENU -->
-  <main class="dashboard">
-
-    <div class="card" onclick="ir('modulos/venta/venta.html')">
-      <i class="fa-solid fa-cart-shopping"></i>
-      <h3>Venta</h3>
-      <p>Registrar venta</p>
+<header class="home-header">
+  <div class="home-header-top">
+    <div class="home-brand">
+      <img src="/recursos/img/default.png?v=2026.04.17.03" class="logo-img" alt="LibreríaSys">
+      <span class="brand-text">LibreríaSys</span>
     </div>
 
-   <div class="card" onclick="ir('modulos/compra/compra.html')">
-      <i class="fa-solid fa-basket-shopping"></i>
-      <h3>Compra</h3>
+    <div class="user-box">
+      <span id="usuarioNombre"></span>
+      <span id="usuarioRol" class="rol-tag"></span>
+      <span id="empresaNombre" class="empresa-tag"></span>
+      <button id="btnLoginHeader" type="button" onclick="irLogin()">Login</button>
+      <button id="btnSalir" type="button" onclick="cerrarSesion()">Salir</button>
+    </div>
+  </div>
+</header>
+
+<nav class="home-shortcuts">
+
+  <div class="shortcut-wrap">
+    <button type="button" class="shortcut" onclick="toggleMenu('menuListado', event)">Listado</button>
+    <div class="drop-menu" id="menuListado">
+      <div class="drop-item" onclick="ir('modulos/listado/listado_productos.html')">Útiles, artículos y servicios</div>
+      <div class="drop-item" onclick="ir('modulos/listado/listado_categorias.html')">Géneros y secciones</div>
+      <div class="drop-item" onclick="ir('modulos/listado/listado_proveedores.html')">Proveedores</div>
+      <div class="drop-item" onclick="ir('modulos/listado/listado_clientes.html')">Clientes</div>
+      <div class="drop-item" onclick="ir('modulos/listado/listado_vendedores.html')">Vendedores</div>
+      <div class="drop-item" onclick="ir('modulos/listado/listado_compradores.html')">Compradores</div>
+    </div>
   </div>
 
-    <div class="card" onclick="ir('modulos/venta/venta.html?rapida=true')">
-      <i class="fa-solid fa-bolt"></i>
-         <h3>Venta Rápida</h3>
-         <p>Cobro rápido</p>
+  <div class="shortcut-wrap">
+    <button type="button" class="shortcut" onclick="toggleMenu('menuReportes', event)">Reportes</button>
+    <div class="drop-menu" id="menuReportes">
+      <div class="drop-item" onclick="ir('modulos/reportes/reporte_produccion.html')">Inventario y servicios</div>
+    </div>
   </div>
 
-     <div class="card" onclick="ir('modulos/proveedores/proveedores.html?rapida=true')">
-         <i class="fa-solid fa-handshake"></i>
-        <h3>Proveedores</h3>
+  <div class="shortcut-wrap">
+    <button type="button" class="shortcut" onclick="toggleMenu('menuInformes', event)">Informes</button>
+    <div class="drop-menu" id="menuInformes">
+      <div class="drop-item" onclick="abrirInformeVentas()">Informe de Ventas</div>
+      <div class="drop-item" onclick="abrirInformeCompras()">Informe de Compras</div>
+      <div class="drop-item" onclick="abrirInformeVentasIA()">Informe de Ventas IA</div>
+    </div>
+  </div>
+
+  <div class="shortcut-wrap">
+    <button type="button" class="shortcut" onclick="toggleMenu('menuConsultas', event)">Consultas</button>
+    <div class="drop-menu" id="menuConsultas">
+      <div class="drop-item" onclick="ir('modulos/movimientoCompra/movimientoCompra.html')">Movimiento de Compra</div>
+      <div class="drop-item" onclick="ir('modulos/movimientoVenta/movimientoVenta.html')">Movimiento de Venta</div>
+      <div class="drop-item" onclick="ir('modulos/movimientoFactura/movimientoFactura.html')">Factura Fiscal</div>
+      <div class="drop-item" onclick="ir('modulos/consultas/consulta_productos.html')">Consulta de productos y servicios</div>
+    </div>
+  </div>
+
+  <div class="shortcut-wrap">
+    <button type="button" class="shortcut" onclick="toggleMenu('menuParametros', event)">Parametros</button>
+    <div class="drop-menu" id="menuParametros">
+      <div class="drop-item" onclick="ir('modulos/parametros/operacion.html')">Operaciones</div>
+      <div class="drop-item" onclick="ir('modulos/parametros/forma_pago.html')">Formas de Pago</div>
+      <div class="drop-item" onclick="ir('modulos/precio/precio.html')">Cambio de Precio</div>
+      <div class="drop-item" onclick="ir('modulos/tipo_pedido/tipo_pedido.html')">Tipo Pedido</div>
+   
+    </div>
+  </div>
+
+  <div class="shortcut-wrap">
+    <button id="btnCambioCotizacion" type="button" class="shortcut" onclick="toggleMenu('menuCotizacion', event)">Cambio Cotización</button>
+    <div class="drop-menu" id="menuCotizacion">
+      <div class="drop-item" onclick="ir('modulos/herramientas/cotizacion.html')">Cotización</div>
+      <div class="drop-item" onclick="ir('modulos/precio/precio.html')">Cambio de Precio</div>
+    </div>
+  </div>
+
+  <div class="shortcut-wrap">
+    <button type="button" class="shortcut" onclick="toggleMenu('menuHerramientas', event)">Herramientas</button>
+    <div class="drop-menu" id="menuHerramientas">
+      <div class="drop-item" onclick="abrirCalculadora()">Calculadora</div>
+      <div class="drop-item" onclick="ir('/modulos/herramientas/herramientas.html', '_blank')">Impresora - Reinicio</div>
+    </div>
+  </div>
+
+  <div class="shortcut-wrap">
+    <button type="button" class="shortcut" id="btnAdmin" style="display:none" onclick="ir('/admin.html')">
+      Administración
+    </button>
+  </div>
+
+  <div class="shortcut-wrap">
+    <button type="button" class="shortcut" id="btnConfig" style="display:none" onclick="toggleMenu('menuConfig', event)">
+      Configuración
+    </button>
+
+    <div class="drop-menu" id="menuConfig">
+
+      <div class="drop-item" onclick="ir('modulos/modelo_factura/modelo_factura.html')">Modelo Factura</div>
+
+    </div>
+  </div>
+
+</nav>
+
+<main class="dashboard">
+  <div class="card card-mobile-action empty-mobile-card bloqueado">
+    <i class="fa-solid fa-spinner"></i>
+    <h3>Cargando accesos</h3>
+    <p>Los programas visibles se calculan segun la asignacion del usuario.</p>
+  </div>
+</main>
+
+<footer class="home-footer">LibreríaSys · útiles escolares y servicios</footer>
+
+<script>
+const MOBILE_MENU_MAP = {
+  menuListado: { tab: "listado", icon: "fa-list" },
+  menuReportes: { tab: "reportes", icon: "fa-chart-column" },
+  menuInformes: { tab: "informes", icon: "fa-file-lines" },
+  menuConsultas: { tab: "consultas", icon: "fa-magnifying-glass" },
+  menuParametros: { tab: "parametros", icon: "fa-sliders" },
+  menuCotizacion: { tab: "cotizacion", icon: "fa-money-bill-transfer" },
+  menuHerramientas: { tab: "herramientas", icon: "fa-screwdriver-wrench" },
+  menuConfig: { tab: "configuracion", icon: "fa-gear" }
+};
+
+const MOBILE_SECTION_TEXT = {
+  principal: "Accesos principales de la librería y servicios",
+  listado: "Opciones de listado",
+  reportes: "Opciones de reportes",
+  informes: "Opciones de informes",
+  consultas: "Opciones de consultas",
+  parametros: "Opciones de parametros",
+  herramientas: "Opciones de herramientas",
+  configuracion: "Opciones de configuracion",
+  cotizacion: "Cambio de cotizacion"
+};
+
+let dashboardOriginalHtml = "";
+let mobileTabActual = "principal";
+
+const MENUS_SUPERIOR_BLOQUEADOS_POR_ROL = {
+  CAIXA: new Set(["menuListado", "menuReportes", "menuInformes", "menuParametros", "menuCotizacion", "cotizacion"]),
+  VENDEDOR: new Set(["menuListado", "menuReportes", "menuInformes", "menuParametros", "menuCotizacion", "cotizacion"])
+};
+
+function esMobilePortrait() {
+  return window.matchMedia("(max-width: 520px) and (orientation: portrait)").matches;
+}
+
+function cerrarMenus() {
+  document.querySelectorAll(".drop-menu").forEach(menu => {
+    menu.style.display = "none";
+    const wrap = menu.closest(".shortcut-wrap");
+    if (wrap) wrap.classList.remove("open");
+  });
+}
+
+function asegurarTabPrincipalMobile() {
+  const nav = document.querySelector(".home-shortcuts");
+  if (!nav || nav.querySelector(".shortcut-mobile-only")) return;
+
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "shortcut shortcut-mobile-only";
+  btn.dataset.mobileTab = "principal";
+  btn.textContent = "Principal";
+  btn.onclick = function(event) {
+    return activarTabMobile("principal", event);
+  };
+
+  nav.insertBefore(btn, nav.firstChild);
+}
+
+function prepararAccesosMobile() {
+  asegurarTabPrincipalMobile();
+
+  document.querySelectorAll(".shortcut-wrap").forEach(wrap => {
+    const btn = wrap.querySelector(".shortcut");
+    const menu = wrap.querySelector(".drop-menu");
+    if (!btn || !menu) return;
+
+    const config = MOBILE_MENU_MAP[menu.id];
+    if (!config) return;
+
+    btn.dataset.mobileTab = config.tab;
+  });
+
+}
+
+function resolverIconoMobile(tabId, label) {
+  const iconoPorTab = {
+    listado: "fa-list",
+    reportes: "fa-chart-column",
+    informes: "fa-file-lines",
+    consultas: "fa-magnifying-glass",
+    parametros: "fa-sliders",
+    herramientas: "fa-screwdriver-wrench",
+    configuracion: "fa-gear",
+    cotizacion: "fa-money-bill-transfer"
+  };
+
+  const texto = (label || "").toLowerCase();
+
+  if (texto.includes("libro") || texto.includes("producto")) return "fa-book";
+  if (texto.includes("categoria")) return "fa-tags";
+  if (texto.includes("proveedor")) return "fa-handshake";
+  if (texto.includes("cliente")) return "fa-user";
+  if (texto.includes("vendedor")) return "fa-user-tie";
+  if (texto.includes("comprador")) return "fa-user";
+  if (texto.includes("compra")) return "fa-basket-shopping";
+  if (texto.includes("venta")) return "fa-receipt";
+  if (texto.includes("factura")) return "fa-file-invoice";
+  if (texto.includes("precio")) return "fa-money-bill-wave";
+  if (texto.includes("pago")) return "fa-credit-card";
+  if (texto.includes("pedido")) return "fa-list-check";
+  if (texto.includes("calculadora")) return "fa-calculator";
+  if (texto.includes("impresora")) return "fa-print";
+  if (texto.includes("empresa")) return "fa-building";
+  if (texto.includes("terminal")) return "fa-display";
+  if (texto.includes("usuario")) return "fa-users";
+  if (texto.includes("modelo")) return "fa-file-contract";
+  if (texto.includes("produccion")) return "fa-kitchen-set";
+
+  return iconoPorTab[tabId] || "fa-circle";
+}
+
+function resolverDescripcionMobile(tabId, label) {
+  const texto = (label || "").toLowerCase();
+
+  if (tabId === "listado") return "Ver listado";
+  if (tabId === "reportes") return "Ver reporte";
+  if (tabId === "informes") return "Ver informe";
+  if (tabId === "consultas") {
+    if (texto.includes("factura")) return "Consultar factura";
+    if (texto.includes("venta")) return "Consultar venta";
+    if (texto.includes("compra")) return "Consultar compra";
+    return "Abrir consulta";
+  }
+  if (tabId === "parametros") return "Configurar";
+  if (tabId === "herramientas") return "Abrir utilidad";
+  if (tabId === "configuracion") return "Administrar";
+  if (tabId === "cotizacion") return "Abrir cotizacion";
+
+  return MOBILE_SECTION_TEXT[tabId] || "Abrir";
+}
+
+function escapeAttr(str) {
+  return String(str || "")
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function escapeHtml(str) {
+  return String(str || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function getServicioProgramas() {
+  return window.SoftSysProgramas || null;
+}
+
+function renderDashboardOperativo(user) {
+  const servicio = getServicioProgramas();
+  if (!servicio) return;
+
+  const dashboard = document.querySelector(".dashboard");
+  if (!dashboard) return;
+
+  const programas = servicio.resolverProgramasUsuario(user, {
+    zona: "operativo",
+    visibleEn: "home"
+  });
+
+  if (!programas.length) {
+    dashboard.innerHTML = `
+      <div class="card card-mobile-action empty-mobile-card bloqueado">
+        <i class="fa-solid fa-lock"></i>
+        <h3>Sin accesos operativos</h3>
+        <p>No hay programas operativos habilitados para este usuario.</p>
+      </div>
+    `;
+    dashboardOriginalHtml = dashboard.innerHTML;
+    return;
+  }
+
+  dashboard.innerHTML = programas.map((item) => `
+    <a class="card card-link" href="${escapeAttr(item.ruta)}" data-programa-codigo="${escapeAttr(item.codigo)}">
+      <i class="fa-solid ${escapeAttr(item.icono || "fa-circle")}"></i>
+      <h3>${escapeHtml(item.nombre)}</h3>
+      <p>${escapeHtml(item.categoria || "Modulo operativo")}</p>
+    </a>
+  `).join("");
+
+  dashboardOriginalHtml = dashboard.innerHTML;
+}
+
+function actualizarAccesosCabecera(user) {
+  const servicio = getServicioProgramas();
+  const rolCanonico = servicio
+    ? servicio.normalizarRol(user.rol)
+    : String(user.rol || "").toUpperCase();
+
+  const btnAdmin = document.getElementById("btnAdmin");
+  const btnConfig = document.getElementById("btnConfig");
+
+  let mostrarAdmin = false;
+  let mostrarConfig = false;
+
+  if (servicio) {
+    const adminProgramas = servicio.resolverProgramasUsuario(user, {
+      zona: "admin",
+      visibleEn: "admin"
+    });
+
+    mostrarAdmin = adminProgramas.length > 0 || ["SUPER", "ADMIN", "SIS"].includes(rolCanonico);
+    mostrarConfig = servicio.usuarioTienePrograma(user, "MODELO_FACTURA") || ["SUPER", "SIS"].includes(rolCanonico);
+  } else {
+    const rol = String(user.rol || "").toLowerCase();
+    mostrarAdmin = rol === "super" || rol === "admin";
+    mostrarConfig = rol === "super";
+  }
+
+  if (btnAdmin) btnAdmin.style.display = mostrarAdmin ? "inline-block" : "none";
+  if (btnConfig) btnConfig.style.display = mostrarConfig ? "inline-block" : "none";
+}
+
+function extraerRutaDesdeOnclick(valor) {
+  const txt = String(valor || "");
+  const match = txt.match(/ir\(\s*['"]([^'"]+)['"]/i);
+  return match ? match[1] : "";
+}
+
+function filtrarMenusPorPrograma(user) {
+  const servicio = getServicioProgramas();
+  if (!servicio) return;
+
+  const habilitados = new Set(servicio.resolverCodigosUsuario(user));
+  const rolCanonico = servicio.normalizarRol(user?.rol);
+  const menusBloqueadosRol = MENUS_SUPERIOR_BLOQUEADOS_POR_ROL[rolCanonico] || new Set();
+  const bloqueadasCaixa = new Set([
+    "/modulos/herramientas/herramientas.html",
+    "/modulos/precio/precio.html",
+    "/modulos/movimientoCompra/movimientoCompra.html",
+    "/modulos/movimientoFactura/movimientoFactura.html"
+  ]);
+
+  document.querySelectorAll(".drop-item").forEach((item) => {
+    const rutaRaw = extraerRutaDesdeOnclick(item.getAttribute("onclick"));
+    if (!rutaRaw) return;
+
+    const ruta = servicio.normalizarRuta(rutaRaw);
+    if (rolCanonico === "CAIXA" && bloqueadasCaixa.has(ruta)) {
+      item.style.display = "none";
+      return;
+    }
+
+    const programa = servicio.buscarProgramaPorRuta(ruta);
+    if (!programa) return;
+
+    item.style.display = habilitados.has(programa.codigo) ? "" : "none";
+  });
+
+  document.querySelectorAll(".shortcut-wrap").forEach((wrap) => {
+    const menu = wrap.querySelector(".drop-menu");
+    if (!menu) return;
+
+    if (menusBloqueadosRol.has(menu.id)) {
+      wrap.style.display = "none";
+      return;
+    }
+
+    const visibles = Array.from(menu.querySelectorAll(".drop-item"))
+      .some((item) => item.style.display !== "none");
+
+    wrap.style.display = visibles ? "" : "none";
+  });
+
+  const btnCotizacion = document.getElementById("btnCambioCotizacion");
+  if (btnCotizacion) {
+    const visible = !menusBloqueadosRol.has("cotizacion");
+    btnCotizacion.style.display = visible ? "" : "none";
+  }
+
+  if (menusBloqueadosRol.has(mobileTabActual)) {
+    mobileTabActual = "principal";
+  }
+}
+
+function crearCardMobile(label, descripcion, icono, onclickCode, extraClass = "") {
+  const accion = onclickCode ? `onclick="${escapeAttr(onclickCode)}"` : "";
+  const claseBloqueo = onclickCode ? "" : " bloqueado";
+
+  return `
+    <div class="card card-mobile-action${claseBloqueo}${extraClass}" ${accion}>
+      <i class="fa-solid ${icono}"></i>
+      <h3>${label}</h3>
+      <p>${descripcion}</p>
+    </div>
+  `;
+}
+
+function construirCardsDesdeMenu(menuId) {
+  const menu = document.getElementById(menuId);
+  const config = MOBILE_MENU_MAP[menuId];
+  if (!menu || !config) return "";
+
+  return Array.from(menu.querySelectorAll(".drop-item"))
+    .filter((item) => item.style.display !== "none")
+    .map((item) => {
+      const label = item.textContent.trim();
+      const onclickCode = item.getAttribute("onclick") || "";
+      const icono = resolverIconoMobile(config.tab, label);
+      return crearCardMobile(label, resolverDescripcionMobile(config.tab, label), icono, onclickCode);
+    })
+    .join("");
+}
+
+function construirCardsCotizacion() {
+  return [
+    crearCardMobile(
+      "Cotización",
+      "Abrir cotizacion",
+      "fa-money-bill-transfer",
+      "ir('modulos/herramientas/cotizacion.html')"
+    ),
+    crearCardMobile(
+      "Cambio de Precio",
+      "Abrir cambio de precio",
+      "fa-money-bill-wave",
+      "ir('modulos/precio/precio.html')"
+    )
+  ].join("");
+}
+
+function marcarTabMobile(tabId) {
+  document.querySelectorAll(".home-shortcuts .shortcut").forEach(btn => {
+    btn.classList.remove("shortcut-active-mobile");
+    if (btn.dataset.mobileTab === tabId) {
+      btn.classList.add("shortcut-active-mobile");
+    }
+  });
+}
+
+function renderDashboardMobile(tabId) {
+  const dashboard = document.querySelector(".dashboard");
+  if (!dashboard) return;
+
+  if (!dashboardOriginalHtml) {
+    dashboardOriginalHtml = dashboard.innerHTML;
+  }
+
+  mobileTabActual = tabId;
+
+  if (tabId === "principal") {
+    dashboard.innerHTML = dashboardOriginalHtml;
+    dashboard.classList.remove("dashboard-mobile-generated");
+    marcarTabMobile(tabId);
+    return;
+  }
+
+  let html = "";
+
+  if (tabId === "cotizacion") {
+    html = construirCardsCotizacion();
+  } else {
+    const menuId = Object.keys(MOBILE_MENU_MAP).find(id => MOBILE_MENU_MAP[id].tab === tabId);
+    html = menuId ? construirCardsDesdeMenu(menuId) : "";
+  }
+
+  if (!html) {
+    html = crearCardMobile("Sin opciones", "No hay contenido disponible", "fa-circle-info", "", " empty-mobile-card");
+  }
+
+  dashboard.innerHTML = html;
+  dashboard.classList.add("dashboard-mobile-generated");
+  marcarTabMobile(tabId);
+}
+
+function restaurarDashboardDesktop() {
+  const dashboard = document.querySelector(".dashboard");
+  if (!dashboard || !dashboardOriginalHtml) return;
+
+  dashboard.innerHTML = dashboardOriginalHtml;
+  dashboard.classList.remove("dashboard-mobile-generated");
+  document.querySelectorAll(".home-shortcuts .shortcut").forEach(btn => {
+    btn.classList.remove("shortcut-active-mobile");
+  });
+}
+
+function activarTabMobile(tabId, event) {
+  if (!esMobilePortrait()) return false;
+
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  cerrarMenus();
+  renderDashboardMobile(tabId);
+  return false;
+}
+
+function accionCotizacion(event) {
+  if (esMobilePortrait()) {
+    return activarTabMobile("cotizacion", event);
+  }
+  ir("modulos/herramientas/cotizacion.html");
+  return false;
+}
+
+function toggleMenu(id, event) {
+  if (esMobilePortrait()) {
+    const config = MOBILE_MENU_MAP[id];
+    if (config) {
+      return activarTabMobile(config.tab, event);
+    }
+  }
+
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  document.querySelectorAll(".drop-menu").forEach(menu => {
+    if (menu.id !== id) {
+      menu.style.display = "none";
+      const wrap = menu.closest(".shortcut-wrap");
+      if (wrap) wrap.classList.remove("open");
+    }
+  });
+
+  const menu = document.getElementById(id);
+  if (!menu) return false;
+
+  const wrap = menu.closest(".shortcut-wrap");
+  const abrir = menu.style.display !== "block";
+
+  menu.style.display = abrir ? "block" : "none";
+  if (wrap) {
+    wrap.classList.toggle("open", abrir);
+  }
+
+  return false;
+}
+
+document.addEventListener("click", function(e) {
+  if (esMobilePortrait()) return;
+
+  if (!e.target.closest(".shortcut-wrap")) {
+    cerrarMenus();
+  }
+});
+
+function ir(ruta, target) {
+  if (!ruta.startsWith("/")) {
+    ruta = "/" + ruta;
+  }
+
+  if (target === "_blank") {
+    window.open(ruta, "_blank", "noopener,noreferrer");
+    return;
+  }
+
+  window.location.href = ruta;
+}
+
+function sincronizarHomeMobile() {
+  prepararAccesosMobile();
+
+  if (esMobilePortrait()) {
+    renderDashboardMobile(mobileTabActual);
+  } else {
+    restaurarDashboardDesktop();
+    cerrarMenus();
+  }
+}
+
+async function init() {
+  try {
+    const res = await fetch("/api/auth/verify", {
+      credentials: "include",
+      cache: "no-store",
+      headers: { "Cache-Control": "no-cache" }
+    });
+
+    if (!res.ok) {
+      throw new Error("No autenticado");
+    }
+
+    const data = await res.json();
+    const user = data.usuario;
+
+    if (window.SoftSysSession?.persistSessionUser) {
+      window.SoftSysSession.persistSessionUser(user);
+    } else {
+      localStorage.setItem("usuario", JSON.stringify(user));
+    }
+
+    const servicio = getServicioProgramas();
+    if (servicio?.inicializar) {
+      await servicio.inicializar();
+    }
+    if (servicio?.cargarAsignacionUsuario) {
+      await servicio.cargarAsignacionUsuario(user.id);
+    }
+
+    document.getElementById("usuarioNombre").textContent = user.usuario;
+    document.getElementById("usuarioRol").textContent = String(user.rol || "").toUpperCase();
+    document.getElementById("usuarioRol").className = `rol-tag rol-${String(user.rol || "").toLowerCase()}`;
+    document.getElementById("empresaNombre").textContent = user.empresa_nombre;
+
+    renderDashboardOperativo(user);
+    actualizarAccesosCabecera(user);
+    filtrarMenusPorPrograma(user);
+
+    sincronizarHomeMobile();
+    window.SoftSysSession?.startIdleGuard?.();
+
+  } catch (e) {
+    window.SoftSysSession?.purgeClientSession?.({ preserveSafe: true });
+    window.location.href = "/login/login.html";
+  }
+}
+
+function irLogin() {
+  window.SoftSysSession?.purgeClientSession?.({ preserveSafe: true });
+  window.location.href = "/login/login.html";
+}
+
+async function cerrarSesion() {
+  if (window.SoftSysSession?.logout) {
+    await window.SoftSysSession.logout({ redirect: true, reason: "manual" });
+    return;
+  }
+
+  await fetch("/api/auth/logout", {
+    method: "POST",
+    credentials: "include",
+    cache: "no-store",
+    headers: { "Cache-Control": "no-cache" }
+  });
+  localStorage.removeItem("usuario");
+  window.location.href = "/login/login.html";
+}
+
+function abrirInformeVentas() {
+  window.location.href = "/modulos/Informes/informe_venta.html";
+}
+
+function abrirInformeCompras() {
+  window.location.href = "/modulos/Informes/informe_compra.html";
+}
+
+function abrirInformeVentasIA() {
+  window.location.href = "/modulos/informes/informe_ia.html";
+}
+
+function abrirCalculadora() {
+  document.getElementById("modalCalc").style.display = "flex";
+  cerrarMenus();
+}
+
+function cerrarCalc() {
+  document.getElementById("modalCalc").style.display = "none";
+}
+
+window.addEventListener("resize", sincronizarHomeMobile);
+window.addEventListener("orientationchange", sincronizarHomeMobile);
+window.addEventListener("DOMContentLoaded", init);
+</script>
+
+<div id="modalCalc" class="modal-calc">
+  <div class="modal-contenido">
+    <div class="modal-header">
+      <span>SYS® Calculadora</span>
+      <button type="button" onclick="cerrarCalc()">x</button>
     </div>
 
-    <div class="card" onclick="ir('modulos/productos/productos.html')">
-      <i class="fa-solid fa-box"></i>
-      <h3>Productos</h3>
-      <p>Administrar</p>
-    </div>
-
-    <div class="card" onclick="location.href='modulos/cliente/cliente.html'">
-      <i class="fas fa-user"></i>
-      <h3>Clientes</h3>
-      <p>Registrar clientes</p>
-    </div>
-
-    <div class="card" onclick="location.href='modulos/comprador/comprador.html'">
-      <i class="fas fa-user"></i>
-      <h3>Comprador</h3>
-      <p>Registrar Comprador</p>
-    </div>
-
-    <div class="card" onclick="ir('modulos/categorias/categorias.html')">
-      <i class="fa-solid fa-tags"></i>
-      <h3>Categorías</h3>
-      <p>Clasificación</p>
-    </div>
-
-    <div class="card" onclick="ir('modulos/sorteo/sorteo.html')">
-      <i class="fa-solid fa-gift"></i>
-      <h3>Sorteo</h3>
-      <p>Promociones</p>
-    </div>
-
-  </main>
-
-  <script src="compartido/js/home.js"></script>
+    <iframe
+      src="/modulos/herramientas/calculadora/calculadora.html"
+      class="calc-frame">
+    </iframe>
+  </div>
+</div>
 
 </body>
 </html>

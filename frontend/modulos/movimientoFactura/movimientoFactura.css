@@ -1,0 +1,285 @@
+/* =====================================
+   MOVIMIENTO FACTURA - STOP TOP STYLE
+===================================== */
+
+body {
+  font-family: "Segoe UI", sans-serif;
+  background: #f4f6f8;
+  margin: 0;
+  color: #2c2c2c;
+}
+
+* {
+  box-sizing: border-box;
+  touch-action: manipulation;
+}
+
+/* ================= TOPBAR ================= */
+
+.mv-topbar {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 1000;
+}
+
+.btn-volver {
+  background: #2e7d32;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: .2s;
+}
+
+.btn-volver:hover {
+  background: #1b5e20;
+}
+
+/* ================= CONTAINER ================= */
+
+.mv-container {
+  width: 96%;
+  max-width: 1300px;
+  margin: 60px auto 30px;
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 14px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+}
+
+/* ================= FILTROS ================= */
+
+.mv-filtros {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 15px;
+  align-items: end;
+  margin-bottom: 20px;
+}
+
+.mv-filtros label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.mv-filtros input,
+.mv-filtros select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #dcdcdc;
+  border-radius: 8px;
+  font-size: 13px;
+  transition: .2s;
+}
+
+.mv-filtros input:focus,
+.mv-filtros select:focus {
+  border-color: #7ED957;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(126,217,87,.2);
+}
+
+/* BOTÓN BUSCAR */
+.mv-filtros button {
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background: #7ED957;
+  color: #1f1f1f;
+  font-weight: 700;
+  cursor: pointer;
+  transition: .2s;
+}
+
+.mv-filtros button:hover {
+  background: #66c946;
+}
+
+/* ================= INPUT BUSQUEDA MINI ================= */
+
+.input-busqueda-mini {
+  display: flex;
+  gap: 5px;
+}
+
+.input-busqueda-mini input {
+  flex: 1;
+}
+
+.input-busqueda-mini button {
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: none;
+  background: #ddd;
+  cursor: pointer;
+  transition: .2s;
+}
+
+.input-busqueda-mini button:hover {
+  background: #ccc;
+}
+
+/* ================= TABLA ================= */
+
+.mv-listado {
+  height: 380px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+
+.mv-listado table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.mv-listado thead {
+  background: #1f1f1f;
+  color: white;
+  position: sticky;
+  top: 0;
+}
+
+.mv-listado th {
+  padding: 9px;
+  text-align: left;
+  font-weight: 600;
+}
+
+.mv-listado td {
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.mv-listado tr {
+  cursor: pointer;
+  transition: .15s;
+}
+
+.mv-listado tbody tr:hover {
+  background: #f1f9eb;
+}
+
+/* FILA SELECCIONADA */
+.fila-seleccionada {
+  background-color: #d4edda !important;
+}
+
+/* ================= ESTADOS ================= */
+
+.estado-ACTIVO {
+  color: #28a745;
+  font-weight: 700;
+}
+
+.estado-ANULADO {
+  color: #e53935;
+  font-weight: 700;
+}
+
+/* ================= DETALLE ================= */
+
+.mv-detalle {
+  background: #fafafa;
+  border-radius: 10px;
+  padding: 15px;
+  border: 1px solid #eee;
+  margin-bottom: 10px;
+}
+
+.mv-detalle h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+.item-detalle {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px dashed #ddd;
+  font-size: 13px;
+}
+
+/* ================= TOTAL ================= */
+
+.mv-total-general {
+  font-size: 17px;
+  font-weight: 800;
+  text-align: right;
+  margin-top: 10px;
+}
+
+/* ================= ACCIONES ================= */
+
+.mv-acciones {
+  position: sticky;
+  bottom: 0;
+  background: white;
+  padding-top: 10px;
+  text-align: right;
+}
+
+.mv-acciones button {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  background: #007bff;
+  color: white;
+  transition: .2s;
+}
+
+.mv-acciones button:hover {
+  background: #0069d9;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0,123,255,.25);
+}
+
+.estado-ANULADO {
+  color: #e53935;
+  font-weight: 700;
+}
+
+.estado-EMITIDO {
+  color: #28a745;
+  font-weight: 700;
+}
+
+.fila-seleccionada {
+  background-color: #d4edda !important;
+}
+
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 768px) {
+
+  .mv-container {
+    padding: 12px;
+  }
+
+  .mv-listado {
+    height: 300px;
+  }
+
+  .mv-listado th,
+  .mv-listado td {
+    font-size: 12px;
+    padding: 6px;
+  }
+
+  .mv-filtros {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
+
+}

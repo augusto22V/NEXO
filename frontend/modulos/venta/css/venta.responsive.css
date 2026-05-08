@@ -1,0 +1,364 @@
+/* ======================================================
+   ESTILOS BASE (mantener arriba de las media queries)
+======================================================= */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.pos-container {
+  display: grid;
+  height: 100dvh;
+  width: 100%;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr) clamp(372px, 31vw, 418px);
+  overflow: hidden;
+}
+
+/* Panel derecho (pedido) - estructura fija */
+.pos-right {
+  display: grid !important;
+  grid-template-rows: auto auto 1fr auto !important;
+  height: 100%;
+  background: #fff;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* Scroll interno real */
+.pedido-lista {
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+  min-height: 0;
+}
+
+.pedido-footer {
+  background: #fff;
+  border-top: 2px solid #eee;
+  padding: 8px 10px calc(env(safe-area-inset-bottom) + 5px) !important;
+}
+
+/* ======================================================
+   FIX overflow
+======================================================= */
+.pos-left,
+.pos-right,
+.pedido-header,
+.pedido-columnas,
+.pedido-lista,
+.pedido-footer,
+.campo-busqueda,
+.input-busqueda,
+.col-descripcion,
+.pedido-columnas > div,
+.item-mini > div {
+  min-width: 0;
+}
+
+.pedido-columnas,
+.item-mini {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* ======================================================
+   LUPAS Y BUSQUEDA
+======================================================= */
+.campo-busqueda .input-busqueda {
+  display: flex !important;
+  gap: 5px;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.input-busqueda input:first-child {
+  width: 65px !important;
+  flex-shrink: 0;
+}
+
+.input-busqueda input:nth-child(2) {
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.input-busqueda button {
+  width: 42px !important;
+  height: 36px !important;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* =========================
+   MOBILE BASE
+========================= */
+@media (max-width: 768px) {
+  .modal-content.teclado-numerico { width: 260px !important; }
+  :root { --cols-productos: 2; --cols-categorias: 2; }
+
+  .pos-left {
+    border-right-color: #c7cdd4;
+    box-shadow: 1px 0 0 #c7cdd4;
+  }
+
+  #pedidoNumero,
+  #mesa {
+    width: 75px !important;
+    height: 24px !important;
+    font-size: 12px !important;
+    padding: 2px 4px !important;
+  }
+
+  .grid-productos,
+  .grid-categorias { gap: 5px; }
+
+  .card-producto,
+  .card-categoria { min-height: 120px; }
+
+  .nombre-producto { font-size: 11px; }
+  .precio-producto { font-size: 12px; }
+
+  .pedido-columnas,
+  .item-mini {
+    display: grid;
+    column-gap: 6px;
+    grid-template-columns: 30px minmax(0, 1fr) 52px 52px;
+    font-size: 12px;
+  }
+}
+
+/* =========================
+   TABLET BASE (769px a 1024px)
+========================= */
+@media (min-width: 769px) and (max-width: 1024px) {
+  :root { --cols-productos: 3; --cols-categorias: 3; }
+  .modal-content.teclado-numerico { width: 280px !important; }
+
+  .pos-left {
+    border-right-color: #c7cdd4;
+    box-shadow: 1px 0 0 #c7cdd4;
+  }
+
+  #pedidoNumero,
+  #mesa {
+    width: 85px;
+    height: 28px;
+    font-size: 14px;
+  }
+
+  .pedido-columnas,
+  .item-mini {
+    column-gap: 8px;
+    grid-template-columns: 34px minmax(0, 1fr) 62px 58px;
+  }
+}
+
+/* ======================================================
+   TABLET PORTRAIT
+======================================================= */
+@media (min-width: 769px) and (max-width: 1024px) and (orientation: portrait) {
+  .pos-container {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: 50dvh minmax(0, 1fr) !important;
+    row-gap: 3px;
+    background: #c7cdd4;
+  }
+
+  .pos-left {
+    border-right: none;
+    border-bottom: none;
+    box-shadow: none;
+  }
+
+  .pos-right {
+    border-top: none;
+    background: #fff;
+    padding-top: 1px;
+  }
+
+  .acciones {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .acciones button {
+    height: 44px !important;
+    min-width: 0;
+    font-size: 12px !important;
+  }
+}
+
+/* ======================================================
+   MOBILE PORTRAIT
+======================================================= */
+@media (max-width: 768px) and (orientation: portrait) {
+  .pos-container {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: 30dvh 70dvh !important;
+  }
+
+  .pos-left {
+    border-right: none;
+    border-bottom: 2px solid #c7cdd4;
+    box-shadow: none;
+  }
+
+  .pos-right {
+    border-top: none;
+  }
+
+  .nav-bar { height: 40px; }
+  .btn-nav { width: 90px; height: 32px; font-size: 12px; }
+  .btn-buscar-producto, .btn-lock { width: 32px; height: 32px; }
+  .btn-buscar-producto { right: 48px; }
+  .grid-productos,
+  .grid-categorias { padding-bottom: 15px; }
+
+  .pedido-footer {
+    padding-inline: 8px !important;
+  }
+
+  .acciones {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+  }
+
+  .acciones button {
+    height: 38px !important;
+    min-width: 0;
+    font-size: 10.5px !important;
+    padding: 2px !important;
+  }
+
+  .acciones button img {
+    width: 16px;
+    height: 16px;
+  }
+
+  .pedido-columnas,
+  .item-mini {
+    grid-template-columns: 28px minmax(0, 1fr) 50px 54px;
+  }
+}
+
+/* ======================================================
+   MOBILE LANDSCAPE
+======================================================= */
+@media (max-height: 500px) and (orientation: landscape) {
+  .pos-container {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+    grid-template-rows: 100vh !important;
+    isolation: isolate;
+  }
+
+  .pos-left {
+    position: relative;
+    z-index: 1;
+    border-right: none;
+    box-shadow: none;
+  }
+
+  .pos-right {
+    position: relative;
+    z-index: 2;
+    box-shadow: inset 2px 0 0 #c7cdd4;
+  }
+
+  .grid-productos,
+  .grid-categorias {
+    overflow-x: hidden;
+  }
+
+  :root { --cols-productos: 3; }
+
+  .card-producto,
+  .card-categoria { min-height: 85px !important; }
+
+  .card-producto img { height: 50px !important; }
+
+  .nav-bar { height: 32px !important; }
+  .btn-buscar-producto, .btn-lock { width: 28px; height: 28px; }
+  .btn-buscar-producto { right: 42px; }
+  .pedido-header { padding: 4px !important; }
+  .campo-busqueda .input-busqueda { margin-bottom: 2px; }
+  input { height: 26px !important; font-size: 11px !important; }
+
+  .acciones button {
+    height: 32px !important;
+    font-size: 9px !important;
+  }
+}
+
+/* ======================================================
+   TABLET LANDSCAPE
+======================================================= */
+@media (min-width: 769px) and (max-width: 1280px) and (orientation: landscape) {
+  .pos-container {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) clamp(342px, 38vw, 395px) !important;
+    width: 100vw !important;
+    isolation: isolate;
+  }
+
+  .grid-productos,
+  .grid-categorias {
+    overflow-x: hidden;
+  }
+
+  .pos-left,
+  .pos-right {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    position: relative;
+  }
+
+  .pos-left {
+    z-index: 1;
+    border-right: none !important;
+    box-shadow: none;
+  }
+
+  .pos-right {
+    z-index: 2;
+    box-shadow: inset 2px 0 0 #c7cdd4;
+  }
+
+  :root { --cols-productos: 3; --cols-categorias: 3; }
+
+  .pos-right {
+    grid-template-rows: auto auto 1fr auto !important;
+  }
+}
+
+/* ======================================================
+   DESKTOP / NOTEBOOK
+======================================================= */
+@media (min-width: 1025px) {
+  .pos-container {
+    grid-template-columns: minmax(0, 1fr) clamp(372px, 29vw, 412px);
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Ticket Fiscal</title>
+
+  <link rel="stylesheet" href="factura_ticket.css">
+</head>
+<button id="autoPrintBtn" style="display:none;"></button>
+<body>
+
+  <div class="ticket">
+
+
+    <div class="line"></div>
+
+    <!-- LOGO -->
+    <div class="logo">
+      <img src="/recursos/img/logofactura.png">
+    </div>
+
+    <!-- EMPRESA -->
+    <div class="center">
+      <div id="empresaNombre" class="bold"></div>
+      <div>RUC: <span id="empresaRuc"></span></div>
+      <div id="empresaDireccion"></div>
+      <div id="empresaTelefono"></div> 
+      <div id="empresaEmail"></div>   
+      <div id="empresaActividad"></div>
+    </div>
+
+    <div class="line"></div>
+
+    <!-- TIMBRADO -->
+    <div>
+      Timbrado: <span id="timbrado"></span><br>
+      Inicio: <span id="inicioTimbrado"></span><br>
+      Vence: <span id="finTimbrado"></span>
+    </div>
+
+    <div class="line"></div>
+
+    <!-- FACTURA -->
+    <div>
+      Factura: <span id="numeroFactura"></span><br>
+      Fecha: <span id="fechaFactura"></span><br>
+      Condición: <span id="condicion"></span><br>
+      Código: <span id="codigoVenta"></span>
+    </div>
+
+    <div class="line"></div>
+
+    <!-- CLIENTE -->
+    <div>
+      Cliente: <span id="clienteFactura"></span><br>
+      CI/RUC: <span id="rucFactura"></span><br>
+      Dirección: <span id="direccionFactura"></span>
+    </div>
+
+    <div class="line"></div>
+
+    <!-- 🔥 IVA TEXTO -->
+    <div class="center">
+      ***** I.V.A. INCLUIDO *****
+    </div>
+
+    <div class="line"></div>
+
+    <!-- DETALLE -->
+    <table id="tablaDetalle">
+      <thead>
+        <tr>
+          <th class="col-cant">Cant</th>
+          <th class="col-desc">Descripción</th>
+          <th class="col-precio">P.Unit</th>
+          <th class="col-total">Total</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <div class="line"></div>
+
+    <!-- IVA -->
+    <div>
+      Gravada 10%: <span id="gravada10"></span><br>
+      Gravada 5%: <span id="gravada5"></span><br>
+      IVA 10%: <span id="iva10"></span><br>
+      IVA 5%: <span id="iva5"></span><br>
+    </div>
+
+    <div class="line"></div>
+
+    <!-- TOTAL -->
+    <div class="total">
+      TOTAL: <span id="totalFactura"></span>
+    </div>
+
+    <div class="line"></div>
+
+    <!-- 🔥 PAGOS -->
+    <div>
+      Pagado GS: <span id="pagadoGs">0</span><br>
+      Vuelto GS: <span id="vueltoGs">0</span>
+    </div>
+
+    <div class="line"></div>
+
+    <!-- 🔥 TIPO COPIA -->
+    <div class="center bold" id="tipoCopia">
+      ORIGINAL: CLIENTE
+    </div>
+
+    <!-- FOOTER -->
+    <div class="center">
+      GRACIAS POR SU COMPRA<br>
+      VÁLIDO COMO COMPROBANTE LEGAL
+    </div>
+
+  </div>
+
+  <button onclick="imprimirTicket()">🖨️ Imprimir Ticket</button>
+
+  <script src="factura_ticket.js"></script>
+
+</body>
+
+</html>

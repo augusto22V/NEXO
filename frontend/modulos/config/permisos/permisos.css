@@ -1,0 +1,347 @@
+body {
+  margin: 0;
+  background: #eef3f8;
+  color: #203241;
+}
+
+.perm-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #1f465d, #163446);
+  color: #fff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.perm-header h1 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.perm-header p {
+  margin: 5px 0 0;
+  font-size: 13px;
+  opacity: 0.92;
+}
+
+.perm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.perm-actions button {
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  border-radius: 9px;
+  padding: 7px 12px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.perm-actions button:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.perm-main {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 16px 18px 24px;
+}
+
+.perm-tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px;
+  background: #dbe7f1;
+  border-radius: 12px;
+  border: 1px solid #c3d3df;
+}
+
+.perm-tab {
+  border: 1px solid transparent;
+  background: transparent;
+  color: #2f5064;
+  border-radius: 9px;
+  padding: 9px 14px;
+  min-width: 110px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+
+.perm-tab:hover {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.perm-tab.is-active {
+  background: #ffffff;
+  color: #154861;
+  border-color: #9ec0d5;
+  box-shadow: 0 1px 0 rgba(15, 40, 56, 0.12);
+}
+
+.perm-status {
+  min-height: 24px;
+  margin-top: 10px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #31566b;
+}
+
+.perm-status.is-error {
+  color: #8a2632;
+}
+
+.perm-status.is-ok {
+  color: #1f6f42;
+}
+
+.perm-panel {
+  margin-top: 10px;
+  background: #fff;
+  border: 1px solid #d4e0ea;
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: 0 8px 20px rgba(17, 44, 60, 0.06);
+}
+
+.perm-panel[hidden] {
+  display: none !important;
+}
+
+.perm-panel-head h2 {
+  margin: 0;
+  font-size: 19px;
+  color: #1e465c;
+}
+
+.perm-panel-head p {
+  margin: 6px 0 0;
+  color: #557485;
+  font-size: 13px;
+}
+
+.perm-toolbar {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
+.perm-field {
+  min-width: 280px;
+  flex: 1;
+}
+
+.perm-field-moneda-base {
+  max-width: 220px;
+  min-width: 180px;
+  flex: 0 0 220px;
+}
+
+.perm-field label {
+  display: block;
+  margin-bottom: 4px;
+  color: #527185;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.perm-toolbar input,
+.perm-toolbar select {
+  width: 100%;
+  height: 38px;
+  border: 1px solid #c4d5e2;
+  border-radius: 9px;
+  padding: 0 11px;
+  background: #fff;
+}
+
+.perm-toolbar button {
+  height: 38px;
+  border: 1px solid #c0d3e0;
+  background: #f0f7fc;
+  color: #20495f;
+  border-radius: 9px;
+  padding: 0 14px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.perm-toolbar button.btn-primary {
+  background: #1a718d;
+  color: #fff;
+  border-color: #1a718d;
+}
+
+.perm-toolbar button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.perm-table-wrap,
+.perm-simple-wrap {
+  border: 1px solid #d7e3ec;
+  border-radius: 11px;
+  background: #fff;
+  overflow: auto;
+}
+
+.perm-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1800px;
+}
+
+.perm-table thead th {
+  position: sticky;
+  top: 0;
+  background: #f3f8fc;
+  border-bottom: 1px solid #d7e3ec;
+  padding: 10px;
+  text-align: left;
+  font-size: 12px;
+  color: #315769;
+  white-space: nowrap;
+}
+
+.perm-table tbody td {
+  border-bottom: 1px solid #edf2f6;
+  padding: 9px 10px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.perm-simple-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 520px;
+}
+
+.perm-simple-table thead th {
+  background: #f3f8fc;
+  border-bottom: 1px solid #d7e3ec;
+  padding: 11px 12px;
+  text-align: left;
+  font-size: 12px;
+  color: #315769;
+}
+
+.perm-simple-table tbody td {
+  border-bottom: 1px solid #edf2f6;
+  padding: 11px 12px;
+  font-size: 14px;
+}
+
+.perm-feature-name {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.perm-feature-name strong {
+  font-size: 14px;
+  color: #203e50;
+}
+
+.perm-feature-name small {
+  font-size: 12px;
+  color: #648193;
+}
+
+.perm-extra-config-row td {
+  background: #f8fbfd;
+  padding-top: 0;
+}
+
+.perm-inline-config {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.perm-inline-config label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #4f6d80;
+}
+
+.perm-inline-config select {
+  width: 100%;
+  height: 38px;
+  border: 1px solid #c4d5e2;
+  border-radius: 9px;
+  padding: 0 11px;
+  background: #fff;
+}
+
+.perm-inline-config small {
+  font-size: 12px;
+  color: #6a8494;
+}
+
+.perm-center {
+  text-align: center;
+}
+
+.perm-chk {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.btn-guardar-vr {
+  border: none;
+  background: #166085;
+  color: #fff;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-guardar-vr:disabled {
+  opacity: 0.6;
+}
+
+.estado-on {
+  color: #1a7743;
+  font-weight: 700;
+}
+
+.estado-off {
+  color: #9a2430;
+  font-weight: 700;
+}
+
+@media (max-width: 980px) {
+  .perm-main {
+    padding: 12px;
+  }
+
+  .perm-toolbar {
+    flex-wrap: wrap;
+    align-items: stretch;
+  }
+
+  .perm-field {
+    min-width: 220px;
+  }
+
+  .perm-toolbar button {
+    min-width: 140px;
+  }
+}

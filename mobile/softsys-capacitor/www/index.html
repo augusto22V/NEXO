@@ -1,0 +1,61 @@
+﻿<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>SoftSys</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div id="setupScreen" class="screen">
+    <div class="card">
+      <div class="card-head">
+        <h1 id="setupTitle">SoftSys</h1>
+        <div class="head-indicators">
+          <div id="connIndicator" class="conn-indicator checking">
+            <span id="connDot" class="dot"></span>
+            <span id="connText">Verificando...</span>
+          </div>
+          <div id="wifiBadge" class="wifi-badge checking" title="Estado de conexion">
+            <span id="wifiIcon">wifi_find</span>
+          </div>
+        </div>
+      </div>
+      <p id="setupDescription">Configura o valida el servidor local.</p>
+
+      <div id="serverConfigGroup">
+        <div id="serverBaseUrlGroup" class="hidden">
+          <label id="serverBaseUrlLabel" for="serverBaseUrl">URL del servidor</label>
+          <input id="serverBaseUrl" type="url" inputmode="url" placeholder="https://mi-servidor.com" />
+        </div>
+
+        <div id="serverIpGroup">
+          <label id="serverIpLabel" for="serverIp">IP del servidor</label>
+          <input id="serverIp" type="text" inputmode="decimal" placeholder="192.168.1.50" />
+        </div>
+
+        <div id="serverPortGroup">
+          <label id="serverPortLabel" for="serverPort">Puerto</label>
+          <input id="serverPort" type="number" min="1" max="65535" value="3000" />
+        </div>
+      </div>
+
+      <p id="savedServerInfo" class="saved-info hidden"></p>
+      <small id="technicalHint" class="hint hidden">Servidor bloqueado. Para cambiarlo, activa modo tecnico oculto o borra datos de la app.</small>
+
+      <div class="row">
+        <button id="btnConnect" class="btn primary">Guardar y conectar</button>
+        <button id="btnRetry" class="btn">Reintentar</button>
+        <button id="btnScan" class="btn">Buscar rapido</button>
+      </div>
+
+      <p id="setupStatus" class="status"></p>
+      <small id="setupHint" class="hint">Ejemplo: http://192.168.X.X:3000</small>
+    </div>
+  </div>
+
+  <div id="loadingOverlay" class="overlay hidden">Verificando conexion...</div>
+
+  <script src="./app.js"></script>
+</body>
+</html>

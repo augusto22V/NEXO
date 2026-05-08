@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" rx="16" fill="#fefce8"/>
+  <rect x="70" y="40" width="20" height="120" rx="4" fill="#84cc16"/>
+  <rect x="76" y="32" width="8" height="12" fill="#1c1917"/>
+  <text x="100" y="186" text-anchor="middle" font-family="Segoe UI,system-ui,sans-serif" font-size="12" fill="#365314">Marcador</text>
+</svg>

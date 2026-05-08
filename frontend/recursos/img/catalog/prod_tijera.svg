@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" rx="16" fill="#fef2f2"/>
+  <circle cx="78" cy="96" r="28" fill="none" stroke="#dc2626" stroke-width="10"/>
+  <circle cx="122" cy="96" r="28" fill="none" stroke="#dc2626" stroke-width="10"/>
+  <path d="M56 140 L100 96 L144 140" fill="none" stroke="#dc2626" stroke-width="8" stroke-linecap="round"/>
+  <text x="100" y="182" text-anchor="middle" font-family="Segoe UI,system-ui,sans-serif" font-size="12" fill="#991b1b">Tijera</text>
+</svg>

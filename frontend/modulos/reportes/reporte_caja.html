@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>LibreríaSys | Reporte de Caja</title>
+  <link rel="stylesheet" href="../../compartido/css/base.css">
+  <link rel="stylesheet" href="../../compartido/css/informes.css">
+</head>
+<body>
+
+<div class="topbar no-print">
+  <button class="btn-volver" onclick="history.back()">â† Volver</button>
+  <div class="titulo"><h1>LibreríaSys</h1><span>Reporte de Caja</span></div>
+  <div class="topbar-acciones">
+    <button class="btn-accion btn-imprimir" onclick="window.print()">ðŸ–¨ Imprimir</button>
+  </div>
+</div>
+
+<div class="informe-wrap">
+<div class="informe-container">
+
+  <div class="informe-header">
+    <div class="informe-empresa"><h2>LibreríaSys</h2><p>Ventas y stock para librerías</p></div>
+    <div class="informe-titulo-doc"><h3>REPORTE DE CAJA</h3></div>
+  </div>
+
+  <hr class="informe-divider">
+
+  <div class="filtro-fecha-wrap no-print">
+    <div class="filtro-fecha-titulo">Filtrar por fecha</div>
+    <div class="filtro-fecha-inputs">
+      <div class="filtro-fecha-campo">
+        <label>Desde</label>
+        <input type="date" id="desde">
+      </div>
+      <div class="filtro-fecha-campo">
+        <label>Hasta</label>
+        <input type="date" id="hasta">
+      </div>
+      <div class="filtro-botones">
+        <button class="btn-filtrar" onclick="cargar()">Buscar</button>
+        <button class="btn-filtrar btn-limpiar" onclick="limpiar()">Limpiar</button>
+      </div>
+    </div>
+  </div>
+
+  <p id="subtitulo" class="filtro-subtitulo" style="display:none"></p>
+
+  <div id="resumen" class="inf-resumen" style="display:none">
+    <h4>Resumen del perÃ­odo</h4>
+    <table class="informe-tabla inf-resumen-tabla">
+      <tbody>
+        <tr><td>Cant. ventas</td><td class="text-right" id="cant_ventas">0</td></tr>
+        <tr><td>Total ventas (Gs)</td><td class="text-right" id="total_ventas">Gs 0</td></tr>
+        <tr><td>Efectivo Gs</td><td class="text-right" id="efectivo_gs">Gs 0</td></tr>
+        <tr><td>Efectivo BRL</td><td class="text-right" id="efectivo_brl">0</td></tr>
+        <tr><td>Efectivo USD</td><td class="text-right" id="efectivo_usd">0</td></tr>
+        <tr><td>Tarjeta</td><td class="text-right" id="tarjeta">Gs 0</td></tr>
+        <tr><td>Transferencia</td><td class="text-right" id="transferencia">Gs 0</td></tr>
+        <tr><td>PIX</td><td class="text-right" id="pix">Gs 0</td></tr>
+        <tr><td>Vuelto total</td><td class="text-right" id="vuelto_total">Gs 0</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <table class="informe-tabla">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Fecha</th>
+        <th>NÂº Venta</th>
+        <th>Vendedor</th>
+        <th class="text-right">Total</th>
+        <th class="text-right">Efectivo Gs</th>
+        <th class="text-right">Tarjeta</th>
+      </tr>
+    </thead>
+    <tbody id="cuerpo">
+      <tr><td colspan="7" class="inf-cargando">Seleccione un rango de fechas</td></tr>
+    </tbody>
+  </table>
+
+  <div class="informe-pie">
+    <span>Generado el <span id="fecha"></span></span>
+    <span>LibreríaSys © Ventas y stock para librerías</span>
+  </div>
+
+</div>
+</div>
+
+<div id="spinnerOverlay" class="spinner-overlay hidden">
+  <div class="spinner-box"><div class="spinner"></div><span>Cargando...</span></div>
+</div>
+
+<script>
+document.getElementById("fecha").textContent = new Date().toLocaleString("es-PY");
+
+const hoy = new Date().toISOString().split("T")[0];
+document.getElementById("desde").value = hoy;
+document.getElementById("hasta").value = hoy;
+
+function formatFecha(iso) {
+  if (!iso) return "-";
+  return new Date(iso).toLocaleDateString("es-PY");
+}
+
+async function cargar() {
+  const desde = document.getElementById("desde").value;
+  const hasta = document.getElementById("hasta").value;
+  if (!desde || !hasta) return;
+
+  document.getElementById("spinnerOverlay").classList.remove("hidden");
+
+  try {
+    const res = await fetch(`/api/caja/informe?fecha_desde=${desde}&fecha_hasta=${hasta}`);
+    const data = await res.json();
+    const tbody = document.getElementById("cuerpo");
+    tbody.innerHTML = "";
+
+    const sub = document.getElementById("subtitulo");
+    sub.style.display = "block";
+    sub.textContent = `Movimientos del ${formatFecha(desde)} al ${formatFecha(hasta)}`;
+
+    const resumen = data.resumen || {};
+    const movs = data.movimientos || [];
+
+    document.getElementById("resumen").style.display = "block";
+    document.getElementById("cant_ventas").textContent = Number(resumen.cant_ventas || 0).toLocaleString("es-PY");
+    document.getElementById("total_ventas").textContent = "Gs " + Number(resumen.total_ventas || 0).toLocaleString("es-PY");
+    document.getElementById("efectivo_gs").textContent = "Gs " + Number(resumen.efectivo_gs || 0).toLocaleString("es-PY");
+    document.getElementById("efectivo_brl").textContent = Number(resumen.efectivo_brl || 0).toLocaleString("es-PY");
+    document.getElementById("efectivo_usd").textContent = Number(resumen.efectivo_usd || 0).toLocaleString("es-PY");
+    document.getElementById("tarjeta").textContent = "Gs " + Number(resumen.tarjeta || 0).toLocaleString("es-PY");
+    document.getElementById("transferencia").textContent = "Gs " + Number(resumen.transferencia || 0).toLocaleString("es-PY");
+    document.getElementById("pix").textContent = "Gs " + Number(resumen.pix || 0).toLocaleString("es-PY");
+    document.getElementById("vuelto_total").textContent = "Gs " + Number(resumen.vuelto_total || 0).toLocaleString("es-PY");
+
+    if (!movs.length) {
+      tbody.innerHTML = '<tr><td colspan="7" class="inf-cargando">Sin movimientos en el perÃ­odo</td></tr>';
+      return;
+    }
+
+    movs.forEach((m, i) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${i + 1}</td>
+        <td>${formatFecha(m.fecha)}</td>
+        <td>${m.numero_venta || "-"}</td>
+        <td>${m.vendedor_nombre || "-"}</td>
+        <td class="text-right">Gs ${Number(m.total_venta || 0).toLocaleString("es-PY")}</td>
+        <td class="text-right">Gs ${Number(m.pago_efectivo || 0).toLocaleString("es-PY")}</td>
+        <td class="text-right">Gs ${Number(m.pago_tarjeta || 0).toLocaleString("es-PY")}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+  } catch (err) {
+    document.getElementById("cuerpo").innerHTML =
+      '<tr><td colspan="7" class="inf-cargando" style="color:#DC2626">Error al cargar</td></tr>';
+    document.getElementById("resumen").style.display = "none";
+  } finally {
+    document.getElementById("spinnerOverlay").classList.add("hidden");
+  }
+}
+
+function limpiar() {
+  document.getElementById("desde").value = hoy;
+  document.getElementById("hasta").value = hoy;
+  document.getElementById("cuerpo").innerHTML =
+    '<tr><td colspan="7" class="inf-cargando">Seleccione un rango de fechas</td></tr>';
+  document.getElementById("subtitulo").style.display = "none";
+  document.getElementById("resumen").style.display = "none";
+}
+</script>
+<script src="/compartido/js/seguridad.js"></script>
+</body>
+</html>
+

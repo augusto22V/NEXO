@@ -1,0 +1,120 @@
+body{
+  font-family: Arial;
+  background: #f5f6f7;
+}
+
+#display{
+  box-sizing: border-box; 
+}
+
+/* CONTENEDOR */
+.contenedor{
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+/* PANEL */
+.panel{
+  width: 100%;
+  max-width: 350px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+
+  display: grid;
+  gap: 12px;
+}
+
+/* HEADER */
+.header{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn-cerrar{
+  background: transparent;
+  color: #999;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.btn-cerrar:hover{
+  color: red;
+}
+
+/* DISPLAY */
+#display{
+  width: 100%;
+  padding: 14px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 22px;
+  text-align: right;
+  background: #f9f9f9;
+
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* GRID */
+.calc-grid{
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+/* BASE BOTONES */
+button{
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+  font-size: 15px;
+}
+
+/* NUMEROS */
+.num{
+  background: #1f6f82;
+  color: white;
+}
+
+.num:hover{
+  background: #185a68;
+}
+
+/* OPERADORES */
+.op{
+  background: #34495e;
+  color: white;
+}
+
+.op:hover{
+  background: #2c3e50;
+}
+
+/* IGUAL */
+.igual{
+  background: #27ae60;
+  color: white;
+}
+
+.igual:hover{
+  background: #1e8449;
+}
+
+/* CLEAR */
+.btn-clear{
+  grid-column: span 4;
+  background: #c0392b;
+  color: white;
+}
+
+.btn-clear:hover{
+  background: #a93226;
+}

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" rx="16" fill="#fffbeb"/>
+  <line x1="56" y1="148" x2="144" y2="52" stroke="#92400e" stroke-width="14" stroke-linecap="round"/>
+  <path d="M144 52 L156 40 L160 56 Z" fill="#1c1917"/>
+  <text x="100" y="182" text-anchor="middle" font-family="Segoe UI,system-ui,sans-serif" font-size="12" fill="#92400e">Pincel</text>
+</svg>

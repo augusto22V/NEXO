@@ -2,7 +2,10 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Sorteo Promocional - Andy Closet</title>
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="/manifest.json">
+  <title>LibreríaSys | Sorte y Promociones</title>
 
   <link rel="stylesheet" href="../../compartido/css/base.css">
   <link rel="stylesheet" href="sorteo.css">
@@ -13,7 +16,6 @@
 <header class="topbar">
   <button class="btn-volver" onclick="volver()">← Volver</button>
   <div>
-    <h1>Stop Top</h1>
     <span>Sorteo Promocional</span>
   </div>
 </header>
@@ -193,7 +195,7 @@
 
 
 <script src="sorteo.js"></script>
-
+<script src="/compartido/js/seguridad.js"></script>
 <script>
 function volver() {
   window.location.href = "../../home.html";

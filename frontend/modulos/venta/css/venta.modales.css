@@ -1,0 +1,512 @@
+/* =========================
+    VARIABLES GLOBALES
+========================= */
+
+:root {
+  --modal-bg: rgba(0,0,0,0.45);
+  --modal-radius: 14px;
+  --modal-padding: 20px;
+
+  --color-ok: #28a745;
+  --color-danger: #dc3545;
+  --color-neutral: #dee2e6;
+  --color-text: #333;
+}
+
+/* =========================
+    MODAL BASE (ÚNICO)
+========================= */
+
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: var(--modal-bg);
+
+  justify-content: center;
+  align-items: center;
+
+  z-index: 9999;
+}
+
+/* ACTIVAR MODAL */
+.modal.show {
+  display: flex;
+}
+
+/* CONTENEDOR BASE */
+.modal-content {
+  background: #fff;
+  border-radius: var(--modal-radius);
+  padding: var(--modal-padding);
+
+  width: 420px;
+  max-width: 95%;
+
+  max-height: 90vh;
+  overflow-y: auto;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  animation: modalPop 0.2s ease;
+}
+
+/* =========================
+    ANIMACIÓN
+========================= */
+
+@keyframes modalPop {
+  from {
+    transform: scale(0.92);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* =========================
+    BOTONES (GLOBAL)
+========================= */
+
+.modal button {
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* CONTENEDOR BOTONES */
+.modal-buttons,
+.modal-confirmar-btns,
+.modal .acciones {
+  display: flex;
+  gap: 10px;
+}
+
+/* BOTÓN BASE */
+.modal button {
+  flex: 1;
+  height: 40px;
+}
+
+/* VARIANTES */
+.btn-confirmar,
+.btn-confirmar-si {
+  background: var(--color-ok);
+  color: #fff;
+}
+
+.btn-cancelar,
+.btn-confirmar-no {
+  background: var(--color-neutral);
+}
+
+/* =========================
+    INPUTS GENERALES
+========================= */
+
+.modal input,
+.modal textarea {
+  width: 100%;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  padding: 5px;
+  font-size: 13px;
+}
+
+.modal textarea {
+  resize: none;
+}
+
+/* =========================
+    MODAL FACTURA
+========================= */
+
+.modal-factura {
+  width: 420px;
+}
+
+.modal-factura h3 {
+  text-align: center;
+}
+
+.modal-factura label {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.modal-factura .input-busqueda {
+  display: flex;
+  gap: 5px;
+}
+
+.total-factura {
+  text-align: right;
+  font-weight: 800;
+  font-size: 16px;
+}
+
+/* =========================
+    MODAL CONFIRMAR
+========================= */
+
+#modalConfirmar {
+  align-items: center;
+}
+
+.modal-confirmar-content {
+  background: #fff;
+  border-radius: var(--modal-radius);
+  padding: 20px;
+
+  width: 300px;
+  max-width: 90%;
+
+  text-align: center;
+
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+
+  animation: modalPop 0.2s ease;
+}
+
+#confirmarTexto {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* =========================
+    MODAL MESA SIMPLE
+========================= */
+
+.modal-content.modal-mesa-simple {
+  width: min(980px, 96vw);
+  max-height: 88vh;
+}
+
+.mesa-simple-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.mesa-simple-header h3 {
+  margin: 0;
+  font-size: 20px;
+}
+
+#mesaSimpleFiltro {
+  height: 38px;
+  font-size: 14px;
+}
+
+.mesa-simple-lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  min-height: 140px;
+  max-height: 56vh;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.modal-content.modal-mesa-simple .mesa-simple-item {
+  border: 2px solid #cbd5e1;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #1f2937;
+  height: auto;
+  min-height: 102px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  align-items: center;
+  padding: 10px 8px;
+  text-align: center;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.13);
+  cursor: pointer;
+  user-select: none;
+}
+
+.modal-content.modal-mesa-simple .mesa-simple-item:hover {
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.13);
+}
+
+.modal-content.modal-mesa-simple .mesa-simple-item.selected {
+  outline: 3px solid rgba(37, 99, 235, 0.7);
+  outline-offset: 0;
+}
+
+.modal-content.modal-mesa-simple .mesa-simple-item.active {
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.35), 0 8px 18px rgba(15, 23, 42, 0.13);
+}
+
+.modal-content.modal-mesa-simple .mesa-simple-item.estado-libre {
+  border-color: #16a34a;
+  background: #f0fdf4;
+}
+
+.modal-content.modal-mesa-simple .mesa-simple-item.estado-ocupada {
+  border-color: #d97706;
+  background: #fff7ed;
+}
+
+.modal-content.modal-mesa-simple .mesa-simple-item.estado-reservada {
+  border-color: #7c3aed;
+  background: #f5f3ff;
+}
+
+.modal-content.modal-mesa-simple .mesa-simple-item.estado-inactiva {
+  border-color: #64748b;
+  background: #f1f5f9;
+}
+
+.mesa-simple-numero {
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1;
+  color: #1f2937;
+}
+
+.mesa-simple-meta {
+  font-size: 11px;
+  font-weight: 700;
+  color: #334155;
+  line-height: 1.2;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mesa-simple-empty {
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+  padding: 18px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 13px;
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 860px) and (max-width: 1099px) {
+  .mesa-simple-lista {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) {
+  .mesa-simple-lista {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+/* =========================
+   🔢 TECLADO NUMÉRICO
+========================= */
+
+.modal-content.teclado-numerico {
+  width: 300px !important;
+  max-width: 90vw;
+  margin: auto;
+}
+
+.teclado-numerico {
+  width: 320px;
+  margin: auto;
+}
+
+.teclado-numerico input {
+  height: 45px;
+  font-size: 18px;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.grid-teclado {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.grid-teclado button {
+  height: 55px;
+  font-size: 18px;
+  background: #f1f1f1;
+}
+
+/* ESPECIALES */
+.grid-teclado button:last-child {
+  background: var(--color-ok);
+  color: white;
+}
+
+.grid-teclado button:nth-child(10) {
+  background: var(--color-danger);
+  color: white;
+}
+
+/* =========================
+    MODAL SABORES
+========================= */
+
+#modalSabores .modal-content {
+  width: 95vw;
+  max-width: 900px;
+  height: 92vh;
+}
+
+.header-sabores {
+  display: flex;
+  gap: 10px;
+}
+
+.grid-sabores {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+  overflow-y: auto;
+}
+
+.sabor-item {
+  background: #fff;
+  border-radius: 10px;
+  padding: 6px;
+  text-align: center;
+  font-size: 12px;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+.sabor-item:hover {
+  transform: scale(1.03);
+}
+
+.sabor-item.seleccionado {
+  border: 2px solid var(--color-ok);
+  background: #e9f7ef;
+}
+
+/* SELECCIONADOS */
+.sabores-seleccionados {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.sabores-seleccionados span {
+  background: #dee2e6;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+/* =========================
+   📱 RESPONSIVE
+========================= */
+
+@media (pointer: coarse) {
+
+  .modal {
+    align-items: flex-start;
+    padding-top: 5vh;
+  }
+
+  .modal-content {
+    width: 95%;
+  }
+
+  .teclado-numerico input {
+    height: 55px;
+    font-size: 22px;
+  }
+
+  .grid-teclado button {
+    height: 65px;
+    font-size: 20px;
+  }
+}
+
+
+
+button {
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+
+.btn-primary {
+  background: #e60000;
+  color: white;
+}
+
+.btn-success {
+  background: #28a745;
+  color: white;
+}
+
+.btn-danger {
+  background: #dc3545;
+  color: white;
+}
+
+.btn-neutral {
+  background: #dee2e6;
+  color: #333;
+}
+
+button:hover {
+  filter: brightness(1.1);
+}
+
+button {
+  transition: transform 0.05s ease, filter 0.1s ease;
+}
+
+
+button {
+  touch-action: manipulation;
+}
+
+
+.hint-fullscreen {
+  position: fixed;
+  top: 50px; /* ajustá según tu navbar */
+  left: 120px; /* ajustar para que apunte al botón */
+
+  background: rgba(0,0,0,0.85);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+
+  animation: fadeIn 0.4s ease;
+  z-index: 9999;
+}
+
+/* flechita */
+.hint-fullscreen::after {
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: 20px;
+
+  border-width: 6px;
+  border-style: solid;
+  border-color: transparent transparent rgba(0,0,0,0.85) transparent;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+

@@ -237,14 +237,7 @@ canvas {
   color: #444;
   line-height: 1.4;
 }
-.titulo-panel {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 20px;    
-  font-weight: 700;
-  margin-bottom: 18px;   
-}
+
 
 .titulo-panel img {
   width: 26px;

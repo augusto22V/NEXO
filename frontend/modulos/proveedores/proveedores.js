@@ -1,10 +1,17 @@
-const API = "/api/proveedores";
+﻿const API = "/api/proveedores";
 
 let proveedores = [];
 let formDirty = false;
+let isSelectionMode = false;
+let selectionReturn = null;
 
 let sortField = "id";
 let sortDir = "desc";
+let cargandoProveedor = false;
+let proveedorSeleccionadoTemp = null;
+let _warnListener = null;
+let _warnFocusEl = null;
+let permitirSalida = false;
 
 // ===== DOM =====
 const proveedorId = document.getElementById("proveedorId");
@@ -17,12 +24,15 @@ const direccionProveedor = document.getElementById("direccionProveedor");
 const emailProveedor = document.getElementById("emailProveedor");
 const activoProveedor = document.getElementById("activoProveedor");
 
+
+const thId = document.getElementById("thId");
 const buscar = document.getElementById("buscar");
 
 const btnNuevo = document.getElementById("btnNuevo");
 const btnGuardar = document.getElementById("btnGuardar");
 const btnEliminar = document.getElementById("btnEliminar");
 const btnCancelar = document.getElementById("btnCancelar");
+const btnSeleccionar = document.getElementById("btnSeleccionar");
 
 const tablaProveedores = document.getElementById("tablaProveedores");
 
@@ -49,6 +59,24 @@ function bloquearFormulario() {
   emailProveedor.disabled = true;
 }
 
+function hayCambiosSinGuardar() {
+
+  if (cargandoProveedor) return true;
+
+  if (btnGuardar.disabled) return false;
+
+  if (!proveedorId.value &&
+      !nombreProveedor.value.trim() &&
+      !razonProveedor.value.trim() &&
+      !rucProveedor.value.trim() &&
+      !telefonoProveedor.value.trim() &&
+      !direccionProveedor.value.trim()) {
+    return false;
+  }
+
+  return true;
+}
+
 function habilitarFormulario() {
   nombreProveedor.disabled = false;
   razonProveedor.disabled = false;
@@ -56,6 +84,103 @@ function habilitarFormulario() {
   telefonoProveedor.disabled = false;
   direccionProveedor.disabled = false;
   emailProveedor.disabled = false;
+}
+
+function mostrarAdvertencia(texto, focusEl = codigoProveedor) {
+
+  const modal = document.getElementById('modalAdvertencia');
+  const txt = document.getElementById('modalAdvertenciaTexto');
+  const btn = modal?.querySelector('.btn-aceptar');
+
+  if (!modal || !txt || !btn) return;
+
+  txt.textContent = texto;
+
+  _warnFocusEl = focusEl || codigoProveedor;
+
+  modal.classList.remove('hidden');
+
+  setTimeout(() => btn.focus(), 30);
+
+  if (_warnListener) document.removeEventListener('keydown', _warnListener);
+
+  _warnListener = function (e) {
+
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      e.stopPropagation();
+      cerrarAdvertencia(true);
+      return;
+    }
+
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      e.stopPropagation();
+      cerrarAdvertencia(true);
+      return;
+    }
+  };
+
+  document.addEventListener('keydown', _warnListener);
+}
+
+function cerrarAdvertencia(refocus = false) {
+
+  const modal = document.getElementById('modalAdvertencia');
+  if (modal) modal.classList.add('hidden');
+
+  if (_warnListener) {
+    document.removeEventListener('keydown', _warnListener);
+    _warnListener = null;
+  }
+
+  if (refocus && _warnFocusEl && typeof _warnFocusEl.focus === "function") {
+    setTimeout(() => {
+      _warnFocusEl.focus();
+      if (typeof _warnFocusEl.select === "function") {
+        _warnFocusEl.select();
+      }
+    }, 30);
+  }
+}
+
+thId.addEventListener("click", () => {
+
+  if (sortField === "id") {
+    sortDir = sortDir === "asc" ? "desc" : "asc";
+  } else {
+    sortField = "id";
+    sortDir = "asc";
+  }
+
+  thId.textContent = sortDir === "asc" ? "ID â–²" : "ID â–¼";
+
+  render(proveedores);
+
+});
+
+function volverSeguro() {
+  if (isSelectionMode) {
+    if (window.opener && !window.opener.closed) window.opener.focus();
+    window.close();
+    return;
+  }
+
+  if (hayCambiosSinGuardar()) {
+
+    baseModalOpenConfirmGeneric({
+      titulo: "Salir",
+      mensaje: "Hay cambios sin guardar. Â¿Desea salir?",
+      onConfirm: () => {
+        permitirSalida = true;
+        window.location.href = "../../home.html";
+      }
+    });
+
+  } else {
+    permitirSalida = true;
+    window.location.href = "../../home.html";
+  }
 }
 
 // ===== RENDER =====
@@ -79,7 +204,7 @@ function render(data) {
   const row = document.createElement("div");
   row.className = "tabla-row";
 
-  //  si está inactivo agregamos clase
+  //  si estÃ¡ inactivo agregamos clase
   if (p.activo === false) {
     row.classList.add("inactivo");
   }
@@ -95,7 +220,7 @@ function render(data) {
   `;
 
   row.onclick = () => {
-    if (formDirty) {
+    if (formDirty && !isSelectionMode) {
       mostrarAdvertencia("Finalice la carga o cancele");
       return;
     }
@@ -103,14 +228,27 @@ function render(data) {
     document.querySelectorAll(".tabla-row").forEach((r) => r.classList.remove("activo"));
     row.classList.add("activo");
 
-    seleccionar(p);
+    if (isSelectionMode) {
+      proveedorSeleccionadoTemp = p;
+      btnSeleccionar.disabled = false;
+    } else {
+      seleccionar(p);
+    }
   };
 
-  row.ondblclick = () => seleccionar(p);
+  row.ondblclick = () => {
+    if (isSelectionMode) {
+      seleccionarProveedorDirecto(p);
+    } else {
+      seleccionar(p);
+    }
+  };
 
   tablaProveedores.appendChild(row);
 });
 }
+
+
 
 // ===== NEXT ID (PG REAL) =====
 async function obtenerProximoId() {
@@ -120,22 +258,25 @@ async function obtenerProximoId() {
   return Number(data.next_id);
 }
 
-// ===== ENTER EN CÓDIGO (igual Producto) =====
+// ===== ENTER EN CÃ“DIGO (igual Producto) =====
 codigoProveedor.addEventListener("keydown", async (e) => {
+
   if (e.key !== "Enter") return;
+
   e.preventDefault();
+  e.stopImmediatePropagation(); // ðŸ”¥ importante
 
   const valor = codigoProveedor.value.trim();
 
-  // ENTER vacío → next-id real
+  // ENTER vacÃ­o â†’ next-id
   if (!valor) {
     try {
       const nextId = await obtenerProximoId();
       codigoProveedor.value = nextId;
-      await modoNuevo(false); // false = no recalcular id otra vez
+      await modoNuevo(false);
       setTimeout(() => nombreProveedor.focus(), 50);
     } catch {
-      mostrarAdvertencia("Error obteniendo código");
+      mostrarAdvertencia("Error obteniendo cÃ³digo", codigoProveedor);
     }
     return;
   }
@@ -144,6 +285,7 @@ codigoProveedor.addEventListener("keydown", async (e) => {
   if (!Number.isFinite(id)) return;
 
   try {
+
     const res = await fetch(`${API}/${id}`);
 
     if (res.ok) {
@@ -152,21 +294,15 @@ codigoProveedor.addEventListener("keydown", async (e) => {
       return;
     }
 
-    // no existe → preparar nuevo con ese id
-    proveedorId.value = "";
-    habilitarFormulario();
-
-    btnGuardar.disabled = false;
-    btnEliminar.disabled = true;
-    btnCancelar.disabled = false;
-
-    formDirty = false;
-    setTimeout(() => nombreProveedor.focus(), 50);
+    // NO EXISTE â†’ advertir y NO avanzar
+    mostrarAdvertencia(`No existe proveedor con cÃ³digo ${id}`, codigoProveedor);
+    return;
 
   } catch (err) {
     console.error(err);
-    mostrarAdvertencia("Error consultando servidor");
+    mostrarAdvertencia("Error consultando servidor", codigoProveedor);
   }
+
 });
 
 // ===== SELECT =====
@@ -188,16 +324,96 @@ function seleccionar(p) {
   btnEliminar.disabled = false;
   btnCancelar.disabled = false;
 
+  if (isSelectionMode) {
+    btnSeleccionar.disabled = false;
+  }
+
   formDirty = false;
 }
 
-// ===== NUEVO / CANCELAR =====
+function seleccionarProveedorDirecto(p) {
+  const proveedorSeleccionado = {
+    id: p.id,
+    nombre: p.nombre,
+    razon_social: p.razon_social,
+    ruc: p.ruc,
+    telefono: p.telefono,
+    direccion: p.direccion,
+    email: p.email
+  };
+
+  if (selectionReturn === "informe_compra" && window.opener && !window.opener.closed) {
+    const inputProveedor = window.opener.document.getElementById("filtroProveedor");
+    if (inputProveedor) {
+      inputProveedor.value = proveedorSeleccionado.nombre || "";
+      if (typeof inputProveedor.focus === "function") inputProveedor.focus();
+    }
+    window.close();
+    return;
+  }
+
+  if (window.opener && !window.opener.closed && typeof window.opener.recibirProveedor === "function") {
+    try {
+      window.opener.recibirProveedor(proveedorSeleccionado);
+      window.opener.focus();
+      window.close();
+      return;
+    } catch {
+      // fallback localStorage
+    }
+  }
+
+  localStorage.setItem("softsysProveedorSeleccionado", JSON.stringify(proveedorSeleccionado));
+  window.close();
+}
+
+function seleccionarProveedor() {
+  if (!proveedorSeleccionadoTemp) {
+    mostrarAdvertencia("Seleccione un proveedor primero");
+    return;
+  }
+
+  const proveedorSeleccionado = {
+    id: Number(proveedorSeleccionadoTemp.id),
+    nombre: proveedorSeleccionadoTemp.nombre,
+    razon_social: proveedorSeleccionadoTemp.razon_social,
+    ruc: proveedorSeleccionadoTemp.ruc,
+    telefono: proveedorSeleccionadoTemp.telefono,
+    direccion: proveedorSeleccionadoTemp.direccion,
+    email: proveedorSeleccionadoTemp.email
+  };
+
+  if (selectionReturn === "informe_compra" && window.opener && !window.opener.closed) {
+    const inputProveedor = window.opener.document.getElementById("filtroProveedor");
+    if (inputProveedor) {
+      inputProveedor.value = proveedorSeleccionado.nombre || "";
+      if (typeof inputProveedor.focus === "function") inputProveedor.focus();
+    }
+    window.close();
+    return;
+  }
+
+  if (window.opener && !window.opener.closed && typeof window.opener.recibirProveedor === "function") {
+    try {
+      window.opener.recibirProveedor(proveedorSeleccionado);
+      window.opener.focus();
+      window.close();
+      return;
+    } catch {
+      // fallback localStorage
+    }
+  }
+
+  localStorage.setItem("softsysProveedorSeleccionado", JSON.stringify(proveedorSeleccionado));
+  window.close();
+}
 function nuevo() {
   modoNuevo(true);
 }
 
 function cancelar() {
   formDirty = false;
+  proveedorSeleccionadoTemp = null;
 
   proveedorId.value = "";
 
@@ -215,6 +431,10 @@ function cancelar() {
   btnGuardar.disabled = true;
   btnEliminar.disabled = true;
   btnCancelar.disabled = true;
+
+  if (isSelectionMode) {
+    btnSeleccionar.disabled = true;
+  }
 
   bloquearFormulario();
 
@@ -257,9 +477,13 @@ async function modoNuevo(recalcularId = true) {
 
 // ===== GUARDAR =====
 async function guardar() {
+
+  cargandoProveedor = true;
+
   if (!nombreProveedor.value.trim()) {
     mostrarAdvertencia("Ingrese nombre");
     nombreProveedor.focus();
+    cargandoProveedor = false;
     return;
   }
 
@@ -292,16 +516,18 @@ async function guardar() {
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
     }
 
-    bloquearFormulario();
-    await modoNuevo(true);
-    await cargar();
+     bloquearFormulario();
+  await modoNuevo(true);
+  await cargar();
 
-    setTimeout(() => {
-      codigoProveedor.focus();
-      codigoProveedor.select();
-    }, 50);
+  cargandoProveedor = false;
 
-  } catch (e) {
+  setTimeout(() => {
+    codigoProveedor.focus();
+    codigoProveedor.select();
+  }, 50);
+
+} catch (e) {
     console.error(e);
     mostrarAdvertencia("Error al guardar");
   }
@@ -362,8 +588,50 @@ telefonoProveedor.addEventListener("input", () => {
 });
 
 rucProveedor.addEventListener("input", () => {
+
+  rucProveedor.addEventListener("keydown", async (e) => {
+
+  if (e.key !== "Enter") return;
+
+  const valor = rucProveedor.value.trim();
+
+  if (!valor) return;
+
+  try {
+
+    const res = await fetch(`/api/proveedores/ruc/${valor}`);
+    const data = await res.json();
+
+    if (data) {
+
+      // ðŸ”¥ reemplaza con DV correcto
+      rucProveedor.value = data.ruc;
+
+      razonProveedor.value = data.razon_social || '';
+      nombreProveedor.value = data.nombre || data.razon_social || '';
+
+      telefonoProveedor.focus();
+
+    } else {
+
+      mostrarAdvertencia("RUC no encontrado", razonProveedor);
+
+    }
+
+  } catch (err) {
+
+    console.error(err);
+    mostrarAdvertencia("Error consultando RUC");
+
+  }
+
+});
+
   rucProveedor.value = rucProveedor.value.replace(/[^0-9-]/g, "");
 });
+
+
+
 
 // marcar dirty
 [
@@ -379,7 +647,7 @@ rucProveedor.addEventListener("input", () => {
   });
 });
 
-// ===== ENTER NAVEGACIÓN ENTRE CAMPOS =====
+// ===== ENTER NAVEGACIÃ“N ENTRE CAMPOS =====
 document.querySelector(".panel-form")?.addEventListener("keydown", (e) => {
   if (e.key !== "Enter") return;
 
@@ -412,23 +680,21 @@ document.addEventListener("keydown", (e) => {
     if (!btnEliminar.disabled) eliminar();
   }
 
-  if (e.key === "Escape") {
-    e.preventDefault();
-    volver();
-  }
+if (e.key === "Escape") {
+
+  // si modal advertencia estÃ¡ abierto â†’ no salir
+  const modal = document.getElementById("modalAdvertencia");
+  if (modal && !modal.classList.contains("hidden")) return;
+
+  // si modal eliminar estÃ¡ abierto â†’ no salir
+  const modalEliminar = document.getElementById("modalEliminar");
+  if (modalEliminar && !modalEliminar.classList.contains("hidden")) return;
+
+  e.preventDefault();
+  volverSeguro();
+}
 });
 
-// ===== INIT =====
-window.onload = () => {
-  modoInicial();
-  cargar();
-  bloquearFormulario();
-
-  setTimeout(() => {
-    codigoProveedor.focus();
-    codigoProveedor.select();
-  }, 100);
-};
 
 function modoInicial() {
   proveedorId.value = "";
@@ -459,3 +725,43 @@ window.filtrar = filtrar;
 window.cerrarModalEliminar = cerrarModalEliminar;
 window.confirmarEliminar = confirmarEliminar;
 window.cerrarAdvertencia = cerrarAdvertencia;
+window.seleccionarProveedor = seleccionarProveedor;
+
+// ===== INIT =====
+window.onload = () => {
+
+  // Detectar modo selecciÃ³n
+  const urlParams = new URLSearchParams(window.location.search);
+  const searchParam = urlParams.get('search');
+  const modoSeleccion = urlParams.get("modo") === "seleccion";
+  selectionReturn = urlParams.get('volver');
+  isSelectionMode = Boolean(window.opener) || searchParam !== null || modoSeleccion;
+
+  if (isSelectionMode) {
+    document.getElementById("moduloTitulo").textContent = "Seleccionar Proveedor";
+    btnSeleccionar.style.display = "inline-flex";
+    btnSeleccionar.disabled = true;
+    // Mantener todos los botones visibles en modo selecciÃ³n
+
+    if (searchParam) {
+      buscar.value = searchParam;
+      filtrar();
+    }
+  }
+
+  modoInicial();
+  bloquearFormulario();
+  cargar();
+
+  baseModalEnableExitProtection({
+    hayCambios: hayCambiosSinGuardar
+  });
+
+  setTimeout(() => {
+    codigoProveedor.disabled = false; 
+    codigoProveedor.focus();
+    codigoProveedor.select();
+  }, 150);
+
+};
+

@@ -1,4 +1,4 @@
-const API = "/api/categorias";
+﻿const API = "/api/categorias";
 
 /* ===== ELEMENTOS ===== */
 const form = document.getElementById("formCategoria");
@@ -15,6 +15,8 @@ const ordenPantalla = document.getElementById("ordenPantalla");
 const imagenCategoria = document.getElementById("imagenCategoria");
 const previewImagen = document.getElementById("previewImagen");
 const activoCategoria = document.getElementById("activoCategoria");
+const mostrarVentaMedioCategoria = document.getElementById("mostrarVentaMedioCategoria");
+const mostrarMenuDigitalCategoria = document.getElementById("mostrarMenuDigitalCategoria");
 
 /* ===== ESTADO ===== */
 let categoriaSeleccionada = null;
@@ -22,9 +24,35 @@ let categoriaBackup = null;
 
 let sortField = "id";
 let sortDir = "desc";
+let permitirSalida = false;
+
+const categoriaQueryParams = new URLSearchParams(window.location.search);
+const categoriaFrom = categoriaQueryParams.get("from");
+const categoriaModo = String(categoriaQueryParams.get("modo") || "").toLowerCase();
+const categoriaVolver = categoriaQueryParams.get("volver");
+const CATEGORIA_STORAGE_KEY = "categoriaSeleccionada";
+const isCategoriaSelectFromProducto = categoriaFrom === "producto";
+const isCategoriaSelectFromConsulta = categoriaFrom === "consulta_productos" || categoriaVolver === "consulta_productos";
+const isCategoriaModoSeleccion = categoriaModo === "seleccion";
+const isCategoriaSelectMode = isCategoriaModoSeleccion || isCategoriaSelectFromProducto || isCategoriaSelectFromConsulta;
+
 
 soloNumeros(codigoCategoria);
 soloNumeros(ordenPantalla);
+
+/* ===== MAYUSCULAS AUTOMATICAS ===== */
+nombreCategoria.addEventListener("input", () => {
+  nombreCategoria.value = nombreCategoria.value.toUpperCase();
+});
+function marcarErrorOrden() {
+  ordenPantalla.style.border = "2px solid #e74c3c";
+  ordenPantalla.style.backgroundColor = "#ffe6e6";
+}
+
+function quitarErrorOrden() {
+  ordenPantalla.style.border = "";
+  ordenPantalla.style.backgroundColor = "";
+}
 
 /* ===== FORM STATES ===== */
 function bloquearForm() {
@@ -41,13 +69,21 @@ function habilitarForm() {
 function estadoInicial() {
   form.reset();
   codigoCategoria.value = "";
-  previewImagen.src = "";
+  if (previewURLCategoria) {
+  URL.revokeObjectURL(previewURLCategoria);
+  previewURLCategoria = null;
+}
+
+previewImagen.src = "";
   bloquearForm();
   btnGuardar.disabled = true;
   btnEliminar.disabled = true;
   btnCancelar.disabled = true;
   categoriaSeleccionada = null;
   categoriaBackup = null;
+  activoCategoria.checked = true;
+  mostrarVentaMedioCategoria.checked = false;
+  mostrarMenuDigitalCategoria.checked = false;
 }
 
 /* ===== OBTENER PROXIMO ID ===== */
@@ -59,74 +95,91 @@ async function obtenerProximoId() {
   return maxId + 1;
 }
 
-/* ===== MODAL ===== */
-const modalOverlay = document.getElementById("modalOverlay");
-const modalIcon = document.getElementById("modalIcon");
-const modalTitulo = document.getElementById("modalTitulo");
-const modalMensaje = document.getElementById("modalMensaje");
-const modalExtra = document.getElementById("modalExtra");
-const modalBtnCancel = document.getElementById("modalBtnCancel");
-const modalBtnOk = document.getElementById("modalBtnOk");
-const modalBtnDanger = document.getElementById("modalBtnDanger");
+function hayCambiosSinGuardar() {
 
-function abrirModalInfo({ titulo, mensaje, extraHTML = "" }) {
-  modalIcon.textContent = "ℹ️";
-  modalTitulo.textContent = titulo;
-  modalMensaje.textContent = mensaje;
-  modalExtra.innerHTML = extraHTML;
-  modalExtra.style.display = extraHTML ? "block" : "none";
-  modalBtnOk.classList.remove("hidden");
-  modalBtnCancel.classList.add("hidden");
-  modalBtnDanger.classList.add("hidden");
-  modalBtnOk.onclick = cerrarModal;
-  modalOverlay.classList.remove("hidden");
-  setTimeout(() => modalBtnOk.focus(), 10);
-}
+  if (btnGuardar.disabled) return false;
 
-function abrirModalConfirm({ titulo, mensaje, onConfirm }) {
-  modalIcon.textContent = "⚠️";
-  modalTitulo.textContent = titulo;
-  modalMensaje.textContent = mensaje;
-  modalExtra.innerHTML = "";
-  modalExtra.style.display = "none";
-  modalBtnOk.classList.add("hidden");
-  modalBtnCancel.classList.remove("hidden");
-  modalBtnDanger.classList.remove("hidden");
-  modalBtnCancel.onclick = cerrarModal;
-  modalBtnDanger.onclick = async () => {
-    cerrarModal();
-    await onConfirm();
-  };
-  modalOverlay.classList.remove("hidden");
-}
-
-function cerrarModal() {
-  modalOverlay.classList.add("hidden");
-  setTimeout(() => {
-    codigoCategoria.focus();
-    codigoCategoria.select();
-  }, 50);
-}
-
-document.addEventListener("keydown", (e) => {
-  if (modalOverlay.classList.contains("hidden")) return;
-  if (e.key === "Enter") {
-    e.preventDefault();
-    if (!modalBtnOk.classList.contains("hidden")) modalBtnOk.click();
-    if (!modalBtnDanger.classList.contains("hidden")) modalBtnDanger.click();
+  if (!categoriaSeleccionada &&
+      !nombreCategoria.value.trim()) {
+    return false;
   }
-  if (e.key === "Escape") cerrarModal();
-});
+
+  return true;
+}
+
+function volverSeguro() {
+
+  if (hayCambiosSinGuardar()) {
+
+    baseModalOpenConfirmGeneric({
+      titulo: "Salir",
+      mensaje: "Hay cambios sin guardar. Â¿Desea salir?",
+      onConfirm: () => {
+        history.back();
+      }
+    });
+
+  } else {
+    history.back();
+  }
+}
 
 /* ===== IMAGEN ===== */
+let previewURLCategoria = null;
+
 imagenCategoria.addEventListener("change", () => {
+
   const file = imagenCategoria.files[0];
   if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => previewImagen.src = e.target.result;
-  reader.readAsDataURL(file);
+
+  // liberar anterior
+  if (previewURLCategoria) {
+    URL.revokeObjectURL(previewURLCategoria);
+  }
+
+  previewURLCategoria = URL.createObjectURL(file);
+
+  previewImagen.src = previewURLCategoria;
 });
 
+function devolverCategoriaSeleccion(c) {
+  if (isCategoriaModoSeleccion) {
+    const categoriaSeleccionada = {
+      id: c.id,
+      nombre: c.nombre || ""
+    };
+
+    if (window.opener && !window.opener.closed && typeof window.opener.recibirCategoria === "function") {
+      try {
+        window.opener.recibirCategoria(categoriaSeleccionada);
+      } catch {
+        localStorage.setItem(CATEGORIA_STORAGE_KEY, JSON.stringify(categoriaSeleccionada));
+      }
+    } else {
+      localStorage.setItem(CATEGORIA_STORAGE_KEY, JSON.stringify(categoriaSeleccionada));
+    }
+
+    window.close();
+    return true;
+  }
+
+  if (isCategoriaSelectFromProducto) {
+    sessionStorage.setItem("categoriaSeleccionadaId", c.id);
+    location.href = "../productos/productos.html?refreshCategorias=1";
+    return true;
+  }
+
+  if (isCategoriaSelectFromConsulta) {
+    sessionStorage.setItem("consultaProductosCategoriaSeleccionada", JSON.stringify({
+      id: c.id,
+      nombre: c.nombre || ""
+    }));
+    location.href = "../consultas/consulta_productos.html";
+    return true;
+  }
+
+  return false;
+}
 /* ===== LISTAR ===== */
 async function cargarCategorias() {
   const res = await fetch(API);
@@ -161,18 +214,72 @@ async function cargarCategorias() {
     ${c.activo ? 'Activo' : 'Inactivo'}
   </span>
   `;
-    row.onclick = () => seleccionarCategoria(c);
+    row.onclick = () => {
+      if (isCategoriaModoSeleccion || isCategoriaSelectFromConsulta) {
+        devolverCategoriaSeleccion(c);
+        return;
+      }
+      seleccionarCategoria(c);
+    };
 
     row.ondblclick = () => {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get("from") === "producto") {
-        sessionStorage.setItem("categoriaSeleccionadaId", c.id);
-        location.href = "../productos/productos.html?refreshCategorias=1";
+      if (isCategoriaSelectMode) {
+        devolverCategoriaSeleccion(c);
       }
     };
 
     lista.appendChild(row);
   });
+}
+
+let _warnListener = null;
+let _warnFocusEl = null;
+
+function mostrarAdvertencia(texto, focusEl = codigoCategoria) {
+
+  const modal = document.getElementById('modalAdvertencia');
+  const txt = document.getElementById('modalAdvertenciaTexto');
+  const btn = modal?.querySelector('.btn-aceptar');
+
+  if (!modal || !txt || !btn) return;
+
+  txt.textContent = texto;
+  _warnFocusEl = focusEl || codigoCategoria;
+
+  modal.classList.remove('hidden');
+
+  setTimeout(() => btn.focus(), 30);
+
+  if (_warnListener) document.removeEventListener('keydown', _warnListener);
+
+  _warnListener = function (e) {
+
+    if (e.key === 'Enter' || e.key === 'Escape') {
+      e.preventDefault();
+      e.stopPropagation();
+      cerrarAdvertencia(true);
+    }
+  };
+
+  document.addEventListener('keydown', _warnListener);
+}
+
+function cerrarAdvertencia(refocus = false) {
+
+  const modal = document.getElementById('modalAdvertencia');
+  if (modal) modal.classList.add('hidden');
+
+  if (_warnListener) {
+    document.removeEventListener('keydown', _warnListener);
+    _warnListener = null;
+  }
+
+  if (refocus && _warnFocusEl) {
+    setTimeout(() => {
+      _warnFocusEl.focus();
+      _warnFocusEl.select?.();
+    }, 40);
+  }
 }
 
 /* ===== SELECCIONAR ===== */
@@ -183,8 +290,16 @@ function seleccionarCategoria(c) {
   categoriaId.value = c.id;
   nombreCategoria.value = c.nombre;
   ordenPantalla.value = c.orden_pantalla || 0;
- previewImagen.src = c.imagen ? `${c.imagen}` : ""
+ // liberar preview si existÃ­a
+if (previewURLCategoria) {
+  URL.revokeObjectURL(previewURLCategoria);
+  previewURLCategoria = null;
+}
+
+previewImagen.src = c.imagen ? c.imagen : "";
  activoCategoria.checked = c.activo === true;
+ mostrarVentaMedioCategoria.checked = c.mostrar_venta_medio === true;
+ mostrarMenuDigitalCategoria.checked = c.mostrar_menu_digital === true;
   habilitarForm()
   btnEliminar.disabled = false;
   btnCancelar.disabled = false;
@@ -194,36 +309,50 @@ function seleccionarCategoria(c) {
 
 /* ===== BUSCAR POR CODIGO ENTER ===== */
 codigoCategoria.addEventListener("keydown", async (e) => {
+
   if (e.key !== "Enter") return;
-  e.preventDefault();
+
   const valor = codigoCategoria.value.trim();
 
   if (!valor) {
+    e.preventDefault();
     await nuevo();
     return;
   }
 
-  const id = parseInt(valor);
+  const id = Number(valor);
+
   const data = await (await fetch(API)).json();
   const encontrada = data.find(c => Number(c.id) === id);
 
   if (encontrada) {
+    e.preventDefault();
     seleccionarCategoria(encontrada);
     return;
   }
 
-  abrirModalInfo({
-    titulo: "No encontrado",
-    mensaje: `No existe categoría con código ${id}`
-  });
+  //  Si no existe â†’ cortar propagaciÃ³n
+  e.preventDefault();
+  e.stopImmediatePropagation();
+
+mostrarAdvertencia(`No existe categorÃ­a con cÃ³digo ${id}`, codigoCategoria);
 });
+
 
 /* ===== NUEVO ===== */
 async function nuevo() {
   form.reset();
+  if (previewURLCategoria) {
+  URL.revokeObjectURL(previewURLCategoria);
+  previewURLCategoria = null;
+}
+
+previewImagen.src = "";
   previewImagen.src = "";
   habilitarForm();
   activoCategoria.checked = true;
+  mostrarVentaMedioCategoria.checked = false;
+  mostrarMenuDigitalCategoria.checked = false;
   categoriaSeleccionada = null;
   categoriaBackup = null;
   btnGuardar.disabled = false;
@@ -255,9 +384,20 @@ form.addEventListener("submit", async (e) => {
 
   const formData = new FormData();
   formData.append("activo", activoCategoria.checked);
+  formData.append("mostrar_venta_medio", mostrarVentaMedioCategoria.checked);
+  formData.append("mostrar_menu_digital", mostrarMenuDigitalCategoria.checked);
 
   formData.append("nombre", nombreCategoria.value.trim());
   formData.append("orden_pantalla", ordenPantalla.value || 0);
+
+  const ordenVentaMedio =
+    categoriaSeleccionada && categoriaBackup
+      ? Number(categoriaBackup.orden_venta_medio ?? 0)
+      : Number(ordenPantalla.value || 0);
+
+  if (Number.isFinite(ordenVentaMedio)) {
+    formData.append("orden_venta_medio", ordenVentaMedio);
+  }
 
   if (imagenCategoria.files[0]) {
     formData.append("imagen", imagenCategoria.files[0]);
@@ -269,68 +409,170 @@ form.addEventListener("submit", async (e) => {
 
   const method = categoriaSeleccionada ? "PUT" : "POST";
 
-  await fetch(url, {
+  const res = await fetch(url, {
     method,
     body: formData
   });
 
+  if (!res.ok) {
+    mostrarAdvertencia("Error al guardar la categorÃ­a");
+    return;
+  }
+
   estadoInicial();
   cargarCategorias();
+
+setTimeout(() => {
+  codigoCategoria.focus();
+  codigoCategoria.select();
+}, 80);
 });
 
 
 /* ===== ELIMINAR ===== */
-async function eliminar() {
+let categoriaAEliminar = null;
+
+function eliminar() {
+
   if (!categoriaSeleccionada) return;
 
-  abrirModalConfirm({
-    titulo: "Confirmar eliminación",
-    mensaje: `¿Desea eliminar la categoría #${categoriaSeleccionada}?`,
-    onConfirm: async () => {
-      const res = await fetch(`${API}/${categoriaSeleccionada}`, { method: "DELETE" });
+  categoriaAEliminar = categoriaSeleccionada;
 
-      if (res.ok) {
-        estadoInicial();
-        cargarCategorias();
-        return;
-      }
+  document.getElementById('modalNombreCategoria').textContent =
+    nombreCategoria.value;
 
-      let data = {};
-      try { data = await res.json(); } catch (_) {}
+  document.getElementById('modalEliminar')
+    .classList.remove('hidden');
+}
 
-      if (res.status === 409) {
-        const productos = (data.productos || []);
-        const listaProd = productos.length
-          ? `<b>Productos relacionados:</b><br>` +
-            productos.map(p => `• Producto #${p.id} — ${p.nombre}`).join("<br>")
-          : "";
+function cerrarModalEliminar() {
+  categoriaAEliminar = null;
+  document.getElementById('modalEliminar')
+    .classList.add('hidden');
+}
 
-        abrirModalInfo({
-          titulo: "No se puede eliminar",
-          mensaje: data.mensaje || `La categoría #${categoriaSeleccionada} está en uso.`,
-          extraHTML: listaProd
-        });
-        return;
-      }
+async function confirmarEliminar() {
 
-      abrirModalInfo({
-        titulo: "Error",
-        mensaje: data.mensaje || "No se pudo eliminar la categoría."
-      });
-    }
+  if (!categoriaAEliminar) return;
+
+  await fetch(`${API}/${categoriaAEliminar}`, {
+    method: 'DELETE'
   });
+
+  cerrarModalEliminar();
+  estadoInicial();
+  cargarCategorias();
 }
 
 /* ===== INDICADOR ORDEN ===== */
 function actualizarIndicadorOrden() {
   const thId = document.getElementById("thId");
   if (!thId) return;
-  thId.textContent = sortDir === "asc" ? "ID ▲" : "ID ▼";
+  thId.textContent = sortDir === "asc" ? "ID â–²" : "ID â–¼";
 }
+
+
+/* ===== ENTER NAVEGACION ===== */
+form.addEventListener("keydown", (e) => {
+  if (e.key !== "Enter") return;
+  if (document.activeElement.id === "codigoCategoria") return;
+  e.preventDefault();
+
+  const focusables = [nombreCategoria, ordenPantalla, imagenCategoria];
+  const index = focusables.indexOf(document.activeElement);
+
+  if (index < focusables.length - 1) {
+    focusables[index + 1].focus();
+  } else {
+    btnGuardar.click();
+  }
+});
+
+
+/* ===== ATAJOS ===== */
+document.addEventListener("keydown", (e) => {
+  if (isCategoriaModoSeleccion) {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      window.close();
+    }
+    return;
+  }
+
+  if (e.key === "F2") { e.preventDefault(); if (!btnNuevo.disabled) nuevo(); }
+  if (e.key === "F3") { e.preventDefault(); if (!btnGuardar.disabled) btnGuardar.click(); }
+  if (e.key === "F4") { e.preventDefault(); if (!btnCancelar.disabled) cancelar(); }
+  if (e.key === "Delete") { e.preventDefault(); if (!btnEliminar.disabled) eliminar(); }
+if (e.key === "Escape") {
+  // si el modalAdvertencia estÃ¡ abierto, no hacemos volverSeguro
+  const abierto = !document.getElementById("modalAdvertencia")?.classList.contains("hidden");
+  if (abierto) return;
+
+  e.preventDefault();
+  volverSeguro();
+}
+});
+
+function soloNumeros(input) {
+  input.addEventListener("input", () => {
+    input.value = input.value.replace(/[^0-9]/g, "");
+  });
+}
+
+/* ===== VALIDAR ORDEN DUPLICADO ===== */
+/* ===== VALIDAR ORDEN DUPLICADO (SOLO AVISA) ===== */
+async function validarOrdenDuplicado() {
+
+  const orden = Number(ordenPantalla.value);
+
+  if (!orden) {
+    quitarErrorOrden();
+    return true;
+  }
+
+  const data = await (await fetch(API)).json();
+
+  const duplicado = data.find(c =>
+    Number(c.orden_pantalla) === orden &&
+    Number(c.id) !== Number(categoriaSeleccionada)
+  );
+
+  if (duplicado) {
+    marcarErrorOrden();
+
+    mostrarAdvertencia(
+      `Ya existe una categorÃ­a con orden ${orden}. 
+      Puede guardar igual o cambiar el orden.`,
+      ordenPantalla
+    );
+
+    return true; 
+  }
+
+  quitarErrorOrden();
+  return true;
+}
+ordenPantalla.addEventListener("blur", validarOrdenDuplicado);
 
 /* ===== INIT ===== */
 document.addEventListener("DOMContentLoaded", () => {
+  if (isCategoriaModoSeleccion) {
+    const panelForm = document.querySelector(".panel-form");
+    const contenedor = document.querySelector(".admin-container");
+    const titulo = document.getElementById("moduloTitulo");
+    const btnVolver = document.querySelector(".btn-volver");
+
+    if (panelForm) panelForm.style.display = "none";
+    if (contenedor) contenedor.classList.add("modo-seleccion");
+    if (titulo) titulo.innerText = "Seleccionar Categoría";
+    if (btnVolver) btnVolver.onclick = () => window.close();
+  }
+
   estadoInicial();
+
+  baseModalEnableExitProtection({
+  hayCambios: hayCambiosSinGuardar
+});
 
   const thId = document.getElementById("thId");
   if (thId) {
@@ -350,33 +592,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }, 120);
 });
 
-/* ===== ENTER NAVEGACION ===== */
-form.addEventListener("keydown", (e) => {
-  if (e.key !== "Enter") return;
-  if (document.activeElement.id === "codigoCategoria") return;
-  e.preventDefault();
 
-  const focusables = [nombreCategoria, ordenPantalla, imagenCategoria];
-  const index = focusables.indexOf(document.activeElement);
 
-  if (index < focusables.length - 1) {
-    focusables[index + 1].focus();
-  } else {
-    btnGuardar.click();
-  }
-});
 
-/* ===== ATAJOS ===== */
-document.addEventListener("keydown", (e) => {
-  if (e.key === "F2") { e.preventDefault(); if (!btnNuevo.disabled) nuevo(); }
-  if (e.key === "F3") { e.preventDefault(); if (!btnGuardar.disabled) btnGuardar.click(); }
-  if (e.key === "F4") { e.preventDefault(); if (!btnCancelar.disabled) cancelar(); }
-  if (e.key === "Delete") { e.preventDefault(); if (!btnEliminar.disabled) eliminar(); }
-  if (e.key === "Escape") { e.preventDefault(); volver(); }
-});
 
-function soloNumeros(input) {
-  input.addEventListener("input", () => {
-    input.value = input.value.replace(/[^0-9]/g, "");
-  });
-}
+

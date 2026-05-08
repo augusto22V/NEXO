@@ -2,123 +2,177 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Andy Closet | Precio</title>
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="/manifest.json">
+  <title>LibreríaSys | Precio</title>
 
-  <link rel="stylesheet" href="../../compartido/css/base.css">
-  <link rel="stylesheet" href="precio.css">
+  <link rel="stylesheet" href="../../compartido/css/base.css?v=2026.04.19.08">
+  <link rel="stylesheet" href="../../compartido/css/panelAuditoria.css?v=2026.04.19.08">
+  <link rel="stylesheet" href="precio.css?v=2026.04.19.08">
 </head>
 <body>
 
-<!-- TOP BAR -->
-<div class="topbar">
-  <button class="btn-volver" onclick="volver()">← Volver</button>
-  <div class="titulo">
-    <h1>Stop Top</h1>
-    <span>Precio del Producto</span>
-  </div>
-</div>
-
-<div class="precio-container">
-
-  <!-- PRODUCTO -->
-  <div class="panel panel-producto">
-    <button class="btn-buscar" onclick="abrirSelector()">
-      🔍 Buscar producto
-    </button>
-
-    <strong id="nombreProducto">---</strong>
-    <small id="descripcionProducto"></small>
+  <div class="topbar" id="precioTopbar">
+    <button id="btnVolverPrecio" class="btn-volver" onclick="volver()">&larr; Volver</button>
+    <div class="titulo">
+      <span>Precio del Producto</span>
+    </div>
   </div>
 
-  <!-- PRECIO -->
-  <div class="panel panel-precio">
-    <form id="formPrecio">
+  <div class="precio-container">
 
-      <input type="hidden" id="producto_id">
+    <div class="panel panel-producto">
+      <div class="busqueda-linea">
+        <div class="campo-busqueda campo-busqueda-codigo">
+          <label for="inputBuscarProductoPrecio" class="label-inline">Codigo</label>
+          <input
+            type="text"
+            id="inputBuscarProductoPrecio"
+            class="input-busqueda-producto"
+            inputmode="search"
+            enterkeyhint="search"
+            autocomplete="off"
+          >
+        </div>
 
-      <div class="fila">
-        <label>Compra</label>
-        <input type="text" id="precioCompra" inputmode="numeric" required>
+        <div class="campo-busqueda campo-busqueda-descripcion">
+          <label for="descripcionProducto" class="label-inline">Descripcion</label>
+          <input
+            type="text"
+            id="descripcionProducto"
+            class="input-busqueda-descripcion"
+            autocomplete="off"
+            readonly
+            value=""
+          >
+        </div>
+
+        <button
+          id="btnBuscarProductoPrecio"
+          class="btn-buscar-inline"
+          type="button"
+          onclick="accionBuscarProductoManual()"
+          title="Buscar producto"
+        >
+          <img src="../../recursos/img/buscar.png" class="icono-buscar" alt="Buscar">
+        </button>
       </div>
 
-      <div class="fila">
-        <label>Transporte</label>
-        <input type="text" id="costoTransporte" inputmode="numeric">
+      <div class="meta-producto">
+        <strong id="nombreProducto" class="nombre-producto-inline">Sin producto seleccionado</strong>
       </div>
+    </div>
 
-      <hr>
+    <div class="panel panel-precio">
+      <form id="formPrecio">
+        <input type="hidden" id="producto_id">
 
-      <!-- TABLA -->
-      <table class="tabla">
-        <thead>
-          <tr>
-            <th>Tipo</th>
-            <th>%</th>
-            <th>Precio</th>
-          </tr>
-        </thead>
-        <tbody>
+        <div class="fila-grid fila-grid-2">
+          <div class="campo campo-inline">
+            <label for="monedaBaseEmpresa">Moneda Base Empresa</label>
+            <input type="text" id="monedaBaseEmpresa" readonly>
+          </div>
 
-          <tr data-tipo="venta">
-            <td>Venta</td>
-            <td>
-              <input
-                type="number"
-                class="margen"
-                step="0.01"
-                min="0"
-                inputmode="decimal"
-              >
-            </td>
-            <td>
-              <input type="text" class="precio" inputmode="numeric">
-            </td>
-          </tr>
+          <div class="campo campo-inline">
+            <label for="monedaCompraProducto">Moneda Compra Producto</label>
+            <div class="fila-moneda-producto-wrap">
+              <select id="monedaCompraProducto">
+                <option value="1">1 - Guaraní</option>
+                <option value="2">2 - Real</option>
+                <option value="3">3 - Dólar</option>
+              </select>
+              <span id="badgeMonedaProducto" class="badge-moneda-producto">---</span>
+            </div>
+          </div>
+        </div>
 
-          <tr data-tipo="minimo">
-            <td>Mínimo</td>
-            <td>
-              <input
-                type="number"
-                class="margen"
-                step="0.01"
-                min="0"
-                inputmode="decimal"
-              >
-            </td>
-            <td>
-              <input type="text" class="precio" inputmode="numeric">
-            </td>
-          </tr>
+        <div class="fila-grid fila-grid-2">
+          <div class="campo campo-inline">
+            <label id="labelPrecioCompra" for="precioCompra">Costo Compra</label>
+            <input type="text" id="precioCompra" inputmode="numeric" required>
+          </div>
 
-          <tr data-tipo="promo">
-            <td>Promo</td>
-            <td>
-              <input
-                type="number"
-                class="margen"
-                step="0.01"
-                min="0"
-                inputmode="decimal"
-              >
-            </td>
-            <td>
-              <input type="text" class="precio" inputmode="numeric">
-            </td>
-          </tr>
+          <div class="campo campo-inline">
+            <label for="costoMedioActual">Costo Total (Compra + Transporte)</label>
+            <input type="text" id="costoMedioActual" inputmode="numeric">
+          </div>
+        </div>
 
-        </tbody>
-      </table>
+        <hr class="separador">
 
-      <button type="submit" class="btn-guardar">
-        Guardar Precio
-      </button>
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th>TIPO</th>
+              <th>%</th>
+              <th>PRECIO</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr data-tipo="minorista">
+              <td>Minorista</td>
+              <td><input type="number" class="margen" step="0.01"></td>
+              <td><input type="text" class="precio"></td>
+            </tr>
+            <tr data-tipo="mayorista">
+              <td>Mayorista</td>
+              <td><input type="number" class="margen" step="0.01"></td>
+              <td><input type="text" class="precio"></td>
+            </tr>
+            <tr data-tipo="minimo">
+              <td>Minimo</td>
+              <td><input type="number" class="margen" step="0.01"></td>
+              <td><input type="text" class="precio"></td>
+            </tr>
+            <tr data-tipo="promocional">
+              <td>Promocional</td>
+              <td><input type="number" class="margen" step="0.01"></td>
+              <td><input type="text" class="precio"></td>
+            </tr>
+          </tbody>
+        </table>
 
-    </form>
+        <div class="acciones-precio">
+          <button type="button" id="btnValorPorCantidad" class="btn-secundario">Valor por Cantidad</button>
+          <button type="submit" id="btnGuardarPrecio" class="btn-guardar">Guardar Precio</button>
+        </div>
+
+        <panel-auditoria id="auditPrecio" data-tabla="producto" data-id-input="producto_id"></panel-auditoria>
+      </form>
+    </div>
   </div>
 
-</div>
+  <div id="modalValorCantidad" class="vp-modal" hidden>
+    <div class="vp-modal-backdrop" data-vp-close></div>
+    <div class="vp-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="vpTitulo">
+      <div class="vp-modal-head">
+        <h3 id="vpTitulo">Valor por Cantidad</h3>
+        <button type="button" id="btnCerrarValorCantidad" class="vp-close" title="Cerrar">X</button>
+      </div>
+      <div class="vp-modal-body">
+        <p class="vp-hint">Defina hasta 4 reglas por cantidad para este producto.</p>
+        <table class="vp-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Cantidad</th>
+              <th>% Valor</th>
+              <th>Valor</th>
+            </tr>
+          </thead>
+          <tbody id="vpBody"></tbody>
+        </table>
+      </div>
+      <div class="vp-modal-foot">
+        <button type="button" id="btnGuardarValorCantidad" class="btn-guardar">Guardar</button>
+        <button type="button" id="btnCancelarValorCantidad" class="btn-secundario">Cancelar</button>
+      </div>
+    </div>
+  </div>
 
-<script src="precio.js"></script>
+  <script src="../../compartido/js/panelAuditoria.js?v=2026.04.19.08"></script>
+  <script src="precio.js?v=2026.04.19.08"></script>
+  <script src="/compartido/js/seguridad.js"></script>
 </body>
 </html>

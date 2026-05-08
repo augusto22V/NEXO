@@ -1,4 +1,4 @@
-/* =========================
+﻿/* =========================
    LAYOUT
 ========================= */
 .admin-container{
@@ -6,11 +6,31 @@
   grid-template-columns:420px 1fr;
   gap:24px;
   padding:24px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+@media(max-width:1200px){
+  .admin-container{
+    grid-template-columns:380px 1fr;
+    gap:20px;
+    padding:20px;
+  }
 }
 
 @media(max-width:1000px){
   .admin-container{
     grid-template-columns:1fr;
+    gap:16px;
+    padding:16px;
+  }
+}
+
+@media(max-width:768px){
+  .admin-container{
+    padding:12px;
+    gap:12px;
   }
 }
 
@@ -40,6 +60,14 @@
   font-size:15px;
   border-radius:14px;
   border:1px solid #ccc;
+  box-sizing: border-box;
+}
+
+@media(max-width:768px){
+  .panel-form input{
+    padding:10px;
+    font-size:14px;
+  }
 }
 
 /* inputs disabled */
@@ -59,9 +87,23 @@
 ========================= */
 .acciones{
   display:grid;
-  grid-template-columns:repeat(2,1fr);
+  grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));
   gap:10px;
   margin-top:20px;
+}
+
+@media(max-width:768px){
+  .acciones{
+    grid-template-columns:repeat(2, 1fr);
+    gap:8px;
+  }
+}
+
+@media(max-width:480px){
+  .acciones{
+    grid-template-columns:1fr;
+    gap:8px;
+  }
 }
 
 .acciones button{
@@ -102,6 +144,7 @@
 #btnGuardar{ background:#2e7d32; color:#fff; }
 #btnEliminar{ background:#c62828; color:#fff; }
 #btnCancelar{ background:#757575; color:#fff; }
+#btnSeleccionar{ background:#2196F3; color:#fff; }
 
 /* =========================
    LISTA
@@ -120,9 +163,21 @@
   font-size:16px;
   outline:none;
 }
-.buscador::placeholder{
-  color:#928d8d;
-  font-size:15px;
+
+@media(max-width:768px){
+  .buscador{
+    width:80%;
+    padding:12px 16px;
+    font-size:14px;
+  }
+}
+
+@media(max-width:480px){
+  .buscador{
+    width:95%;
+    padding:10px 14px;
+    font-size:13px;
+  }
 }
 
 .aviso-tabla{
@@ -140,17 +195,27 @@
   border:1px solid #eee;
   border-radius:14px;
   overflow:hidden;
+  width: 100%;
 }
 
 .tabla-header{
   display:grid;
- grid-template-columns:70px 220px 140px 140px 220px 200px 120px;
+  grid-template-columns:70px 1fr 120px 120px 1fr 1fr 100px;
   background:#f0f0f0;
   padding:14px 16px;
   font-size:14px;
   font-weight:700;
   color:#333;
   border-bottom:1px solid #ddd;
+  gap: 8px;
+}
+
+@media(max-width:1200px){
+  .tabla-header{
+    grid-template-columns:60px 1fr 100px 100px 1fr 1fr 80px;
+    padding:12px 14px;
+    font-size:13px;
+  }
 }
 
 .tabla-body{
@@ -161,12 +226,22 @@
 
 .tabla-row{
   display:grid;
-  grid-template-columns:70px 220px 140px 140px 220px 200px 120px;
+  grid-template-columns:70px 1fr 120px 120px 1fr 1fr 100px;
   padding:12px 16px;
   border-top:1px solid #eee;
   font-size:14px;
   cursor:pointer;
   align-items:center;
+  gap: 8px;
+  min-width: fit-content;
+}
+
+@media(max-width:1200px){
+  .tabla-row{
+    grid-template-columns:60px 1fr 100px 100px 1fr 1fr 80px;
+    padding:10px 14px;
+    font-size:13px;
+  }
 }
 
 .tabla-row:hover{
@@ -179,7 +254,7 @@
 }
 
 /* =========================
-   BOTÓN VOLVER (igual)
+   BOTÃ“N VOLVER (igual)
 ========================= */
 .btn-volver{
   background:rgba(255,255,255,0.2);
@@ -295,4 +370,151 @@
 .admin-container {
   width: 100%;
   max-width: 100%;
+}
+/* =========================
+   TABLA RESPONSIVE CELULAR
+   Mostrar: ID, Nombre, RUC, Telefono, Direccion
+========================= */
+@media (max-width: 768px) {
+  .admin-container {
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .panel {
+    padding: 14px;
+    border-radius: 14px;
+  }
+
+  .panel-form label {
+    margin-top: 8px;
+    font-size: 13px;
+  }
+
+  .panel-form input {
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  .acciones {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  .acciones button {
+    min-height: 40px;
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .acciones button img {
+    width: 18px;
+    height: 18px;
+  }
+
+  .buscador {
+    width: 100%;
+    margin: 0 0 12px;
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+
+  .tabla-proveedores {
+    width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .tabla-body {
+    max-height: 46dvh;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .tabla-header,
+  .tabla-row {
+    grid-template-columns: 44px minmax(96px, 1.12fr) minmax(80px, 0.88fr) minmax(88px, 0.95fr) minmax(96px, 1.05fr);
+    min-width: 0;
+    gap: 6px;
+    padding-inline: 8px;
+  }
+
+  .tabla-header {
+    padding-block: 10px;
+    font-size: 11px;
+  }
+
+  .tabla-row {
+    padding-block: 8px;
+    font-size: 11px;
+  }
+
+  .tabla-header span:nth-child(6),
+  .tabla-row span:nth-child(6),
+  .tabla-header span:nth-child(7),
+  .tabla-row span:nth-child(7) {
+    display: none;
+  }
+
+  .tabla-row span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+@media (max-width: 768px) and (orientation: landscape) {
+  .admin-container {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .panel {
+    padding: 12px;
+  }
+
+  .acciones {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .tabla-body {
+    max-height: 38dvh;
+  }
+
+  .tabla-header,
+  .tabla-row {
+    grid-template-columns: 42px minmax(86px, 1.1fr) minmax(76px, 0.88fr) minmax(82px, 0.92fr) minmax(88px, 1fr);
+    gap: 5px;
+  }
+
+  .tabla-header {
+    font-size: 10px;
+  }
+
+  .tabla-row {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) and (orientation: portrait) {
+  .acciones {
+    grid-template-columns: 1fr;
+  }
+
+  .tabla-header,
+  .tabla-row {
+    grid-template-columns: 38px minmax(78px, 1.08fr) minmax(68px, 0.82fr) minmax(72px, 0.88fr) minmax(78px, 0.98fr);
+    gap: 4px;
+    padding-inline: 6px;
+  }
+
+  .tabla-header,
+  .tabla-row {
+    font-size: 10px;
+  }
+
+  .tabla-body {
+    max-height: 48dvh;
+  }
 }

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="manifest" href="/manifest.json" />
+  <title>LibreríaSys | Recetas</title>
+
+  <link rel="stylesheet" href="../../compartido/css/base.css" />
+  <link rel="stylesheet" href="../../compartido/css/panelAuditoria.css" />
+  <link rel="stylesheet" href="receta.css" />
+</head>
+<body>
+  <div class="topbar">
+    <button class="btn-volver" onclick="window.location.href='/home.html'">? Volver</button>
+    <div class="titulo"><span>Recetas de Produccion</span></div>
+  </div>
+
+  <main class="receta-layout">
+    <section class="panel formulario-panel">
+      <div class="panel-head">
+        <h2>Nueva Receta</h2>
+        <button id="btnIrProduccion" class="btn btn-soft" type="button">Ir a Produccion</button>
+      </div>
+
+      <form id="formReceta" autocomplete="off">
+        <input id="recetaId" type="hidden" />
+        <div class="grid-top">
+          <div class="field autocomplete-wrap">
+            <label>Producto final</label>
+            <div class="input-with-action">
+              <input id="productoFinalSearch" type="text" placeholder="Buscar producto por nombre..." />
+              <button id="btnBuscarProductoFinal" class="btn-lupa" type="button" title="Buscar producto final">??</button>
+            </div>
+            <input id="productoFinalId" type="hidden" />
+            <div id="productoFinalList" class="autocomplete-list"></div>
+          </div>
+
+          <div class="field">
+            <label>Nombre de receta</label>
+            <input id="nombreReceta" type="text" placeholder="Ej: Receta Hamburguesa Clasica" />
+          </div>
+        </div>
+
+        <div class="insumos-head">
+          <h3>Insumos</h3>
+          <button id="btnAgregarInsumo" class="btn btn-soft" type="button">+ Agregar insumo</button>
+        </div>
+
+        <div class="tabla-wrap">
+          <table class="tabla-insumos">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Unidad</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tbodyInsumos"></tbody>
+          </table>
+        </div>
+
+        <div class="actions">
+          <button id="btnGuardarReceta" class="btn btn-primary" type="submit">Guardar receta</button>
+        </div>
+        <panel-auditoria id="auditReceta" data-tabla="receta" data-id-input="recetaId"></panel-auditoria>
+      </form>
+
+      <div id="statusReceta" class="status"></div>
+    </section>
+
+    <section class="panel listado-panel">
+      <div class="panel-head">
+        <h2>Recetas</h2>
+        <button id="btnRefrescarRecetas" class="btn btn-soft" type="button">Actualizar</button>
+      </div>
+
+      <div class="field">
+        <label>Buscar receta</label>
+        <input id="buscarReceta" type="text" placeholder="Nombre de receta o producto final" />
+      </div>
+
+      <div class="tabla-wrap listado-wrap">
+        <table class="tabla-listado">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Receta</th>
+              <th>Producto final</th>
+              <th>Insumos</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyRecetas"></tbody>
+        </table>
+      </div>
+
+      <div class="detalle-box">
+        <h3>Detalle</h3>
+        <div id="detalleReceta" class="detalle-receta">Seleccione una receta para ver el detalle.</div>
+      </div>
+    </section>
+  </main>
+
+  <div id="pickerOverlay" class="picker-overlay" hidden>
+    <div class="picker-modal" role="dialog" aria-modal="true" aria-labelledby="pickerTitulo">
+      <div class="picker-head">
+        <h3 id="pickerTitulo">Seleccionar producto</h3>
+        <button id="pickerCerrar" class="btn btn-soft" type="button">Cerrar</button>
+      </div>
+      <input id="pickerBuscar" type="text" placeholder="Buscar..." />
+      <div id="pickerLista" class="picker-lista"></div>
+    </div>
+  </div>
+
+  <script src="../../compartido/js/panelAuditoria.js"></script>
+  <script src="receta.js"></script>
+  <script src="/compartido/js/seguridad.js"></script>
+</body>
+</html>

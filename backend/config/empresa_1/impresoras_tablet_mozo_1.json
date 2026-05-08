@@ -1,0 +1,14 @@
+{
+  "empresa_id": 1,
+  "terminal_id": 4,
+  "preparo": {
+    "tipo": "red",
+    "nombre": "Preparo2",
+    "ip": "192.168.123.100",
+    "puerto": 9100
+  },
+  "venta": {
+    "tipo": "usb",
+    "nombre": "Venta2"
+  }
+}

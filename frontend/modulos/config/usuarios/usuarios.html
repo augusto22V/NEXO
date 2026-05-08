@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>LibreríaSys | Usuarios</title>
+
+<link rel="stylesheet" href="../../../compartido/css/base.css">
+<link rel="stylesheet" href="../../../compartido/css/panelAuditoria.css">
+<link rel="stylesheet" href="usuarios.css">
+</head>
+
+<body>
+
+<div class="topbar">
+  <button class="btn-volver" onclick="volver()">Volver</button>
+
+  <div class="titulo">
+    <span>Configuracion de Usuarios</span>
+  </div>
+</div>
+
+<main class="contenedor">
+  <section class="panel">
+    <div class="panel-header">
+      <button class="btn-nuevo" onclick="nuevoUsuario()">+ Nuevo Usuario</button>
+    </div>
+
+    <table class="tabla">
+      <thead>
+        <tr>
+          <th>Usuario</th>
+          <th>Nombre</th>
+          <th>Rol/Tipo</th>
+          <th>Activo</th>
+          <th>Programas</th>
+          <th>Accion</th>
+        </tr>
+      </thead>
+      <tbody id="tablaUsuarios"></tbody>
+    </table>
+  </section>
+</main>
+
+<div id="modalUsuario" class="modal">
+  <div class="modal-content">
+    <h3 id="tituloModal">Nuevo Usuario</h3>
+    <input type="hidden" id="usuarioIdActual">
+
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>Usuario</label>
+        <input id="nuevoUsuarioNombre">
+      </div>
+
+      <div class="form-group full">
+        <label>Nombre</label>
+        <input id="nuevoNombre">
+      </div>
+
+      <div class="form-group full">
+        <label>Contrasena</label>
+        <input id="nuevoPassword" type="password">
+      </div>
+
+      <div class="form-group">
+        <label>Rol / Tipo</label>
+        <select id="nuevoRol"></select>
+      </div>
+
+      <div class="form-group">
+        <label>Activo</label>
+        <label class="check-inline">
+          <input type="checkbox" id="nuevoActivo" checked>
+          Activo
+        </label>
+      </div>
+
+      <div class="form-group full rol-sugerencia">
+        <span class="subtit">Plantilla base por rol</span>
+        <p id="rolSugerencia">-</p>
+      </div>
+
+      <div class="form-group">
+        <label>Modo Factura</label>
+        <select id="nuevoModoFactura">
+          <option value="PREGUNTAR">Preguntar</option>
+          <option value="SIEMPRE">Siempre</option>
+          <option value="NUNCA">Nunca</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Modo Impresion</label>
+        <select id="nuevoModoImpresion">
+          <option value="AUTO">Automatico</option>
+          <option value="MANUAL">Manual</option>
+        </select>
+      </div>
+
+      <div class="form-group full">
+        <label class="check-inline">
+          <input type="checkbox" id="nuevoModoConfirmacion">
+          Confirmar antes de cobrar
+        </label>
+      </div>
+
+      <div class="form-group full">
+        <button id="btnConfigProgramas" type="button" class="btn-outline" onclick="abrirProgramasDesdeModal()">
+          Configurar programas del usuario
+        </button>
+      </div>
+
+      <div class="form-group full">
+        <panel-auditoria id="auditUsuario" data-tabla="usuario" data-id-input="usuarioIdActual"></panel-auditoria>
+      </div>
+
+      <div class="modal-buttons full">
+        <button onclick="guardarUsuario()" class="btn-primary">Guardar</button>
+        <button onclick="cerrarModal()" class="btn-secondary">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="modalProgramasUsuario" class="modal">
+  <div class="modal-content modal-content-wide">
+    <h3>Programas por Usuario</h3>
+    <p id="programaUsuarioInfo" class="programa-info">-</p>
+
+    <div class="programa-dual">
+      <div class="programa-col">
+        <label>Disponibles</label>
+        <input id="filtroDisponibles" placeholder="Filtrar disponibles...">
+        <select id="listaDisponibles" multiple size="12"></select>
+      </div>
+
+      <div class="programa-actions">
+        <button id="btnAgregarPrograma" type="button" class="btn-primary">Agregar -></button>
+        <button id="btnQuitarPrograma" type="button" class="btn-secondary"><- Quitar</button>
+        <button id="btnRestaurarPlantilla" type="button" class="btn-outline">Restaurar plantilla rol</button>
+      </div>
+
+      <div class="programa-col">
+        <label>Asignados</label>
+        <input id="filtroAsignados" placeholder="Filtrar asignados...">
+        <select id="listaAsignados" multiple size="12"></select>
+      </div>
+    </div>
+
+    <div class="modal-buttons">
+      <button id="btnGuardarProgramas" type="button" class="btn-primary">Guardar programas</button>
+      <button id="btnCerrarProgramas" type="button" class="btn-secondary">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script src="../../../compartido/js/panelAuditoria.js"></script>
+<script src="/compartido/js/programas.acceso.js"></script>
+<script src="usuarios.js"></script>
+<script src="/compartido/js/seguridad.js"></script>
+
+</body>
+</html>

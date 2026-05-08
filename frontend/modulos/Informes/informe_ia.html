@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="/manifest.json">
+  <title>LibreríaSys | Informe de Compras y  Ventas IA</title>
+  <link rel="stylesheet" href="../../compartido/css/base.css">
+  <link rel="stylesheet" href="../../compartido/css/home.css">
+  <link rel="stylesheet" href="informes.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="topbar no-print">
+    <button class="btn-volver" onclick="window.location.href='/home.html'">Volver</button>
+    <div class="titulo"><span>Informe de Compras y Ventas IA</span></div>
+    <div class="topbar-acciones">
+      <button class="btn-accion btn-imprimir" onclick="window.location.href='/home.html'">Salir</button>
+    </div>
+  </div>
+
+  <div class="informe-wrap ia-wrap">
+    <div class="informe-container ia-container">
+      <div class="filtro-fecha-wrap ia-query-wrap">
+        <div class="filtro-fecha-titulo">Consulta inteligente</div>
+        <div class="ia-context-row">
+          <label for="contextSelector">Contexto</label>
+          <select id="contextSelector" class="ia-context-select">
+            <option value="ventas">Ventas</option>
+            <option value="compras">Compras</option>
+            <option value="todos" selected>Todos</option>
+          </select>
+        </div>
+        <div class="ia-query-row">
+          <textarea id="prompt" class="ia-prompt" placeholder="Ej: Cuantas ventas hizo Juan en todo el tiempo? o Ventas por producto este mes"></textarea>
+          <button id="btnGenerar" class="btn-filtrar ia-btn">Generar</button>
+        </div>
+
+        <div id="quickAnswerCard" class="ia-quick-card">
+          <div class="ia-quick-title">Respuesta IA</div>
+          <div id="quickAnswer" class="ia-quick-body"></div>
+        </div>
+
+        <div class="ia-analysis-grid">
+          <div class="ia-analysis-card">
+            <div class="ia-quick-title">Analisis Automatico</div>
+            <ul id="analysisList" class="ia-list"></ul>
+          </div>
+          <div class="ia-analysis-card">
+            <div class="ia-quick-title">Recomendaciones</div>
+            <ul id="recommendList" class="ia-list"></ul>
+          </div>
+        </div>
+        <div id="metaText" class="ia-meta">Esperando consulta...</div>
+        <div id="status" class="status"></div>
+      </div>
+
+      <section id="kpiGrid" class="kpis ia-kpis"></section>
+
+      <section class="charts ia-charts">
+        <article class="chart-card ia-chart-card">
+          <h3>Ventas por Fecha</h3>
+          <div class="chart-holder"><canvas id="chartFecha"></canvas></div>
+        </article>
+        <article class="chart-card ia-chart-card">
+          <h3>Ventas por Producto</h3>
+          <div class="chart-holder"><canvas id="chartProducto"></canvas></div>
+        </article>
+      </section>
+
+      <section class="table-card ia-table-card">
+        <div class="table-scroll ia-table-scroll">
+          <table class="informe-tabla">
+            <thead id="theadRows"><tr><th>Resultado</th></tr></thead>
+            <tbody id="tbodyRows"><tr><td>Escriba una consulta y presione Generar</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <div id="fechaGenerado" class="informe-pie ia-foot"></div>
+    </div>
+  </div>
+
+  <script src="informe_ia.js"></script>
+  <script src="/compartido/js/seguridad.js"></script>
+</body>
+</html>
+
+
+

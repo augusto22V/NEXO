@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" rx="16" fill="#f0fdf4"/>
+  <rect x="52" y="64" width="96" height="56" rx="10" fill="#ffffff" stroke="#86efac" stroke-width="4"/>
+  <rect x="60" y="124" width="80" height="20" rx="4" fill="#cbd5e1"/>
+  <text x="100" y="178" text-anchor="middle" font-family="Segoe UI,system-ui,sans-serif" font-size="13" fill="#166534">Borrador</text>
+</svg>

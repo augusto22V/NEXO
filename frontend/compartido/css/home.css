@@ -1,24 +1,176 @@
-/* ===== HEADER ===== */
-.home-header {
-  background: #1F1F1F; /* negro elegante */
-  color: white;
-  padding: 22px 28px;
-  box-shadow: 0 6px 20px rgba(0,0,0,.15);
+﻿/* =========================
+   VARIABLES
+========================= */
+:root{
+  --color-principal:#147696;
+  --color-hover:#418F9E;
+  --color-text:#1F1F1F;
 }
 
-.home-header h1 {
-  font-size: 26px;
+/* =========================
+   HEADER
+========================= */
+
+.home-header {
+  background: linear-gradient(135deg, #1F2A30, #26343B);
+  padding: 10px 30px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.home-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* LOGO + MARCA */
+.home-brand {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+}
+
+.logo-img {
+  height: 50px;
+  transform: scale(1.5);
+  transform-origin: left center;
+}
+
+.brand-text {
+  font-size: 28px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+/* =========================
+   USUARIO HEADER
+========================= */
+
+.user-box {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* NOMBRE */
+#usuarioNombre {
+  font-size: 16px;
   font-weight: 600;
+  color: #fff;
+}
+
+/* ROL */
+.rol-tag {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  text-transform: uppercase;
   letter-spacing: .5px;
 }
 
-.home-header span {
+.rol-super    { background: rgba(126,217,87,0.15); color: #7ED957; border: 1px solid #7ED957; }
+.rol-admin    { background: #4CAF50; color: #fff; }
+.rol-vendedor { background: #457b9d; color: #fff; }
+
+/* EMPRESA */
+.empresa-tag {
   font-size: 14px;
-  opacity: .8;
-  color: #7ED957; /* verde lima marca */
+  color: #fff;
+  font-weight: 600;
+  opacity: 0.9;
 }
 
-/* ===== DASHBOARD ===== */
+/* BOTON SALIR */
+#btnSalir,
+#btnLoginHeader {
+  background: transparent;
+  color: rgba(255,255,255,0.7);
+  border: 1px solid rgba(255,255,255,0.2);
+  font-size: 13px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: .2s;
+}
+
+#btnSalir:hover,
+#btnLoginHeader:hover {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+}
+
+/* =========================
+   BARRA SUPERIOR
+========================= */
+
+.home-shortcuts{
+  background: #fff;
+  border-bottom: 1px solid rgba(0,0,0,.1);
+  padding: 0 18px;
+  display: flex;
+}
+
+.shortcut{
+  border: none;
+  background: transparent;
+  color: var(--color-text);
+  padding: 12px 16px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  border-right: 1px solid rgba(0,0,0,.08);
+  transition: .2s;
+}
+
+.shortcut:last-child{
+  border-right: none;
+}
+
+.shortcut:hover{
+  background: rgba(0,0,0,.03);
+  border-bottom-color: var(--color-principal);
+}
+
+/* =========================
+   DROPDOWN
+========================= */
+
+.shortcut-wrap { position: relative; }
+
+.drop-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  background: #fff;
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.13);
+  min-width: 200px;
+  z-index: 200;
+}
+
+.shortcut-wrap.open .drop-menu { display: block; }
+
+.drop-item {
+  padding: 11px 16px;
+  font-size: 13px;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+}
+
+.drop-item:last-child { border-bottom: none; }
+
+.drop-item:hover { background: #f5f5f5; }
+
+/* =========================
+   DASHBOARD
+========================= */
+
 .dashboard {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -27,108 +179,585 @@
   background: #f7f7f7;
 }
 
-/* ===== TARJETAS ===== */
+/* =========================
+   CARDS
+========================= */
+
 .card {
-  background: white;
+  background: #fff;
   border-radius: 18px;
   padding: 30px;
   text-align: center;
   cursor: pointer;
-
   box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-  transition: transform .2s ease, box-shadow .2s ease, border .2s ease;
-
-  border: 2px solid transparent;
+  transition: .2s;
+    min-height: 120px; 
 }
 
 .card:hover {
   transform: translateY(-6px);
   box-shadow: 0 16px 40px rgba(0,0,0,0.15);
-  border-color: #7ED957;
+  border: 2px solid var(--color-principal);
 }
 
-/* ===== ICONO ===== */
 .card i {
   font-size: 48px;
-  color: #7ED957;
+  color: var(--color-principal);
   margin-bottom: 15px;
-  transition: transform .2s ease;
 }
 
-.card:hover i {
-  transform: scale(1.1);
-}
-
-/* ===== TITULO ===== */
 .card h3 {
   margin-bottom: 6px;
   font-weight: 600;
-  color: #1F1F1F;
 }
 
-/* ===== TEXTO ===== */
 .card p {
   font-size: 14px;
   color: #777;
 }
-/* ===== CARD COMPRA ===== */
-.card-compra {
+
+/* BLOQUEADO */
+.card.bloqueado {
+  opacity: 0.35;
+  pointer-events: none;
+  filter: grayscale(1);
+}
+
+/* =========================
+   FOOTER
+========================= */
+
+.home-footer{
+  padding: 14px 22px;
+  text-align: right;
+  font-weight: 800;
+  font-size: 12px;
+  color: rgba(0,0,0,.55);
+  background: #f7f7f7;
+  border-top: 1px solid rgba(0,0,0,0.06);
+}
+
+/* =========================
+   ANIMACION
+========================= */
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 900px){
+  .dashboard{
+    padding: 22px;
+    gap: 18px;
+  }
+}
+
+@media (max-width: 700px){
+  .dashboard{
+    grid-template-columns: repeat(2, minmax(150px, 1fr));
+    padding: 18px;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 520px){
+  .home-shortcuts{
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
+
+
+/* =========================
+   TABLET GRANDE (10-11")
+========================= */
+@media (max-width: 1024px){
+
+  .brand-text {
+    font-size: 24px;
+  }
+
+  .logo-img {
+    transform: scale(1.3);
+  }
+
+  .dashboard {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    padding: 25px;
+  }
+
+}
+
+/* =========================
+   TABLET 7"
+========================= */
+@media (max-width: 768px){
+
+  .home-header {
+    padding: 8px 16px;
+  }
+
+  .brand-text {
+    font-size: 20px;
+  }
+
+  .logo-img {
+    transform: scale(1.1);
+  }
+
+  .user-box {
+    gap: 10px;
+  }
+
+  #usuarioNombre {
+    font-size: 14px;
+  }
+
+  .empresa-tag {
+    display: none; /* opcional, limpia espacio */
+  }
+
+  .dashboard {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    padding: 18px;
+  }
+
+  .card {
+    padding: 20px;
+  }
+
+}
+
+/* =========================
+   CELULAR
+========================= */
+@media (max-width: 520px){
+
+  .home-header-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .home-brand {
+    gap: 12px;
+  }
+
+  .brand-text {
+    font-size: 18px;
+  }
+
+  .logo-img {
+    transform: scale(1);
+  }
+
+  .user-box {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  #usuarioNombre {
+    font-size: 13px;
+  }
+
+  .rol-tag {
+    font-size: 10px;
+  }
+
+  #btnSalir,
+#btnLoginHeader {
+    font-size: 11px;
+    padding: 5px 10px;
+  }
+
+  .dashboard {
+    grid-template-columns: 1fr;
+    padding: 14px;
+    gap: 14px;
+  }
+
+  .card {
+    padding: 18px;
+  }
+
+  .card i {
+    font-size: 36px;
+  }
+
+  .home-shortcuts {
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .shortcut {
+    flex: 0 0 auto;
+  }
+
+}
+
+
+/* FONDO */
+.modal-calc{
+  display: none;
+  position: fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background: rgba(0,0,0,0.4);
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+/* CAJA */
+.modal-contenido{
+  width: 380px;
+  height: 600px;
+  max-height: 90vh;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 10px;
 }
 
-.compra-actions {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-top: 6px;
+/* HEADER */
+.modal-header{
+  display:flex;
+  justify-content:space-between;
+  padding:10px;
+  background:#1f6f82;
+  color:white;
 }
 
-.compra-total {
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px solid rgba(0,0,0,.08);
-  font-size: 14px;
-  color: #444;
+/* IFRAME */
+.calc-frame{
+  flex:1;
+  border:none;
 }
-
-/* ===== BOTONES (MEJORADOS) ===== */
-.btn-comprar {
-  border: none;
-  padding: 10px 14px;
-  border-radius: 12px;
+.modal-header button{
+  font-size: 20px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.2);
+  color: white;
   cursor: pointer;
-  font-weight: 700;
-  transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  box-shadow: 0 8px 18px rgba(0,0,0,.10);
 }
 
-.btn-comprar:active {
-  transform: translateY(1px) scale(.99);
+.modal-header button:hover{
+  background: rgba(255,255,255,0.4);
 }
 
-.btn-comprar--primary {
-  background: #7ED957; /* tu verde marca */
-  color: #1F1F1F;
+/* =========================
+   POS MOBILE PORTRAIT
+========================= */
+@media (max-width: 520px) and (orientation: portrait){
+
+  html,
+  body{
+    height:100%;
+  }
+
+  body{
+    min-height:100dvh;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    background:#f7f7f7;
+  }
+
+  .home-header,
+  .home-shortcuts,
+  .home-footer{
+    flex-shrink:0;
+  }
+
+  .home-header{
+    padding:8px 12px;
+  }
+
+  .home-header-top{
+    flex-direction:column;
+    align-items:flex-start;
+    gap:8px;
+  }
+
+  .home-brand{
+    gap:12px;
+  }
+
+  .brand-text{
+    font-size:20px;
+  }
+
+  .logo-img{
+    transform:scale(1);
+  }
+
+  .user-box{
+    width:100%;
+    justify-content:space-between;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+
+  #usuarioNombre{
+    font-size:13px;
+  }
+
+  .rol-tag{
+    font-size:10px;
+  }
+
+  .empresa-tag{
+    display:none;
+  }
+
+  #btnSalir,
+  #btnLoginHeader{
+    font-size:10px;
+    padding:5px 10px;
+  }
+
+  .home-shortcuts{
+    display:flex;
+    gap:8px;
+    padding:8px 10px;
+    overflow-x:auto;
+    overflow-y:hidden;
+    white-space:nowrap;
+    scrollbar-width:none;
+    position:relative;
+    z-index:30;
+    background:#fff;
+  }
+
+  .home-shortcuts::-webkit-scrollbar{
+    display:none;
+  }
+
+  .shortcut-wrap,
+  .shortcut{
+    flex:0 0 auto;
+  }
+
+  .shortcut-mobile-only{
+    display:inline-flex;
+  }
+
+  .shortcut{
+    min-height:42px;
+    padding:10px 14px;
+    border-right:none;
+    border:1px solid rgba(0,0,0,.08);
+    border-radius:12px;
+    background:#fff;
+  }
+
+  .shortcut-active-mobile{
+    background:var(--color-principal);
+    color:#fff;
+    border-color:var(--color-principal);
+    box-shadow:0 6px 16px rgba(20,118,150,.22);
+  }
+
+  .drop-menu{
+    display:none !important;
+  }
+
+  .dashboard{
+    flex:1 1 auto;
+    min-height:0;
+    overflow-y:auto;
+    overflow-x:hidden;
+    grid-template-columns:repeat(3, minmax(0, 1fr));
+    --mobile-card-height:clamp(86px, calc((100dvh - 216px) / 3), 116px);
+    grid-auto-rows:var(--mobile-card-height);
+    gap:8px;
+    padding:8px 8px 12px;
+    align-content:start;
+  }
+
+  .card{
+    min-height:var(--mobile-card-height);
+    padding:12px 8px;
+    border-radius:12px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:flex-start;
+    text-align:left;
+  }
+
+  .card i{
+    font-size:20px;
+    margin-bottom:6px;
+  }
+
+  .card h3{
+    margin:0 0 4px;
+    font-size:12px;
+    line-height:1.15;
+  }
+
+  .card p{
+    margin:0;
+    font-size:10px;
+    line-height:1.2;
+  }
+
+  .dashboard-mobile-generated .card,
+  .card-mobile-action{
+    width:auto;
+    min-width:0;
+  }
+
+  .home-footer{
+    padding:10px 12px calc(env(safe-area-inset-bottom) + 8px);
+    font-size:10px;
+  }
 }
 
-.btn-comprar--primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 14px 28px rgba(0,0,0,.16);
+
+
+
+/* =========================
+   POS MOBILE LANDSCAPE
+   (solo celular horizontal)
+========================= */
+@media (max-width: 900px) and (max-height: 520px) and (orientation: landscape){
+  body{
+    min-height:100dvh;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+  }
+
+  .home-header{
+    padding:6px 10px;
+  }
+
+  .home-header-top{
+    align-items:center;
+    gap:8px;
+  }
+
+  .home-brand{
+    gap:10px;
+  }
+
+  .brand-text{
+    font-size:16px;
+    letter-spacing:.8px;
+  }
+
+  .logo-img{
+    height:34px;
+    transform:scale(1);
+  }
+
+  .user-box{
+    gap:8px;
+    flex-wrap:wrap;
+  }
+
+  #usuarioNombre{
+    font-size:12px;
+  }
+
+  .rol-tag{
+    font-size:10px;
+    padding:3px 8px;
+  }
+
+  #btnSalir,
+  #btnLoginHeader{
+    font-size:11px;
+    padding:4px 10px;
+  }
+
+  .home-shortcuts{
+    display:flex;
+    gap:6px;
+    padding:6px 8px;
+    overflow-x:auto;
+    overflow-y:hidden;
+    white-space:nowrap;
+    scrollbar-width:none;
+    border-bottom:1px solid rgba(0,0,0,.08);
+  }
+
+  .home-shortcuts::-webkit-scrollbar{
+    display:none;
+  }
+
+  .shortcut-wrap,
+  .shortcut{
+    flex:0 0 auto;
+  }
+
+  .shortcut{
+    min-height:34px;
+    padding:8px 10px;
+    border-right:none;
+    border:1px solid rgba(0,0,0,.08);
+    border-radius:10px;
+    font-size:12px;
+  }
+
+  .drop-menu{
+    display:none !important;
+  }
+
+  .dashboard{
+    flex:1 1 auto;
+    min-height:0;
+    overflow-y:auto;
+    overflow-x:hidden;
+    grid-template-columns:repeat(4, minmax(0, 1fr));
+    --mobile-card-height:clamp(74px, calc((100dvh - 156px) / 2), 96px);
+    grid-auto-rows:var(--mobile-card-height);
+    gap:6px;
+    padding:8px 8px 10px;
+    align-content:start;
+  }
+
+  .card{
+    min-height:var(--mobile-card-height);
+    padding:8px 7px;
+    border-radius:10px;
+  }
+
+  .card i{
+    font-size:16px;
+    margin-bottom:4px;
+  }
+
+  .card h3{
+    margin:0 0 3px;
+    font-size:11px;
+    line-height:1.1;
+  }
+
+  .card p{
+    margin:0;
+    font-size:9px;
+    line-height:1.15;
+  }
+
+  .home-footer{
+    padding:6px 10px calc(env(safe-area-inset-bottom) + 4px);
+    font-size:9px;
+  }
 }
 
-.btn-comprar--ghost {
-  background: rgba(31,31,31,.06);
-  color: #1F1F1F;
-  box-shadow: none;
-  border: 1px solid rgba(31,31,31,.12);
-}
 
-.btn-comprar--ghost:hover {
-  background: rgba(31,31,31,.10);
-}
+

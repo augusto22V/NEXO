@@ -1,0 +1,13 @@
+.card-producto.drag-activo,
+.card-categoria.drag-activo {
+  border: 3px dashed #28a745;
+  box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.16);
+  filter: brightness(0.99);
+}
+
+.card-producto.dragging,
+.card-categoria.dragging {
+  opacity: 0.6;
+  z-index: 2;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16);
+}

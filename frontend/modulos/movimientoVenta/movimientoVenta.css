@@ -1,0 +1,443 @@
+/* =====================================
+   MOVIMIENTO VENTA - PRO UI STYLE
+===================================== */
+
+body {
+  font-family: "Segoe UI", sans-serif;
+  background: linear-gradient(to bottom, #eef2f5, #f8fafc);
+  margin: 0;
+  color: #2c2c2c;
+}
+
+* {
+  touch-action: manipulation;
+}
+
+/* ================= TOPBAR ================= */
+
+.mv-topbar{
+  position: fixed;
+  top: 6px;
+  left: 10px;
+  z-index: 1000;
+}
+
+.btn-volver{
+  background: #2e7d32;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,.15);
+}
+
+.btn-volver:hover{
+  background: #1b5e20;
+}
+
+/* ================= CONTAINER ================= */
+
+.mv-container {
+  width: 98%;
+  max-width: 1500px;
+  margin: 40px auto 15px; /* 🔥 más arriba */
+  background: #ffffff;
+  padding: 16px 20px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+/* ================= FILTROS ================= */
+
+.mv-filtros {
+  background: #f8fdf4;
+  border: 1.5px solid #c8edb0;
+  border-radius: 14px;
+
+  padding: 12px;
+  margin-bottom: 12px;
+
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  align-items: end;
+}
+
+.mv-filtros label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #2e7d32;
+  margin-bottom: 2px;
+}
+
+.mv-filtros input,
+.mv-filtros select {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 13px;
+  transition: .2s;
+}
+
+.mv-filtros input:focus,
+.mv-filtros select:focus {
+  border-color: #7ED957;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(126,217,87,.15);
+}
+
+/* botón buscar */
+.btn-buscar {
+  background: #7ED957;
+  color: #1f1f1f;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  padding: 8px;
+  cursor: pointer;
+}
+
+.btn-buscar:hover {
+  background: #6bc74b;
+}
+
+/* ================= TABLA ================= */
+
+.mv-listado {
+  height: 340px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.mv-listado table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+/* header fijo */
+.mv-listado thead th {
+  position: sticky;
+  top: 0;
+  background: #1f1f1f;
+  color: white;
+  z-index: 2;
+}
+
+.mv-listado th {
+  padding: 8px;
+  text-align: left;
+  font-weight: 600;
+}
+
+.mv-listado td {
+  padding: 7px;
+  border-bottom: 1px solid #eee;
+}
+
+.mv-listado tr {
+  transition: .15s;
+  cursor: pointer;
+}
+
+.mv-listado tbody tr:hover {
+  background: #f7fbf3;
+}
+
+/* ================= SELECCIÓN FUERTE ================= */
+
+.fila-seleccionada {
+  background: #dff5d0 !important;
+  border-left: 4px solid #28a745;
+}
+
+/* ================= ESTADOS (BADGE STYLE) ================= */
+
+.estado-PENDIENTE {
+  background: #fff8e1;
+  color: #f57f17;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.estado-CONCLUIDO {
+  background: #e3f2fd;
+  color: #1565c0;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.estado-EFECTIVADO {
+  background: #e8f5e9;
+  color: #2e7d32;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.estado-CANCELADO {
+  background: #fdecea;
+  color: #c62828;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* ================= DETALLE ================= */
+
+.mv-detalle {
+  background: #fafafa;
+  border-radius: 10px;
+  padding: 10px;
+  border: 1px solid #eee;
+  margin-bottom: 10px;
+}
+
+.mv-detalle h3 {
+  margin: 0 0 6px;
+  font-size: 14px;
+}
+
+.item-detalle {
+  padding: 5px 0;
+  border-bottom: 1px dashed #ddd;
+  font-size: 13px;
+}
+
+/* ================= ACCIONES ================= */
+
+.mv-acciones {
+  position: sticky;
+  bottom: 0;
+  background: white;
+  padding: 10px 0;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #eee;
+}
+
+.acciones-info {
+  font-size: 13px;
+  font-weight: 700;
+  color: #444;
+}
+
+.acciones-botones {
+  display: flex;
+  gap: 10px;
+}
+
+/* botones */
+
+.mv-acciones button {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 13px;
+  transition: .2s;
+}
+
+/* verde */
+.btn-efectivo {
+  background: #28a745;
+  color: white;
+}
+
+/* rojo */
+.btn-anular {
+  background: #dc3545;
+  color: white;
+}
+
+/* azul */
+.btn-factura {
+  background: #007bff;
+  color: white;
+}
+
+.mv-acciones button:hover {
+  transform: translateY(-1px);
+  opacity: 0.9;
+}
+
+/* ================= CHECK ================= */
+
+.check-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+}
+
+/* ================= INPUT MINI ================= */
+
+.input-busqueda-mini {
+  display: flex;
+  gap: 4px;
+}
+
+.input-busqueda-mini input {
+  flex: 1;
+}
+
+.input-busqueda-mini button {
+  padding: 6px;
+  border-radius: 8px;
+  border: none;
+  background: #e0e0e0;
+  cursor: pointer;
+}
+
+.input-busqueda-mini button:hover {
+  background: #d5d5d5;
+}
+
+/* ================= MODALES FACTURA ================= */
+
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.45);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal.show {
+  display: flex;
+}
+
+.modal-content {
+  width: min(420px, 92vw);
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.modal-confirmar-content {
+  width: min(320px, 92vw);
+  background: #fff;
+  border-radius: 14px;
+  padding: 22px 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.18);
+}
+
+#confirmarTexto {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #222;
+}
+
+.modal-confirmar-btns,
+.modal .acciones {
+  display: flex;
+  gap: 10px;
+}
+
+.modal button {
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 700;
+  min-height: 40px;
+}
+
+.modal-confirmar-btns button,
+.modal .acciones button {
+  flex: 1;
+}
+
+.btn-confirmar-si {
+  background: #28a745;
+  color: #fff;
+}
+
+.btn-confirmar-no,
+.modal .acciones button:first-child,
+.input-busqueda button {
+  background: #e9ecef;
+  color: #1f1f1f;
+}
+
+.modal .acciones button:last-child {
+  background: #007bff;
+  color: #fff;
+}
+
+.modal input,
+.modal textarea {
+  width: 100%;
+  border: 1px solid #d7dde4;
+  border-radius: 10px;
+  padding: 9px 10px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.modal input:focus,
+.modal textarea:focus {
+  outline: none;
+  border-color: #68b24e;
+  box-shadow: 0 0 0 3px rgba(104, 178, 78, 0.14);
+}
+
+.modal-factura h3 {
+  margin: 0 0 4px;
+  text-align: center;
+}
+
+.modal-factura label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #2e7d32;
+}
+
+.input-busqueda {
+  display: flex;
+  gap: 6px;
+}
+
+.input-busqueda input {
+  flex: 1;
+}
+
+.input-busqueda button {
+  width: 44px;
+  flex: 0 0 44px;
+}
+
+.total-factura {
+  text-align: right;
+  font-size: 16px;
+  font-weight: 800;
+  color: #1b1b1b;
+}

@@ -1,0 +1,5 @@
+npm run apk:local:release
+npm run apk:casa:release
+
+
+en 

@@ -2,20 +2,20 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Stop Top | Proveedores</title>
+  <title>LibreríaSys | Editoriales y distribuidoras</title>
 
-  <link rel="stylesheet" href="../../compartido/css/base.css" />
-  <link rel="stylesheet" href="proveedores.css" />
+  <link rel="stylesheet" href="../../compartido/css/base.css?v=2026.04.18.03" />
+  <link rel="stylesheet" href="../../compartido/css/panelAuditoria.css?v=2026.04.18.03" />
+  <link rel="stylesheet" href="proveedores.css?v=2026.04.18.03" />
 </head>
 
 <body>
 
 <header class="topbar">
-  <button class="btn-volver" onclick="volver()">← Volver</button>
+ <button class="btn-volver" onclick="volverSeguro()">← Volver</button>
 
   <div class="titulo">
-    <h1>Stop Top</h1>
-    <span id="moduloTitulo">Proveedores</span>
+  <span id="moduloTitulo">Editoriales y distribuidoras</span>
   </div>
 </header>
 
@@ -23,9 +23,9 @@
 
   <!-- PANEL IZQUIERDO -->
   <section class="panel panel-form">
-    <h2>Proveedor</h2>
+    <h2>Proveedor (editorial / distribuidora)</h2>
 
-    <form autocomplete="off">
+    <form autocomplete="off" onsubmit="return false;">
 
       <input type="hidden" id="proveedorId">
 
@@ -57,7 +57,7 @@
     <span>Activo</span>
 
     </form>
-
+    <panel-auditoria id="auditProveedor" data-tabla="proveedor" data-id-input="proveedorId"></panel-auditoria>
     <!-- ACCIONES -->
     <div class="acciones">
       <button type="button" id="btnNuevo" onclick="nuevo()" title="Nuevo">
@@ -83,6 +83,12 @@
         <span>Cancelar</span>
         <small>F4</small>
       </button>
+
+      <button type="button" id="btnSeleccionar" onclick="seleccionarProveedor()" title="Seleccionar" style="display:none;">
+        <img src="../../recursos/img/buscar.png" />
+        <span>Seleccionar</span>
+        <small>Enter</small>
+      </button>
     </div>
 
   </section>
@@ -106,7 +112,7 @@
     <div class="tabla-proveedores">
 
       <div class="tabla-header">
-        <span>ID</span>
+         <span id="thId" class="th-orden" title="Ordenar por ID">ID ▼</span>
         <span>Nombre</span>
         <span>RUC</span>
         <span>Teléfono</span>
@@ -153,18 +159,17 @@
     <p class="modal-text" id="modalAdvertenciaTexto"></p>
 
     <div class="modal-actions center">
-      <button class="btn-aceptar" onclick="cerrarAdvertencia()">Aceptar</button>
+      <button class="btn-aceptar" onclick="cerrarAdvertencia(true)">Aceptar</button>
     </div>
   </div>
 </div>
 
-<script src="proveedores.js"></script>
 
-<script>
-function volver(){
-  window.location.href = "../../home.html";
-}
-</script>
+
+<script src="../../compartido/js/baseModal.js?v=2026.04.18.03"></script>
+<script src="../../compartido/js/panelAuditoria.js?v=2026.04.18.03"></script>
+<script src="proveedores.js?v=2026.04.18.03"></script>
+<script src="/compartido/js/seguridad.js?v=2026.04.18.03"></script>
 
 </body>
 </html>

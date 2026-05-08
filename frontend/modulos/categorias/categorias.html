@@ -3,13 +3,17 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Andy Closet | Categorías</title>
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="/manifest.json">
+  <title>LibreríaSys | Géneros y secciones</title>
 
   <!-- estilos base del sistema -->
   <link rel="stylesheet" href="../../compartido/css/base.css">
+  <link rel="stylesheet" href="../../compartido/css/panelAuditoria.css">
 
   <!-- estilos específicos del módulo -->
-  <link rel="stylesheet" href="categorias.css">
+  <link rel="stylesheet" href="categorias.css?v=2026.04.18.02">
 </head>
 
 <body>
@@ -18,12 +22,11 @@
   <div class="topbar">
 
     <!-- botón volver a pantalla anterior -->
-    <button class="btn-volver" onclick="volver()">← Volver</button>
+    <button class="btn-volver" onclick="volverSeguro()">← Volver</button>
 
     <!-- título del sistema -->
     <div class="titulo">
-      <h1>Stop Top</h1>
-      <span id="moduloTitulo">Gestión</span>
+      <span id="moduloTitulo">Géneros y secciones de estantería</span>
     </div>
 
   </div>
@@ -34,7 +37,7 @@
     <!-- panel izquierdo con formulario -->
     <div class="panel panel-form">
 
-      <h2>Categoría</h2>
+      <h2>Género o sección</h2>
 
       <!-- formulario de registro -->
       <form id="formCategoria" enctype="multipart/form-data">
@@ -43,8 +46,10 @@
         <input type="hidden" id="categoriaId">
 
         <!-- código categoría -->
-        <label>Código</label>
-        <input type="text" id="codigoCategoria" inputmode="numeric" pattern="[0-9]*">
+      <label>Código</label>
+<div class="codigo-row">
+  <input type="text" id="codigoCategoria">
+</div>
 
         <!-- nombre categoría -->
         <label>Nombre</label>
@@ -60,23 +65,28 @@
     <input type="checkbox" id="activoCategoria" checked>
     Activa
   </label>
+
+  <label style="display:flex; align-items:center; gap:6px; margin:0;">
+    <input type="checkbox" id="mostrarVentaMedioCategoria">
+    Mostrar en VentaMedio
+  </label>
+
+  <label style="display:flex; align-items:center; gap:6px; margin:0;">
+    <input type="checkbox" id="mostrarMenuDigitalCategoria">
+    Mostrar en Menú Digital
+  </label>
 </div>
 
         <!-- selección imagen -->
         <label>Imagen</label>
         <input type="file" id="imagenCategoria" accept="image/*">
 
-          <label>Estado</label>
-          <select id="activoCategoria">
-          <option value="true">Activo</option>
-        <option value="false">Inactivo</option>
-          </select>
-
         <!-- vista previa imagen -->
         <div class="preview-box">
           <img id="previewImagen" src="" alt="">
         </div>
 
+        <panel-auditoria id="auditCategoria" data-tabla="categoria" data-id-input="categoriaId"></panel-auditoria>
         <!-- botones de acción -->
         <div class="acciones">
 
@@ -145,42 +155,58 @@
 
   </div>
 
-  <!-- modal global para mensajes y confirmaciones -->
-  <div id="modalOverlay" class="modal-overlay hidden">
 
-    <div class="modal-box">
+<!-- MODAL CONFIRMAR ELIMINACIÓN -->
+<div id="modalEliminar" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="modal-icon">⚠️</div>
 
-      <!-- icono modal -->
-      <div class="modal-icon" id="modalIcon">⚠️</div>
+    <h3 class="modal-title">Confirmar eliminación</h3>
 
-      <!-- título modal -->
-      <h3 class="modal-title" id="modalTitulo">Título</h3>
+    <p class="modal-text">
+      ¿Desea eliminar la categoría?
+    </p>
 
-      <!-- mensaje -->
-      <p class="modal-text" id="modalMensaje">Mensaje</p>
+    <p class="modal-nombre" id="modalNombreCategoria"></p>
 
-      <!-- contenido extra opcional -->
-      <div id="modalExtra" class="modal-text hidden"></div>
-
-      <!-- botones modal -->
-      <div class="modal-actions" id="modalActions">
-        <button id="modalBtnCancel" class="btn-cancelar hidden">Cancelar</button>
-        <button id="modalBtnOk" class="btn-aceptar">Aceptar</button>
-        <button id="modalBtnDanger" class="btn-eliminar hidden">Eliminar</button>
-      </div>
-
+    <div class="modal-actions">
+      <button class="btn-cancelar" onclick="cerrarModalEliminar()">Cancelar</button>
+      <button class="btn-eliminar" onclick="confirmarEliminar()">Eliminar</button>
     </div>
-
   </div>
+</div>
+
+<!-- MODAL ADVERTENCIA -->
+<div id="modalAdvertencia" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="modal-icon">⚠️</div>
+
+    <h3 class="modal-title">Atención</h3>
+
+    <p class="modal-text" id="modalAdvertenciaTexto"></p>
+
+    <div class="modal-actions center">
+      <button class="btn-aceptar" onclick="cerrarAdvertencia(true)">Aceptar</button>
+    </div>
+  </div>
+</div>
 
   <!-- script principal del módulo -->
-  <script src="categorias.js"></script>
+  <script src="../../compartido/js/baseModal.js"></script>
+  <script src="../../compartido/js/panelAuditoria.js"></script>
+  <script src="categorias.js?v=2026.04.18.02"></script>
+<script src="/compartido/js/seguridad.js"></script>
+
 
   <!-- mostrar nombre del módulo en título -->
   <script>
-    const nombreModulo = document.title.split("|")[1]?.trim();
-    if (nombreModulo) {
-      document.getElementById("moduloTitulo").textContent = nombreModulo;
+    const paramsTitulo = new URLSearchParams(window.location.search);
+    const modoTitulo = paramsTitulo.get("modo");
+    if (modoTitulo !== "seleccion") {
+      const nombreModulo = document.title.split("|")[1]?.trim();
+      if (nombreModulo) {
+        document.getElementById("moduloTitulo").textContent = nombreModulo;
+      }
     }
   </script>
 

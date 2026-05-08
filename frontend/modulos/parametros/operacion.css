@@ -1,0 +1,42 @@
+@import "../proveedores/proveedores.css";
+
+.form-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.form-row label {
+  width: 150px;
+  margin-top: 0;
+}
+
+.form-row input[type="checkbox"] {
+  width: auto;
+  transform: scale(1.2);
+}
+
+.input-id[readonly] {
+  background: #ececec;
+  border-color: #bdbdbd;
+  color: #666;
+  cursor: not-allowed;
+}
+
+body.modo-seleccion .admin-container {
+  grid-template-columns: 1fr;
+}
+
+body.modo-seleccion .panel-form {
+  display: none !important;
+}
+
+body.modo-seleccion .panel-lista {
+  min-height: calc(100vh - 78px);
+}
+
+body.modo-seleccion .panel-lista .buscador {
+  width: 100%;
+  margin: 0 0 14px 0;
+}

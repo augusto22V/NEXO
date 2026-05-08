@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="manifest" href="/manifest.json" />
+  <title>LibreríaSys | Produccion</title>
+
+  <link rel="stylesheet" href="../../compartido/css/base.css" />
+  <link rel="stylesheet" href="../../compartido/css/panelAuditoria.css" />
+  <link rel="stylesheet" href="produccion.css" />
+</head>
+<body>
+  <div class="topbar">
+    <button class="btn-volver" onclick="window.location.href='/home.html'">? Volver</button>
+    <div class="titulo"><span>Produccion</span></div>
+  </div>
+
+  <main class="prod-layout">
+    <section class="panel panel-form">
+      <div class="panel-head">
+        <h2>Nueva Produccion</h2>
+        <button id="btnIrRecetas" class="btn btn-soft" type="button">Gestionar Recetas</button>
+      </div>
+
+      <form id="formProduccion" autocomplete="off">
+        <input id="produccionId" type="hidden" />
+        <div class="grid-top">
+          <div class="field autocomplete-wrap">
+            <label>Receta</label>
+            <div class="input-with-action">
+              <input id="recetaSearch" type="text" placeholder="Buscar receta por nombre..." />
+              <button id="btnBuscarReceta" class="btn-lupa" type="button" title="Buscar receta">??</button>
+            </div>
+            <input id="recetaId" type="hidden" />
+            <div id="recetaList" class="autocomplete-list"></div>
+          </div>
+
+          <div class="field">
+            <label>Producto final</label>
+            <input id="productoFinalNombre" type="text" readonly placeholder="Se carga al seleccionar receta" />
+          </div>
+
+          <div class="field">
+            <label>Cantidad a producir</label>
+            <input id="cantidadProducida" type="number" min="0.0001" step="0.0001" placeholder="0" />
+          </div>
+
+          <div class="field">
+            <label>Fecha</label>
+            <input id="fechaProduccion" type="date" />
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="btnPreview" class="btn btn-soft" type="button">Previsualizar</button>
+          <button id="btnCrear" class="btn btn-primary" type="submit">Registrar Produccion</button>
+        </div>
+        <panel-auditoria id="auditProduccion" data-tabla="produccion" data-id-input="produccionId"></panel-auditoria>
+      </form>
+
+      <div id="statusProd" class="status"></div>
+    </section>
+
+    <section class="panel panel-preview">
+      <h2>Previsualizacion</h2>
+      <div class="tabla-wrap">
+        <table class="tabla-preview">
+          <thead>
+            <tr>
+              <th>Insumo</th>
+              <th>Cantidad</th>
+              <th>Unidad</th>
+              <th>Stock</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyPreview">
+            <tr><td colspan="5">Sin previsualizacion</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel panel-listado">
+      <div class="panel-head">
+        <h2>Historial de Produccion</h2>
+        <button id="btnRefrescarProd" class="btn btn-soft" type="button">Actualizar</button>
+      </div>
+
+      <div class="tabla-wrap listado-wrap">
+        <table class="tabla-listado">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Fecha</th>
+              <th>Receta</th>
+              <th>Producto final</th>
+              <th>Cantidad</th>
+              <th>Usuario</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyProduccion"></tbody>
+        </table>
+      </div>
+
+      <div class="detalle-box">
+        <h3>Detalle</h3>
+        <div id="detalleProduccion" class="detalle-produccion">Seleccione una produccion para ver el detalle.</div>
+      </div>
+    </section>
+  </main>
+
+  <div id="pickerRecetaOverlay" class="picker-overlay" hidden>
+    <div class="picker-modal" role="dialog" aria-modal="true" aria-labelledby="pickerRecetaTitulo">
+      <div class="picker-head">
+        <h3 id="pickerRecetaTitulo">Seleccionar receta</h3>
+        <button id="pickerRecetaCerrar" class="btn btn-soft" type="button">Cerrar</button>
+      </div>
+      <input id="pickerRecetaBuscar" type="text" placeholder="Buscar receta..." />
+      <div id="pickerRecetaLista" class="picker-lista"></div>
+    </div>
+  </div>
+
+  <script src="../../compartido/js/panelAuditoria.js"></script>
+  <script src="produccion.js"></script>
+  <script src="/compartido/js/seguridad.js"></script>
+</body>
+</html>

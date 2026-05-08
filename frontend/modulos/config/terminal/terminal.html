@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+
+<meta charset="UTF-8">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="/manifest.json">
+
+<title>LibreríaSys | Terminales</title>
+
+<link rel="stylesheet" href="../../../compartido/css/base.css">
+<link rel="stylesheet" href="../../../compartido/css/panelAuditoria.css">
+<link rel="stylesheet" href="terminal.css">
+<link rel="stylesheet" href="../../../recursos/css/all.min.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+</head>
+
+<body>
+
+<header class="topbar">
+
+  <button class="btn-volver" onclick="volver()">← Volver</button>
+
+  <div class="titulo">
+    <span>Configuración de terminales</span>
+  </div>
+
+
+</header>
+
+<main class="contenedor">
+
+  <!-- FORMULARIO -->
+  <section class="panel">
+
+    <div class="panel-title">
+      <span>Registro de terminal</span>
+    </div>
+    <input type="hidden" id="terminalIdActual">
+
+    <div class="form-grid">
+
+      <div class="form-group">
+        <label for="selectEmpresa">Empresa</label>
+        <select id="selectEmpresa"></select>
+      </div>
+
+      <div class="form-group">
+        <label for="inputNombre">Nombre de terminal</label>
+        <input type="text" id="inputNombre" placeholder="Ej.: Caja Principal">
+      </div>
+
+      <div class="form-group">
+        <label for="inputDescripcion">Descripción</label>
+        <input type="text" id="inputDescripcion" placeholder="Opcional">
+      </div>
+
+      <div class="form-group">
+        <label for="selectTipo">Tipo</label>
+        <select id="selectTipo">
+          <option value="BARRA">PRINCIPAL</option>
+          <option value="CAJA">CAJA</option>
+          <option value="COCINA">COCINA</option>
+          <option value="TABLET">TABLET</option>
+          <option value="BARRA">BARRA</option>
+        </select>
+      </div>
+
+      <div class="form-group full">
+        <label>Estado</label>
+        <label class="check-inline">
+          <input type="checkbox" id="checkActivo" checked>
+          Activo
+        </label>
+      </div>
+
+    </div>
+
+    <panel-auditoria id="auditTerminal" data-tabla="terminal" data-id-input="terminalIdActual"></panel-auditoria>
+
+    <div class="form-actions">
+
+      <button class="btn btn-secondary" onclick="nuevoRegistro()">Nuevo</button>
+
+      <button class="btn btn-primary" id="btnGuardar" onclick="guardarTerminal()">Guardar</button>
+
+      <button class="btn btn-warning" id="btnActualizar" onclick="actualizarTerminal()" disabled>Modificar</button>
+
+      <button class="btn btn-danger" id="btnEliminar" onclick="eliminarTerminal()" disabled>Eliminar</button>
+
+    </div>
+
+    <div id="msgBox" class="msg-box" style="display:none;"></div>
+
+  </section>
+
+
+  <!-- LISTADO -->
+  <section class="panel">
+
+    <div class="panel-title">
+      <span>Listado de terminales</span>
+    </div>
+
+    <div class="list-toolbar">
+      <input
+        type="text"
+        id="inputBuscar"
+        placeholder="Buscar por nombre, tipo o empresa..."
+      >
+    </div>
+
+    <div class="table-wrap">
+
+      <table class="tabla">
+
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Empresa</th>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Tipo</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+
+        <tbody id="tablaTerminales"></tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+</main>
+
+<script src="../../../compartido/js/panelAuditoria.js"></script>
+<script src="terminal.js"></script>
+
+</body>
+</html>

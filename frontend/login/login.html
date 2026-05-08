@@ -1,0 +1,191 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#1F1F1F">
+  <link rel="manifest" href="/manifest.json?v=2026.04.17.03">
+
+  <title>LibreríaSys | Iniciar sesión</title>
+
+  <!-- CSS mínimo inmediato -->
+  <style>
+    body {
+      margin: 0;
+      background: #0c0f14;
+      color: white;
+      font-family: sans-serif;
+    }
+
+    .loader {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0c0f14;
+      color: #ffffff;
+      font-size: 18px;
+      z-index: 9999;
+    }
+  </style>
+
+  <!-- Preload de recursos críticos -->
+  <link rel="preload" href="/login/login.css?v=2026.04.17.03" as="style">
+  <link rel="preload" href="/login/login.js?v=2026.04.17.03" as="script">
+  <link rel="preload" href="/recursos/img/default.png?v=2026.04.17.03" as="image">
+
+  <link rel="stylesheet" href="/login/login.css?v=2026.04.17.03">
+</head>
+
+<body>
+
+  <!-- LOADER: debe ir arriba -->
+  <div id="loader" class="loader">
+    Cargando LibreríaSys…
+  </div>
+
+  <div class="panel-left">
+    <div class="left-content">
+      <img
+        src="/recursos/img/default.png?v=2026.04.17.03"
+        class="logo-img"
+        alt="LibreríaSys"
+        data-login-logo
+        fetchpriority="high"
+        decoding="async"
+      >
+
+      <div class="contact-info">
+        <span>+595 971 473522</span>
+        <span>+595 982 408662</span>
+      </div>
+
+      <div class="system-sub">
+        Punto de venta y catálogo para librerías
+      </div>
+
+      <div class="feat-item"><div class="feat-dot"></div>Venta en caja y búsqueda por código / ISBN</div>
+      <div class="feat-item"><div class="feat-dot"></div>Stock y ubicación de títulos</div>
+      <div class="feat-item"><div class="feat-dot"></div>Clientes, vendedores y editoriales</div>
+      <div class="feat-item"><div class="feat-dot"></div>Caja y arqueos</div>
+      <div class="feat-item"><div class="feat-dot"></div>Compras a distribuidoras</div>
+      <div class="feat-item"><div class="feat-dot"></div>Facturación fiscal</div>
+      <div class="feat-item"><div class="feat-dot"></div>Multiempresa</div>
+    </div>
+  </div>
+
+  <div class="panel-right">
+    <div class="form-box">
+
+      <img
+        src="/recursos/img/default.png?v=2026.04.17.03"
+        class="form-logo"
+        alt="LibreríaSys"
+        data-login-logo
+        decoding="async"
+      >
+
+      <div class="form-title">Bienvenido</div>
+      <div class="form-sub">Ingrese tus credenciales</div>
+
+      <div class="campo">
+        <label for="selectEmpresa">Empresa</label>
+        <select id="selectEmpresa" autocomplete="organization"></select>
+      </div>
+
+      <div class="campo">
+        <label for="selectTerminal">Terminal</label>
+        <select id="selectTerminal"></select>
+      </div>
+
+      <div class="error-msg" id="errorMsg"></div>
+
+      <div id="quickLoginWrap" class="quick-login hidden" aria-live="polite">
+        <div class="quick-login-head">
+          <span>Acceso rapido</span>
+          <button id="btnCambiarUsuario" type="button" class="quick-login-change">Cambiar usuario</button>
+        </div>
+        <div id="quickLoginUsuario" class="quick-login-user">-</div>
+      </div>
+
+      <div class="campo campo-usuario">
+        <label for="inputUsuario">Usuario</label>
+        <div class="usuario-combo">
+          <input
+            type="text"
+            id="inputUsuario"
+            placeholder="Ingrese tu usuario"
+            autocomplete="username"
+            aria-autocomplete="list"
+            autocapitalize="none"
+            spellcheck="false"
+          >
+          <button id="btnUsuarioDropdown" type="button" class="usuario-dropdown-btn" aria-label="Mostrar usuarios">
+            <span class="usuario-dropdown-caret"></span>
+          </button>
+        </div>
+        <div id="usuarioDropdownPanel" class="usuario-dropdown-panel hidden" role="listbox" aria-label="Sugerencias de usuario"></div>
+      </div>
+
+      <div class="campo">
+        <label for="inputPassword">Contrasena o PIN</label>
+        <input
+          type="password"
+          id="inputPassword"
+          placeholder="Ingrese su contrasena o PIN"
+          autocomplete="current-password"
+          autocapitalize="none"
+          spellcheck="false"
+        >
+      </div>
+
+      <button id="btnLogin" class="btn-login" type="button">Ingresar</button>
+
+      <div class="version">LibreríaSys 2026</div>
+    </div>
+  </div>
+
+  <div id="licenciaOverlay" class="licencia-overlay hidden">
+    <div class="licencia-box">
+      <div class="licencia-title">Control de Licencia</div>
+      <div id="licenciaMensaje" class="licencia-mensaje"></div>
+
+      <div class="licencia-campo">
+        <label>Control Actual</label>
+        <div id="controlActualWrap" class="control-grupos control-actual"></div>
+      </div>
+
+      <div class="licencia-campo">
+        <label>Nuevo Control</label>
+        <div class="control-grupos control-nuevo">
+          <input id="nuevoControl1" class="nuevo-control-input" type="text" inputmode="numeric" maxlength="4" autocomplete="off">
+          <input id="nuevoControl2" class="nuevo-control-input" type="text" inputmode="numeric" maxlength="4" autocomplete="off">
+          <input id="nuevoControl3" class="nuevo-control-input" type="text" inputmode="numeric" maxlength="4" autocomplete="off">
+          <input id="nuevoControl4" class="nuevo-control-input" type="text" inputmode="numeric" maxlength="4" autocomplete="off">
+        </div>
+      </div>
+
+      <div id="licenciaError" class="licencia-error"></div>
+
+      <div class="licencia-acciones">
+        <button id="btnLicenciaConfirmar" type="button">Confirmar</button>
+        <button id="btnLicenciaContinuar" type="button">Continuar</button>
+        <button id="btnLicenciaCerrar" type="button">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.addEventListener("load", () => {
+      document.getElementById("loader")?.remove();
+    });
+  </script>
+
+  <script src="/compartido/js/app.config.js?v=2026.04.17.03" defer></script>
+  <script src="/compartido/js/session.manager.js?v=2026.04.17.03" defer></script>
+  <script src="/compartido/js/cache.bootstrap.js?v=2026.04.17.03" defer></script>
+  <script src="/login/login.js?v=2026.04.17.03" defer></script>
+</body>
+</html>
+

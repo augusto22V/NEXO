@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Programas | Administracion</title>
+
+  <link rel="stylesheet" href="/compartido/css/base.css">
+  <link rel="stylesheet" href="/modulos/config/programas/programas.css">
+  <link rel="stylesheet" href="/recursos/css/all.min.css">
+
+  <script defer src="/compartido/js/seguridad.js"></script>
+  <script defer src="/compartido/js/programas.acceso.js"></script>
+  <script defer src="/modulos/config/programas/programas.js"></script>
+</head>
+<body>
+  <header class="prog-header">
+    <div>
+      <h1>Programas</h1>
+      <p>Catalogo maestro de modulos y pantallas del sistema</p>
+    </div>
+    <div class="prog-actions">
+      <button type="button" onclick="window.location.href='/admin.html'">Volver Admin</button>
+      <button type="button" onclick="window.location.href='/home.html'">Operativo</button>
+    </div>
+  </header>
+
+  <main class="prog-main">
+    <section class="prog-toolbar">
+      <div class="prog-filtros">
+        <input id="filtroPrograma" type="text" placeholder="Buscar por codigo, nombre o ruta...">
+        <select id="filtroZona">
+          <option value="">Todas las zonas</option>
+          <option value="operativo">Operativo</option>
+          <option value="admin">Admin</option>
+        </select>
+        <select id="filtroActivo">
+          <option value="">Todos</option>
+          <option value="activos">Solo activos</option>
+          <option value="inactivos">Solo inactivos</option>
+        </select>
+      </div>
+      <div class="prog-toolbar-right">
+        <span id="conteoProgramas">0 programas</span>
+        <button id="btnNuevoPrograma" type="button" class="btn-principal">+ Nuevo programa</button>
+      </div>
+    </section>
+
+    <section class="prog-table-wrap">
+      <table class="prog-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Codigo</th>
+            <th>Nombre</th>
+            <th>Ruta</th>
+            <th>Zona</th>
+            <th>Categoria</th>
+            <th>Icono</th>
+            <th>Home</th>
+            <th>Admin</th>
+            <th>Activo</th>
+            <th>Orden</th>
+            <th>Accion</th>
+          </tr>
+        </thead>
+        <tbody id="tablaProgramas"></tbody>
+      </table>
+    </section>
+  </main>
+
+  <div id="modalPrograma" class="prog-modal" aria-hidden="true">
+    <div class="prog-modal-content">
+      <h3 id="tituloModalPrograma">Nuevo programa</h3>
+
+      <input type="hidden" id="programaId">
+
+      <div class="prog-form-grid">
+        <label>
+          Codigo
+          <input id="programaCodigo" maxlength="80" placeholder="VENTA_RAPIDA">
+        </label>
+
+        <label>
+          Nombre
+          <input id="programaNombre" maxlength="120" placeholder="VentaRapida">
+        </label>
+
+        <label class="col-span-2">
+          Ruta
+          <input id="programaRuta" maxlength="220" placeholder="/modulos/venta/venta_rapida.html">
+        </label>
+
+        <label>
+          Zona
+          <select id="programaZona">
+            <option value="operativo">Operativo</option>
+            <option value="admin">Admin</option>
+          </select>
+        </label>
+
+        <label>
+          Categoria
+          <input id="programaCategoria" maxlength="80" placeholder="Ventas">
+        </label>
+
+        <label>
+          Icono (Font Awesome)
+          <input id="programaIcono" maxlength="80" placeholder="fa-bolt">
+        </label>
+
+        <label>
+          Orden menu
+          <input id="programaOrden" type="number" min="0" step="1" value="10">
+        </label>
+
+        <label class="check-label">
+          <input id="programaVisibleHome" type="checkbox">
+          Visible en home
+        </label>
+
+        <label class="check-label">
+          <input id="programaVisibleAdmin" type="checkbox">
+          Visible en admin
+        </label>
+
+        <label class="check-label">
+          <input id="programaActivo" type="checkbox" checked>
+          Activo
+        </label>
+      </div>
+
+      <div class="prog-modal-actions">
+        <button id="btnGuardarPrograma" type="button" class="btn-principal">Guardar</button>
+        <button id="btnCerrarPrograma" type="button" class="btn-secundario">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

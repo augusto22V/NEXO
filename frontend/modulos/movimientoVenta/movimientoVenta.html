@@ -1,0 +1,198 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="/manifest.json">
+<title>Movimiento Venta</title>
+<link rel="stylesheet" href="../../compartido/css/panelAuditoria.css">
+<link rel="stylesheet" href="movimientoVenta.css">
+</head>
+
+<body>
+
+<!-- ================= TOPBAR ================= -->
+<div class="mv-topbar">
+    <button type="button" class="btn-volver" onclick="salir()">← Volver a Venta</button>
+</div>
+
+<div class="mv-container">
+
+    <!-- ================= FILTROS ================= -->
+    <div class="mv-filtros">
+
+        <div>
+            <label>Fecha Desde</label>
+            <input type="date" id="fechaDesde">
+        </div>
+
+        <div>
+            <label>Fecha Hasta</label>
+            <input type="date" id="fechaHasta">
+        </div>
+
+        <div>
+            <label>Moneda</label>
+            <select id="moneda">
+                <option value="">Todas</option>
+                <option value="GUARANI">Guaraní</option>
+                <option value="DOLAR">Dólar</option>
+            </select>
+        </div>
+
+        <div>
+            <label>Situación</label>
+            <select id="situacion">
+                <option value="">Todas</option>
+                <option value="PENDIENTE">Pendiente</option>
+                <option value="CONCLUIDO" selected>Concluido</option>
+                <option value="EFECTIVADO">Efectivado</option>
+                <option value="CANCELADO">Cancelado</option>
+            </select>
+        </div>
+
+        <div>
+            <label>N° Nota</label>
+            <input type="number" id="numeroNota">
+        </div>
+
+        <div class="input-busqueda-mini">
+            <input type="text" id="clienteFiltro" placeholder="Cliente">
+            <button type="button" onclick="abrirBusquedaCliente()">🔍</button>
+        </div>
+
+        <div class="input-busqueda-mini">
+            <input type="text" id="vendedorFiltro" placeholder="Vendedor">
+            <button type="button" onclick="abrirBusquedaVendedor()">🔍</button>
+        </div>
+
+        <button type="button" class="btn-buscar" onclick="buscarMovimientos()">Buscar</button>
+
+    </div>
+
+    <!-- ================= LISTADO ================= -->
+    <div class="mv-listado">
+        <table>
+            <thead>
+                <tr>
+                    <th class="th-check">
+                        <label class="check-wrapper">
+                            <input type="checkbox" id="checkAll">
+                            <span class="check-fake"></span>
+                        </label>
+                    </th>
+
+                    <th>Fecha</th>
+                    <th>Tipo Pedido</th>
+                    <th>N°</th>
+                    <th>Mesa</th>
+                    <th>N° Fac</th>
+                    <th>Cliente</th>
+                    <th>Vendedor</th>
+                    <th>Moneda</th>
+                    <th>Estado</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+
+            <tbody id="tablaMovimientos"></tbody>
+        </table>
+    </div>
+
+    <!-- ================= DETALLE ================= -->
+    <div class="mv-detalle">
+        <div class="detalle-header">
+            <h3>Detalle Venta</h3>
+        </div>
+        <input type="hidden" id="ventaIdActual">
+        <div id="detalleVenta"></div>
+        <panel-auditoria id="auditMovimientoVenta" data-tabla="venta" data-id-input="ventaIdActual"></panel-auditoria>
+    </div>
+
+    <!-- ================= ACCIONES ================= -->
+    <div class="mv-acciones">
+
+        <!-- INFO -->
+        <div class="acciones-info">
+            <span id="contadorSeleccion">0 seleccionados</span>
+        </div>
+
+        <!-- BOTONES -->
+        <div class="acciones-botones">
+
+            <!-- 🔥 YA EXISTENTE (NO CAMBIAMOS FUNCION) -->
+            <button type="button" class="btn-efectivo" onclick="efectivizar()">
+                💰 Efectivizar
+            </button>
+
+            <!-- 🔥 NUEVO -->
+            <button type="button" class="btn-anular" onclick="anularSeleccionados()">
+                ❌ Anular
+            </button>
+
+            <!-- 🔥 NUEVO -->
+            <button type="button" class="btn-factura" onclick="facturarSeleccionados(event)">
+                🧾 Facturar
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div id="modalConfirmar" class="modal no-close">
+    <div class="modal-confirmar-content">
+        <p id="confirmarTexto"></p>
+        <div class="modal-confirmar-btns">
+            <button type="button" id="confirmarSi" class="btn-confirmar-si">Sí</button>
+            <button type="button" id="confirmarNo" class="btn-confirmar-no">No</button>
+        </div>
+    </div>
+</div>
+
+<div id="modalFactura" class="modal no-close">
+    <div class="modal-content modal-factura">
+        <h3>🧾 Generar Factura</h3>
+
+        <label>Cliente</label>
+        <div class="input-busqueda">
+            <input id="clienteCodigoFactura">
+            <button type="button" id="btnBuscarClienteFactura">🔍</button>
+        </div>
+
+        <label>RUC</label>
+        <input id="rucFacturaInput">
+
+        <label>Nombre</label>
+        <input id="nombreFacturaInput">
+
+        <label>Dirección</label>
+        <input id="direccionFacturaInput">
+
+        <label>Ciudad</label>
+        <input id="ciudadFacturaInput">
+
+        <label>Número</label>
+        <input id="numeroFacturaPreview" readonly>
+
+        <div class="total-factura">
+            Total: <strong id="totalFacturaPreview"></strong>
+        </div>
+
+        <div class="acciones">
+            <button type="button" onclick="cerrarModalFactura()">Cancelar</button>
+            <button type="button" id="btnConfirmarFactura" onclick="confirmarFactura()">Facturar</button>
+        </div>
+    </div>
+</div>
+
+<script src="movimientoVenta.js"></script>
+<script src="../../compartido/js/panelAuditoria.js"></script>
+<script src="/compartido/js/seguridad.js"></script>
+
+</body>
+</html>
+

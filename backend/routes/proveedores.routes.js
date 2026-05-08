@@ -33,7 +33,6 @@ router.get("/", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
 /* =========================
    GET TODOS (ADMIN)
 ========================= */
@@ -165,19 +164,74 @@ router.put("/:id", async (req, res) => {
 ========================= */
 router.delete("/:id", async (req, res) => {
   try {
-
     const id = Number(req.params.id);
 
-    await pool.query(`
-      UPDATE proveedor SET activo = false WHERE id = $1
+    const r = await pool.query(`
+      DELETE FROM proveedor
+      WHERE id = $1
+      RETURNING id
     `, [id]);
 
-    res.json({ mensaje: "Proveedor desactivado" });
+    if (r.rowCount === 0) {
+      return res.status(404).json({ error: "Proveedor no existe" });
+    }
+
+    res.json({ mensaje: "Proveedor eliminado correctamente" });
 
   } catch (error) {
     console.error("ERROR DELETE PROVEEDOR:", error);
     res.status(500).json({ error: error.message });
   }
+});
+
+
+const axios = require("axios");
+
+/* =========================
+   BUSCAR RUC PROVEEDOR
+========================= */
+router.get("/ruc/:ruc", async (req, res) => {
+
+  const rucInput = req.params.ruc;
+  const rucBase = rucInput.split("-")[0];
+
+  try {
+
+    // 1. Buscar en BD
+    const local = await pool.query(
+      "SELECT * FROM proveedor WHERE ruc LIKE $1",
+      [rucBase + "%"]
+    );
+
+    if (local.rows.length > 0) {
+      return res.json(local.rows[0]);
+    }
+
+    // 2. Consultar TuRuc
+    const response = await axios.get(
+      `https://turuc.com.py/api/contribuyente/${rucBase}`
+    );
+
+    const data = response.data?.data;
+
+    if (!data || !data.ruc) {
+      return res.json(null);
+    }
+
+    // 🔥 SOLO DEVUELVE (NO GUARDA)
+    return res.json({
+      ruc: data.ruc,
+      razon_social: data.razonSocial,
+      nombre: data.razonSocial
+    });
+
+  } catch (err) {
+
+    console.error("ERROR RUC PROVEEDOR:", err.message);
+    return res.json(null);
+
+  }
+
 });
 
 module.exports = router;

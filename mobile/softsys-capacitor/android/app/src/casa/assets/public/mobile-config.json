@@ -1,0 +1,8 @@
+{
+  "appName": "SoftSys Casa",
+  "setupDescription": "Conecta la app con tu servidor remoto o en la nube.",
+  "setupHint": "Ejemplo: https://mi-servidor.com o http://181.123.45.67:3000",
+  "serverMode": "baseUrl",
+  "baseUrlLabel": "URL publica del servidor",
+  "baseUrlPlaceholder": "https://mi-servidor.com"
+}

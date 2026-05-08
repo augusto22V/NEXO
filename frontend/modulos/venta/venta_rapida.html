@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="theme-color" content="#1F1F1F">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="manifest" href="/manifest.json?v=2026.04.21.01">
+  <title>LibreríaSys | Venta en caja</title>
+
+  <link rel="stylesheet" href="./css/venta.css?v=2026.04.21.01">
+  
+</head>
+
+<body>
+
+  <div class="pos-container">
+
+    <div id="mensajeSistema" class="mensaje-sistema"></div>
+
+    <!-- =========================
+         PANEL IZQUIERDO
+    ========================== -->
+    <div class="pos-left">
+
+      <div class="nav-bar">
+        <button class="btn-nav" id="btnNav" onclick="accionPrincipal()">
+          Salir
+        </button>
+        <input
+          id="busquedaRapidaPOS"
+          type="text"
+          placeholder="Descripcion o codigo de barra"
+          oninput="filtrarProductosRapido(this.value)"
+        >
+
+                <button id="btnBuscarProductoRapido" class="btn-buscar-producto" onclick="abrirBuscadorProductosPOS()" title="Buscar libro o artículo (F1)">
+          <img src="/recursos/img/buscar.png" alt="Buscar libro" />
+        </button>
+
+        <button id="btnLock" class="btn-lock" onclick="toggleLock()">
+          <img src="/recursos/img/ampliar.png" id="iconFullscreen" />
+        </button>
+      </div>
+
+      <div class="grid-categorias" id="categorias"></div>
+      <div class="grid-productos" id="productos" style="display:none;"></div>
+
+    </div>
+
+    <!-- =========================
+         PANEL DERECHO
+    ========================== -->
+    <div class="pos-right">
+
+      <!-- CABECERA PEDIDO -->
+      <div class="pedido-header">
+
+        <!--  AJUSTADO -->
+        <div class="pedido-row-top">
+
+          <div class="pedido-left-top">
+
+            <span id="estadoPedido" class="estado">PENDIENTE</span>
+
+            <div class="pedido-numero-line">
+              <h3>Venta</h3>
+              <span>N°</span>
+
+              <input type="text" id="pedidoNumero" placeholder="N° Pedido" readonly onclick="abrirTecladoPedido()"
+                ontouchend="event.preventDefault(); abrirTecladoPedido()">
+
+              <button class="btn-buscar-pedido" onclick="buscarMovimiento()">
+                <img src="/recursos/img/buscar.png">
+              </button>
+            </div>
+
+          </div>
+
+          <div class="pedido-right-top">
+            <input type="datetime-local" id="fechaPedido" readonly>
+          </div>
+
+        </div>
+
+        <!-- FILA 2 -->
+        <div class="pedido-row-mid">
+
+          <div class="campo-busqueda">
+            <label>Vendedor</label>
+            <div class="input-busqueda">
+              <input type="text" id="vendedorCodigo" placeholder="Código" inputmode="numeric">
+              <input type="text" id="vendedorNombre" placeholder="Nombre" readonly>
+              <button onclick="abrirModuloVendedor()">
+                <img src="/recursos/img/buscar.png">
+              </button>
+            </div>
+          </div>
+
+          <div class="campo-busqueda">
+            <label>Cliente</label>
+            <div class="input-busqueda">
+              <input type="text" id="clienteCodigo" placeholder="Código" inputmode="numeric">
+              <input type="text" id="clienteNombre" placeholder="Nombre">
+              <button onclick="abrirModuloCliente()">
+                <img src="/recursos/img/buscar.png">
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- BOTONES -->
+        <div class="pedido-botones-top">
+
+          <button onclick="nuevoPedido()">
+            <img src="/recursos/img/nuevo.png"> Nuevo
+          </button>
+
+          <button onclick="cancelarPedido()">
+            <img src="/recursos/img/cancelar.png"> Cancelar
+          </button>
+
+          <button type="button" onclick="ponerVentaEnEspera()" title="Guardar para continuar luego">
+            <img src="/recursos/img/guardar.png"> En espera
+          </button>
+
+          <div class="mesa-tipo-group" style="display:none">
+            <input type="text" id="mesa" value="" readonly>
+            <select id="tipoPedido" aria-hidden="true">
+              <option value="" selected>Sin tipo</option>
+            </select>
+            <div class="tipo-pedido-box" id="tipoPedidoBox" style="display:none"></div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- COLUMNAS -->
+      <div class="pedido-columnas">
+        <div class="col-cantidad">Cant.</div>
+        <div class="col-descripcion">Descripción</div>
+        <div class="col-precio">Precio</div>
+        <div class="col-acciones">Acciones</div>
+      </div>
+
+      <!-- LISTA -->
+      <div class="pedido-lista" id="orderList"></div>
+
+      <!-- FOOTER -->
+      <div class="pedido-footer">
+
+        <!--  SI QUERÉS MULTIMONEDA CAMBIAR ACÁ -->
+        <div class="totales">
+          <div class="totales-left">
+            Ítems: <span id="cantidadItems">0</span>
+          </div>
+
+          <div class="totales-right">
+            <div class="total-label">Total:</div>
+
+            <div id="total" class="totales-monedas">
+              <!-- JS llena esto -->
+            </div>
+          </div>
+        </div>
+
+        <div class="acciones">
+
+          <button class="btn-preparo" onclick="procesarVenta('rapido')">
+            <img src="/recursos/img/efectivizar.png">
+            Cobro Rapido
+          </button>
+
+          <button class="btn-preparo" onclick="procesarVenta('rapido_ticket')">
+            <img src="/recursos/img/imprimir.png">
+            Rapido + Ticket
+          </button>
+
+          <button class="btn-efectivizar" onclick="procesarVenta()">
+            <img src="/recursos/img/efectivizar.png">
+            Cobro Detallado
+          </button>
+
+          <button class="btn-venta" onclick="printVenta()">
+            <img src="/recursos/img/imprimir.png">
+            Imprimir Venta
+          </button>
+
+        </div>
+
+        <div class="preparo-feedback" style="display:none">
+          <span id="estadoPreparo" class="estado-preparo estado-preparo-idle">Sin envio</span>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+  <!-- =========================
+     MODAL EDITAR ITEM
+========================= -->
+  <div id="modalEditarItem" class="modal">
+    <div class="modal-content">
+
+      <h3>Editar Producto</h3>
+
+      <label>Cantidad</label>
+      <input type="number" id="editCantidad" inputmode="numeric">
+
+      <label>Precio</label>
+      <input type="text" id="editPrecio" inputmode="numeric">
+
+      <label>Observación</label>
+      <textarea id="editObservacion" placeholder="Ej: formato A4, color, plazo de entrega..."></textarea>
+
+      <div class="modal-buttons">
+        <button class="btn-success" onclick="guardarEdicion()">Guardar</button>
+        <button class="btn-neutral" onclick="cerrarModalEditar()">Cancelar</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- =========================
+     MODAL CONFIRMAR (reemplaza confirm() nativo)
+========================= -->
+  <div id="modalConfirmar" class="modal no-close">
+    <div class="modal-confirmar-content">
+      <p id="confirmarTexto"></p>
+      <div class="modal-confirmar-btns">
+        <button id="confirmarSi" class="btn-confirmar-si">Sí</button>
+        <button id="confirmarNo" class="btn-confirmar-no">No</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalMesaSimple" class="modal">
+    <div class="modal-content modal-mesa-simple">
+      <div class="mesa-simple-header">
+        <h3>Seleccionar Mesa</h3>
+        <button type="button" class="btn-neutral" onclick="recargarMesasSimple()">Actualizar</button>
+      </div>
+
+      <input
+        type="text"
+        id="mesaSimpleFiltro"
+        placeholder="Filtrar por numero, estado o pedido..."
+        oninput="renderMesasSimple()"
+      >
+
+      <div id="mesaSimpleLista" class="mesa-simple-lista"></div>
+
+      <div class="modal-buttons">
+        <button type="button" class="btn-success" onclick="confirmarMesaSimple()">Usar Mesa</button>
+        <button type="button" class="btn-neutral" onclick="cerrarModal('modalMesaSimple')">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================
+     TECLADO NUM�RICO - PEDIDO
+======================== -->
+  <div id="modalPedido" class="modal">
+    <div class="modal-content teclado-numerico">
+
+      <h3>Número de Pedido</h3>
+      <input type="text" id="pedidoTemp" readonly>
+
+      <div class="grid-teclado">
+        <button onclick="agregarNumeroPedido(1)">1</button>
+        <button onclick="agregarNumeroPedido(2)">2</button>
+        <button onclick="agregarNumeroPedido(3)">3</button>
+        <button onclick="agregarNumeroPedido(4)">4</button>
+        <button onclick="agregarNumeroPedido(5)">5</button>
+        <button onclick="agregarNumeroPedido(6)">6</button>
+        <button onclick="agregarNumeroPedido(7)">7</button>
+        <button onclick="agregarNumeroPedido(8)">8</button>
+        <button onclick="agregarNumeroPedido(9)">9</button>
+        <button onclick="borrarNumeroPedido()">⌫</button>
+        <button onclick="agregarNumeroPedido(0)">0</button>
+        <button onclick="confirmarPedido()">OK</button>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    window.__POS_MODE = window.__POS_MODE || { sinCocina: true, sinTipoPedido: true };
+  </script>
+  <script>
+    function obtenerFechaHoraLocal() {
+      const ahora = new Date();
+
+      const año = ahora.getFullYear();
+      const mes = String(ahora.getMonth() + 1).padStart(2, '0');
+      const dia = String(ahora.getDate()).padStart(2, '0');
+
+      const hora = String(ahora.getHours()).padStart(2, '0');
+      const minutos = String(ahora.getMinutes()).padStart(2, '0');
+
+      return `${año}-${mes}-${dia}T${hora}:${minutos}`;
+    }
+
+
+    document.getElementById("fechaPedido").value = obtenerFechaHoraLocal();
+  </script>
+
+
+  <div id="modalSabores" class="modal no-close">
+    <div class="modal-content">
+
+      <!-- HEADER -->
+      <div class="header-sabores">
+        <h3>Seleccionar Sabores</h3>
+        <input type="text" id="buscarSabor" placeholder="🔍 Buscar sabor...">
+      </div>
+
+      <!-- LISTA -->
+      <div id="listaSabores" class="grid-sabores"></div>
+
+      <!-- (opcional) sabores seleccionados -->
+      <div id="saboresSeleccionadosUI" class="sabores-seleccionados"></div>
+
+      <!--  SECCIÓN COMPACTA -->
+      <div class="edit-pizza-box">
+
+        <div class="row-edit">
+
+          <!-- CONTADOR -->
+          <div class="contador-box">
+            <span id="contadorSabores">0 / 4</span>
+          </div>
+
+          <!-- CANTIDAD -->
+          <div class="campo-mini">
+            <label>Cant.</label>
+            <input type="number" id="editCantidadPizza" value="1">
+          </div>
+
+          <!-- PRECIO -->
+          <div class="campo-mini">
+            <label>Precio</label>
+            <input type="text" id="editPrecioPizza">
+          </div>
+
+          <!-- OBSERVACIÓN -->
+          <div class="campo-observacion">
+            <label>Observación</label>
+            <textarea id="editObsPizza" placeholder="Ej: sin tomate..."></textarea>
+          </div>
+
+        </div>
+
+        <!-- BOTONES -->
+        <div class="modal-buttons">
+          <button onclick="confirmarSabores()">Confirmar</button>
+          <button onclick="cerrarModalSabores()">Cancelar</button>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+
+  <div id="modalFactura" class="modal no-close">
+    <div class="modal-content modal-factura">
+
+      <h3>🧾 Generar Factura</h3>
+
+      <label>Cliente</label>
+      <div class="input-busqueda">
+        <input id="clienteCodigoFactura">
+        <button id="btnBuscarClienteFactura">🔍</button>
+      </div>
+
+      <label>RUC</label>
+      <input id="rucFacturaInput">
+
+      <label>Nombre</label>
+      <input id="nombreFacturaInput">
+
+      <label>Dirección</label>
+      <input id="direccionFacturaInput">
+
+      <label>Ciudad</label>
+      <input id="ciudadFacturaInput">
+
+      <label>Número</label>
+      <input id="numeroFacturaPreview" readonly>
+
+      <div class="total-factura">
+        Total: <strong id="totalFacturaPreview"></strong>
+      </div>
+
+      <div class="acciones">
+        <button onclick="cerrarModalFactura()">Cancelar</button>
+        <button onclick="confirmarFactura()">Facturar</button>
+      </div>
+
+    </div>
+  </div>
+
+
+  <script src="/compartido/js/app.config.js?v=2026.04.17.03"></script>
+  <script src="/compartido/js/session.manager.js?v=2026.04.17.03"></script>
+  <script src="/compartido/js/cache.bootstrap.js?v=2026.04.17.03"></script>
+  <script src="tipo_pedido.shared.js?v=2026.04.19.01"></script>
+  <script src="venta_rapida.js?v=2026.04.21.01"></script>
+  <script src="/compartido/js/seguridad.js?v=2026.04.17.03"></script>
+
+</body>
+
+</html>
+
+
+
