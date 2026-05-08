@@ -10,12 +10,25 @@ const PERMISOS_DEFAULT = Object.freeze({ venta_rapida_efectivizar: true });
 
 /* === INIT === */
 document.addEventListener("DOMContentLoaded", async () => {
+  centrarVentana();
   await cargarPermisos();
   await cargarCotizacion();
   await cargarVentaDesdeURL();
   actualizarHora();
   setInterval(actualizarHora, 1000);
 });
+
+/* === CENTRAR VENTANA === */
+function centrarVentana() {
+  try {
+    const w = Math.min(screen.availWidth,  960);
+    const h = Math.min(screen.availHeight, 680);
+    const left = Math.round((screen.availWidth  - w) / 2);
+    const top  = Math.round((screen.availHeight - h) / 2);
+    window.moveTo(left, top);
+    window.resizeTo(w, h);
+  } catch (_) {}
+}
 
 /* === HORA === */
 function actualizarHora() {
@@ -51,7 +64,7 @@ function tienePermiso(clave) {
 
 /* === CARGAR VENTA === */
 async function cargarVentaDesdeURL() {
-  const params = new URLSearchParams(window.location.search);
+  const params     = new URLSearchParams(window.location.search);
   const ventasParam = params.get("ventas");
   const ventaParam  = params.get("venta_id");
 
@@ -64,14 +77,14 @@ async function cargarVentaDesdeURL() {
   }
 
   if (!ventasIds.length) {
-    document.getElementById("itemsBody").innerHTML = '<div class="items-vacio">Sin venta</div>';
+    setItemsBody('<div class="items-vacio">Sin venta</div>');
     return;
   }
 
-  document.getElementById("itemsBody").innerHTML = '<div class="items-vacio">Cargando...</div>';
+  setItemsBody('<div class="items-vacio">Cargando...</div>');
 
   let totalGeneral = 0;
-  let todosItems = [];
+  let todosItems   = [];
 
   for (const id of ventasIds) {
     try {
@@ -86,9 +99,9 @@ async function cargarVentaDesdeURL() {
   }
 
   ventaActual = {
-    ids: ventasIds,
-    id: ventasIds.join(","),
-    total: totalGeneral,
+    ids:      ventasIds,
+    id:       ventasIds.join(","),
+    total:    totalGeneral,
     detalles: todosItems
   };
 
@@ -96,56 +109,68 @@ async function cargarVentaDesdeURL() {
   actualizarHeader();
 }
 
+function setItemsBody(html) {
+  const el = document.getElementById("itemsBody");
+  if (el) el.innerHTML = html;
+}
+
+/* === FORMATO CANTIDAD === */
+function fmtCantidad(n) {
+  const num = Number(n);
+  return Number.isInteger(num) ? String(num) : num.toFixed(2).replace(/\.?0+$/, "");
+}
+
 /* === RENDER ITEMS === */
 function renderItems(detalles) {
-  const cont  = document.getElementById("itemsBody");
   const cantEl = document.getElementById("cantItems");
+  if (cantEl) cantEl.textContent = detalles ? detalles.length : 0;
 
   if (!detalles || !detalles.length) {
-    cont.innerHTML = '<div class="items-vacio">Sin ítems</div>';
-    if (cantEl) cantEl.textContent = "0";
+    setItemsBody('<div class="items-vacio">Sin ítems</div>');
     return;
   }
 
-  if (cantEl) cantEl.textContent = detalles.length;
+  const html = detalles.map(item => {
+    const nombre  = item.descripcion || item.producto_nombre || "(sin nombre)";
+    const gs      = Number(item.subtotal || 0);
+    const brlStr  = cotizacion.brl > 0 ? (gs / cotizacion.brl).toFixed(2).replace(".", ",") : "—";
+    const usdStr  = cotizacion.usd > 0 ? (gs / cotizacion.usd).toFixed(2).replace(".", ",") : "—";
+    const qty     = fmtCantidad(item.cantidad);
 
-  cont.innerHTML = detalles.map(item => {
-    const nombre    = item.descripcion || item.producto_nombre || "(sin nombre)";
-    const gs        = Number(item.subtotal || 0);
-    const brlStr    = cotizacion.brl > 0 ? (gs / cotizacion.brl).toFixed(2).replace(".", ",") : "—";
-    const usdStr    = cotizacion.usd > 0 ? (gs / cotizacion.usd).toFixed(2).replace(".", ",") : "—";
-    return `
-      <div class="item-card">
-        <div class="item-nombre">${item.cantidad}× ${nombre}</div>
-        <div class="item-montos">
-          <span class="item-moneda-row"><span class="item-flag">🇵🇾</span> ${gs.toLocaleString("es-PY")}</span>
-          <span class="item-moneda-row"><span class="item-flag">🇧🇷</span> ${brlStr}</span>
-          <span class="item-moneda-row"><span class="item-flag">🇺🇸</span> ${usdStr}</span>
-        </div>
-      </div>`;
+    return `<div class="item-card">
+      <div class="item-nombre"><span class="item-qty">${qty}×</span> ${nombre}</div>
+      <div class="item-montos">
+        <span class="item-moneda-row"><span class="item-flag">🇵🇾</span>${gs.toLocaleString("es-PY")}</span>
+        <span class="item-moneda-row"><span class="item-flag">🇧🇷</span>${brlStr}</span>
+        <span class="item-moneda-row"><span class="item-flag">🇺🇸</span>${usdStr}</span>
+      </div>
+    </div>`;
   }).join("");
+
+  setItemsBody(html);
 }
 
 /* === HEADER TOTALES === */
 function actualizarHeader() {
   if (!ventaActual) return;
-  const totalGs       = Number(ventaActual.total);
-  const pagadoGs      = pagos.reduce((s, p) => s + p.montoGs, 0);
-  const pendienteGs   = Math.max(0, totalGs - pagadoGs);
-  const pendienteBrl  = cotizacion.brl > 0 ? pendienteGs / cotizacion.brl : 0;
-  const pendienteUsd  = cotizacion.usd > 0 ? pendienteGs / cotizacion.usd : 0;
 
+  const totalGs     = Number(ventaActual.total) || 0;
+  const pagadoGs    = pagos.reduce((s, p) => s + p.montoGs, 0);
+  const pendienteGs = Math.max(0, totalGs - pagadoGs);
+
+  // Fila "Total"
   setEl("totalHeaderGs",  totalGs.toLocaleString("es-PY"));
   setEl("totalHeaderBrl", cotizacion.brl > 0 ? (totalGs / cotizacion.brl).toFixed(2).replace(".", ",") : "0,00");
   setEl("totalHeaderUsd", cotizacion.usd > 0 ? (totalGs / cotizacion.usd).toFixed(2).replace(".", ",") : "0,00");
 
+  // Fila "A pagar"
   setEl("aPagarGs",  pendienteGs.toLocaleString("es-PY"));
-  setEl("aPagarBrl", pendienteBrl > 0 ? pendienteBrl.toFixed(2).replace(".", ",") : "0,00");
-  setEl("aPagarUsd", pendienteUsd > 0 ? pendienteUsd.toFixed(2).replace(".", ",") : "0,00");
+  setEl("aPagarBrl", cotizacion.brl > 0 && pendienteGs > 0 ? (pendienteGs / cotizacion.brl).toFixed(2).replace(".", ",") : "0,00");
+  setEl("aPagarUsd", cotizacion.usd > 0 && pendienteGs > 0 ? (pendienteGs / cotizacion.usd).toFixed(2).replace(".", ",") : "0,00");
 
   const apRow = document.querySelector(".cobro-apagar-row");
   if (apRow) {
-    apRow.classList.toggle("apagar-ok",   pendienteGs <= 0);
+    apRow.classList.toggle("apagar-ok",    pendienteGs <= 0);
     apRow.classList.toggle("apagar-falta", pendienteGs > 0);
   }
 }
@@ -160,7 +185,7 @@ function agregarPago() {
   if (!ventaActual) { mostrarToast("Sin venta cargada", "error"); return; }
 
   const metodo = document.getElementById("metodoPagoSel")?.value || "EFECTIVO";
-  const moneda = document.getElementById("monedaSel")?.value   || "PYG";
+  const moneda = document.getElementById("monedaSel")?.value    || "PYG";
   const monto  = parseFloat(document.getElementById("montoInput")?.value || "0");
 
   if (!monto || monto <= 0) { mostrarToast("Ingrese un monto válido", "error"); return; }
@@ -171,7 +196,7 @@ function agregarPago() {
   }
 
   let montoGs = monto;
-  if (moneda === "BRL") montoGs = monto * cotizacion.brl;
+  if      (moneda === "BRL") montoGs = monto * cotizacion.brl;
   else if (moneda === "USD") montoGs = monto * cotizacion.usd;
 
   pagos.push({ metodo, moneda, monto, montoGs });
@@ -245,7 +270,7 @@ function limpiarCliente() {
   clienteActual = null;
   const rucEl    = document.getElementById("rucInput");
   const nombreEl = document.getElementById("clienteNombre");
-  if (rucEl)    rucEl.value = "";
+  if (rucEl)    rucEl.value    = "";
   if (nombreEl) nombreEl.value = "";
 }
 
@@ -258,8 +283,8 @@ async function efectivizar(imprimirTicket = true) {
   if (!ventaActual) { mostrarToast("Sin venta cargada", "error"); return; }
   if (!pagos.length) { mostrarToast("Agregue al menos un pago", "error"); return; }
 
-  const totalGs   = Number(ventaActual.total);
-  const pagadoGs  = pagos.reduce((s, p) => s + p.montoGs, 0);
+  const totalGs  = Number(ventaActual.total);
+  const pagadoGs = pagos.reduce((s, p) => s + p.montoGs, 0);
 
   if (pagadoGs < totalGs) {
     const falta = Math.round(totalGs - pagadoGs);
@@ -276,11 +301,11 @@ async function efectivizar(imprimirTicket = true) {
     let pagoGs = 0, pagoBrl = 0, pagoUsd = 0, pagoTarjeta = 0, pagoTransferencia = 0;
 
     for (const p of pagos) {
-      if (p.moneda === "BRL")      pagoBrl += p.monto;
-      else if (p.moneda === "USD") pagoUsd += p.monto;
-      else if (p.metodo === "TARJETA")        pagoTarjeta       += p.monto;
-      else if (p.metodo === "TRANSFERENCIA")  pagoTransferencia += p.monto;
-      else                                    pagoGs            += p.monto;
+      if      (p.moneda === "BRL")              pagoBrl           += p.monto;
+      else if (p.moneda === "USD")              pagoUsd           += p.monto;
+      else if (p.metodo === "TARJETA")          pagoTarjeta       += p.monto;
+      else if (p.metodo === "TRANSFERENCIA")    pagoTransferencia += p.monto;
+      else                                      pagoGs            += p.monto;
     }
 
     const body = {
@@ -293,7 +318,7 @@ async function efectivizar(imprimirTicket = true) {
       pago_transferencia: pagoTransferencia,
       total_pagado_gs:    Math.round(pagadoGs),
       imprimir_ticket:    imprimirTicket,
-      cliente_id:         clienteActual?.id   || null,
+      cliente_id:         clienteActual?.id     || null,
       cliente_nombre:     clienteActual?.nombre || null
     };
 
@@ -344,6 +369,7 @@ async function efectivizar(imprimirTicket = true) {
         window.close();
       }
     }, 1800);
+
   } catch (_) {
     mostrarToast("Error de conexión", "error");
   } finally {
@@ -372,6 +398,6 @@ function mostrarToast(msg, tipo = "info") {
   cont.appendChild(div);
   setTimeout(() => {
     div.classList.add("toast-out");
-    setTimeout(() => div.remove(), 280);
+    setTimeout(() => div.remove(), 250);
   }, 3200);
 }

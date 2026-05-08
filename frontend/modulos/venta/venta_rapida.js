@@ -2098,49 +2098,70 @@ function actualizarBadgeEspera() {
   }
 }
 
-function mostrarPanelEspera() {
-  if (ventasEnEspera.length === 0) {
-    mostrarToast("No hay ventas en espera", "info");
-    return;
-  }
+async function mostrarPanelEspera() {
   cerrarPanelVentasEspera();
+
   const wrap = document.createElement("div");
   wrap.id = "panelVentasEsperaPOS";
   wrap.style.cssText =
     "position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:10050;display:flex;align-items:center;justify-content:center;padding:16px;";
   const box = document.createElement("div");
   box.style.cssText =
-    "background:#fff;border-radius:10px;max-width:420px;width:100%;max-height:70vh;overflow:auto;padding:16px;box-shadow:0 8px 24px rgba(0,0,0,.25);";
+    "background:#fff;border-radius:10px;max-width:440px;width:100%;max-height:70vh;overflow:auto;padding:16px;box-shadow:0 8px 24px rgba(0,0,0,.25);";
   box.innerHTML = `
     <h3 style="margin:0 0 12px">Ventas en espera</h3>
-    <div id="listaPanelEsperaInner"></div>
+    <div id="listaPanelEsperaInner" style="min-height:48px">Cargando...</div>
     <div style="margin-top:12px">
       <button type="button" id="btnCerrarPanelEspera" class="btn-neutral">Cerrar</button>
     </div>`;
-  const lista = box.querySelector("#listaPanelEsperaInner");
-  ventasEnEspera.forEach((v) => {
-    const row = document.createElement("div");
-    row.style.cssText =
-      "display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid #eee;";
-    const totalStr = Number(v.total || 0).toLocaleString("es-PY");
-    const span = document.createElement("span");
-    span.textContent = `Venta #${v.numero ?? v.id} — Gs ${totalStr}`;
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.textContent = "Reanudar";
-    btn.className = "btn-success";
-    btn.addEventListener("click", () => reanudarVenta(v.id));
-    row.appendChild(span);
-    row.appendChild(btn);
-    lista.appendChild(row);
-  });
+
   wrap.appendChild(box);
-  wrap.addEventListener("click", (e) => {
-    if (e.target === wrap) cerrarPanelVentasEspera();
-  });
+  wrap.addEventListener("click", (e) => { if (e.target === wrap) cerrarPanelVentasEspera(); });
   box.querySelector("#btnCerrarPanelEspera").addEventListener("click", cerrarPanelVentasEspera);
   document.body.appendChild(wrap);
   panelVentasEsperaFlotante = wrap;
+
+  try {
+    const res = await fetch("/api/venta/en-espera?limit=50", { credentials: "include" });
+    const data = await res.json();
+    const lista = box.querySelector("#listaPanelEsperaInner");
+
+    const ventas = Array.isArray(data) ? data : (data.ventas || data.data || []);
+
+    if (!ventas.length) {
+      lista.innerHTML = '<p style="color:#999;text-align:center;padding:16px 0">No hay ventas en espera</p>';
+      return;
+    }
+
+    // Sincronizar array en memoria con lo que hay en la BD
+    ventasEnEspera = ventas.map(v => ({ id: v.id, numero: v.numero, total: v.total }));
+
+    lista.innerHTML = "";
+    ventas.forEach((v) => {
+      const totalStr  = Number(v.total || 0).toLocaleString("es-PY");
+      const notaStr   = v.nota_espera ? ` — ${v.nota_espera}` : "";
+      const clienteStr = v.cliente_nombre ? `<br><small style="color:#888">${v.cliente_nombre}</small>` : "";
+      const row = document.createElement("div");
+      row.style.cssText =
+        "display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 0;border-bottom:1px solid #eee;";
+      row.innerHTML = `
+        <div>
+          <span style="font-weight:600">Venta #${v.numero ?? v.id}</span>
+          <span style="color:#555"> — Gs ${totalStr}${notaStr}</span>
+          ${clienteStr}
+        </div>`;
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.textContent = "Reanudar";
+      btn.className = "btn-success";
+      btn.addEventListener("click", () => reanudarVenta(v.id));
+      row.appendChild(btn);
+      lista.appendChild(row);
+    });
+  } catch (_) {
+    const lista = box.querySelector("#listaPanelEsperaInner");
+    lista.innerHTML = '<p style="color:#c62828;text-align:center">Error cargando ventas en espera</p>';
+  }
 }
 
 async function procesarVenta(modo = "detallado") {
@@ -2262,15 +2283,14 @@ async function reanudarVenta(id) {
   const vid = Number(id);
   if (!ventaPosIdValido(vid)) return;
 
-  const borradorTieneItems = Array.isArray(pedidoActual.items) && pedidoActual.items.length > 0;
+  const borradorTieneItems = Array.isArray(pedidoActual?.items) && pedidoActual.items.length > 0;
 
   if (borradorTieneItems) {
-    mostrarConfirmar(
-      "Hay productos en el pedido actual. ¿Descartarlos y cargar la venta en espera?",
-      async () => {
-        await ejecutarReanudarDesdeEspera(vid);
-      }
-    );
+    // Abrir en nueva ventana para no perder la venta actual
+    cerrarPanelVentasEspera();
+    const url = `${window.location.pathname}?reanudar_id=${vid}`;
+    const popup = window.open(url, `venta_espera_${vid}`, "width=1280,height=800");
+    if (!popup) window.location.href = url;
     return;
   }
 
@@ -3968,10 +3988,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const params = new URLSearchParams(window.location.search);
 
-  const ventaId = params.get("venta_id");
-  const pedidoURL = params.get("pedido");
+  const ventaId     = params.get("venta_id");
+  const reanudarId  = params.get("reanudar_id");
+  const pedidoURL   = params.get("pedido");
   const postCobroURL = params.get("post_cobro");
-  const cargandoVentaExistente = Boolean(ventaId || pedidoURL);
+  const cargandoVentaExistente = Boolean(ventaId || pedidoURL || reanudarId);
 
   iniciarMotorReintentosCocina();
 
@@ -3983,15 +4004,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     mostrarMensaje("No se pudo cargar Tipo Pedido desde backend", "error");
   }
 
+  // PRIORIDAD 0: reanudar venta en espera en nueva ventana
+  if (reanudarId) {
+    await ejecutarReanudarDesdeEspera(Number(reanudarId));
+  }
   //  PRIORIDAD 1: ID (CORRECTO)
-if (ventaId) {
-  await cargarVentaPorId(ventaId);
-}
+  else if (ventaId) {
+    await cargarVentaPorId(ventaId);
+  }
   //  PRIORIDAD 2: numero (legacy)
-if (pedidoURL) {
-  document.getElementById("pedidoNumero").value = pedidoURL;
-  await buscarPedidoPorNumero();
-}
+  else if (pedidoURL) {
+    document.getElementById("pedidoNumero").value = pedidoURL;
+    await buscarPedidoPorNumero();
+  }
 
 if (postCobroURL === "1" && !ventaId) {
   mostrarMensaje("No se encontro la venta cobrada", "error");
