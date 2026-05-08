@@ -43,7 +43,19 @@ async function cargarCotizacion() {
     const data = await res.json();
     cotizacion.brl = Number(data.brl) || 0;
     cotizacion.usd = Number(data.usd) || 0;
-  } catch (_) {}
+
+    if (cotizacion.brl <= 0 || cotizacion.usd <= 0) {
+      const faltan = [];
+      if (cotizacion.brl <= 0) faltan.push("REAL");
+      if (cotizacion.usd <= 0) faltan.push("DÓLAR");
+      mostrarToast(
+        `⚠ Falta cargar cotización ${faltan.join(" y ")} — abrí Herramientas › Cotización`,
+        "warning"
+      );
+    }
+  } catch (_) {
+    mostrarToast("Error cargando cotización", "error");
+  }
 }
 
 /* === PERMISOS === */
