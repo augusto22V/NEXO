@@ -643,11 +643,22 @@ function recalcDif() {
   setDif('dcBoxUsd', 'dcUsdVal', null, contUsd - espUsd, fUsd);
 }
 
-function confirmarCierre() {
+async function confirmarCierre() {
   if (!tienePermisoCaja('caja_conferir_cierre')) {
     mostrarToast('Sin permiso para conferir cierre', 'error');
     return;
   }
+
+  // Advertencia si hay ventas EN_ESPERA sin resolver
+  let warningHtml = '';
+  try {
+    const r = await fetch('/api/venta/en-espera?limit=100', { credentials: 'include' });
+    const rows = await r.json();
+    const enEspera = Array.isArray(rows) ? rows.length : 0;
+    if (enEspera > 0) {
+      warningHtml = `<div class="gc-warn">⚠ Hay <strong>${enEspera}</strong> venta(s) EN ESPERA sin resolver. El sistema no permitirá cerrar hasta resolverlas.</div>`;
+    }
+  } catch (_) {}
 
   const cGs  = parseFloat(document.getElementById('cierreGs').value)  || 0;
   const cBrl = parseFloat(document.getElementById('cierreBrl').value) || 0;
@@ -698,6 +709,10 @@ function confirmarCierre() {
       </tbody>
     </table>`;
 
+  if (warningHtml) {
+    document.getElementById('modalResumen').insertAdjacentHTML('afterbegin', warningHtml);
+  }
+
   document.getElementById('modalCierre').classList.add('open');
 }
 
@@ -718,10 +733,26 @@ async function ejecutarCierre() {
     observacion:         document.getElementById('obsCierre').value
   });
   if (r) {
-    mostrarToast('Caja cerrada correctamente âœ“', 'success');
+    mostrarToast('Caja cerrada correctamente ✔', 'success');
     setBadge('CERRADA');
+
+    // Step 8: Mostrar resumen post-cierre con diferencias
+    const resumen = r.resumen || {};
+    const color = n => n >= 0 ? '#2e7d32' : '#c62828';
+    document.getElementById('statsCierre').innerHTML =
+      statBox('Esperado Gs',  fGs(resumen.esp_gs),   'c-gs')  +
+      statBox('Diferencia Gs',  `<span style=”color:${color(resumen.dif_gs)}”>${fGs(resumen.dif_gs)}</span>`,  '') +
+      statBox('Esperado R$',  fBrl(resumen.esp_brl), 'c-brl') +
+      statBox('Diferencia R$',  `<span style=”color:${color(resumen.dif_brl)}”>${fBrl(resumen.dif_brl)}</span>`, '') +
+      statBox('Esperado US$', fUsd(resumen.esp_usd), 'c-usd') +
+      statBox('Diferencia US$', `<span style=”color:${color(resumen.dif_usd)}”>${fUsd(resumen.dif_usd)}</span>`, '');
+
+    // Deshabilitar botón para evitar doble cierre
+    const btnCierre = document.getElementById('btnEjecutarCierre');
+    if (btnCierre) { btnCierre.disabled = true; btnCierre.textContent = 'Caja cerrada'; }
+
     setTimeout(() => cargarHistorial(), 500);
-    const tabHistorial = document.querySelector('.gc-tab[data-tab=\"historial\"]');
+    const tabHistorial = document.querySelector('.gc-tab[data-tab=”historial”]');
     if (tabHistorial && !tabHistorial.classList.contains('is-hidden')) {
       showTab('historial', tabHistorial);
     }

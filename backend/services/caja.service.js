@@ -37,6 +37,8 @@ async function ensureCajaSchema() {
     await db.query(`ALTER TABLE caja ADD COLUMN IF NOT EXISTS terminal_id BIGINT`);
     await db.query(`ALTER TABLE caja ADD COLUMN IF NOT EXISTS monto_inicial_real NUMERIC(12,2) DEFAULT 0`);
     await db.query(`ALTER TABLE caja ADD COLUMN IF NOT EXISTS monto_inicial_dolar NUMERIC(12,2) DEFAULT 0`);
+    await db.query(`ALTER TABLE caja ADD COLUMN IF NOT EXISTS monto_final_real  NUMERIC(12,2) DEFAULT 0`);
+    await db.query(`ALTER TABLE caja ADD COLUMN IF NOT EXISTS monto_final_dolar NUMERIC(12,2) DEFAULT 0`);
     await db.query(`ALTER TABLE caja_movimiento ADD COLUMN IF NOT EXISTS usuario_id BIGINT`);
     await db.query(`ALTER TABLE caja_movimiento ADD COLUMN IF NOT EXISTS caja_sesion_id BIGINT`);
     await db.query(`ALTER TABLE caja_movimiento ADD COLUMN IF NOT EXISTS fecha TIMESTAMPTZ`);
@@ -89,6 +91,7 @@ async function ensureCajaSchema() {
         END IF;
       END $$;
     `);
+    await db.query(`ALTER TABLE caja_sesiones ADD COLUMN IF NOT EXISTS monto_apertura NUMERIC(12,2) DEFAULT 0`);
     await db.query(`ALTER TABLE caja_sesiones ADD COLUMN IF NOT EXISTS monto_apertura_real NUMERIC(12,2) DEFAULT 0`);
     await db.query(`ALTER TABLE caja_sesiones ADD COLUMN IF NOT EXISTS monto_apertura_dolar NUMERIC(12,2) DEFAULT 0`);
 

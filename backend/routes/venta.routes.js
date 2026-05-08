@@ -1600,7 +1600,8 @@ router.post("/en-espera/:id", requirePermisoVentaRapida("venta_rapida_ver"), asy
 
     const estado = String(v.rows[0].estado || "").toUpperCase();
     if (estado === "EFECTIVADO") throw new Error("No se puede poner en espera una venta cobrada");
-    if (estado === "CANCELADO") throw new Error("No se puede poner en espera una venta cancelada");
+    if (estado === "CANCELADO")  throw new Error("No se puede poner en espera una venta cancelada");
+    if (estado === "CONCLUIDO")  throw new Error("No se puede poner en espera una venta concluida");
 
     await client.query(
       `
@@ -1641,6 +1642,21 @@ router.post("/reanudar/:id", requirePermisoVentaRapida("venta_rapida_ver"), asyn
     const estado = String(v.rows[0].estado || "").toUpperCase();
     if (estado === "EFECTIVADO") throw new Error("No se puede reanudar una venta cobrada");
     if (estado === "CANCELADO") throw new Error("No se puede reanudar una venta cancelada");
+
+    // Verificar stock disponible antes de reanudar (FOR UPDATE OF p previene race conditions)
+    const detalleRes = await client.query(
+      `SELECT vd.producto_id, vd.cantidad, p.stock, p.no_control_stock, p.nombre
+       FROM venta_detalle vd
+       JOIN producto p ON p.id = vd.producto_id
+       WHERE vd.venta_id = $1
+       FOR UPDATE OF p`,
+      [id]
+    );
+    for (const item of detalleRes.rows) {
+      if (!item.no_control_stock && Number(item.stock) < Number(item.cantidad)) {
+        throw new Error(`Stock insuficiente para "${item.nombre}": disponible ${item.stock}, requerido ${item.cantidad}`);
+      }
+    }
 
     await client.query(
       `
@@ -1745,9 +1761,9 @@ router.post("/cancelar/:id", requirePermisoVentaRapida("venta_rapida_cancelar"),
     }
 
 // =====================================
-// DEVOLVER STOCK SI YA ESTABA CONCLUIDO O EFECTIVADO
+// DEVOLVER STOCK SI YA ESTABA CONCLUIDO, EFECTIVADO, EN_ESPERA O PENDIENTE
 // =====================================
-if (estado === "CONCLUIDO" || estado === "EFECTIVADO") {
+if (estado === "CONCLUIDO" || estado === "EFECTIVADO" || estado === "EN_ESPERA" || estado === "PENDIENTE") {
 
   const detalle = await client.query(`
     SELECT producto_id, cantidad, precio_gs, precio

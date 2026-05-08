@@ -1832,14 +1832,8 @@ router.post("/cerrar", requirePermisoVentaRapida("caja_cerrar"), async (req, res
   const client = await pool.connect();
   try {
     const terminalId = getTerminalIdFromReq(req);
-    const usuarioId = getUsuarioIdFromReq(req);
-    const empresaId = getEmpresaIdFromReq(req);
-    const caja = await getCajaAbierta(client, { terminalId, adoptLegacy: true });
-
-    if (!caja) return res.status(400).json({ error: "No hay caja abierta" });
-
-    const sys = await getCajaResumen(client, caja.id);
-    const cot = await getCotizaciones(client);
+    const usuarioId  = getUsuarioIdFromReq(req);
+    const empresaId  = getEmpresaIdFromReq(req);
 
     const {
       monto_contado = 0,
@@ -1850,6 +1844,60 @@ router.post("/cerrar", requirePermisoVentaRapida("caja_cerrar"), async (req, res
       monto_contado_pix = 0,
       observacion = ""
     } = req.body || {};
+
+    // 2a: Validar montos negativos antes de tocar la DB
+    const camposMoneda = { monto_contado, monto_contado_real, monto_contado_dolar,
+                           monto_contado_tarjeta, monto_contado_transferencia, monto_contado_pix };
+    for (const [k, v] of Object.entries(camposMoneda)) {
+      if (parseFloat(v) < 0) return res.status(400).json({ error: `${k} no puede ser negativo` });
+    }
+
+    // 2b: BEGIN primero, luego bloquear la fila de caja con FOR UPDATE
+    await client.query("BEGIN");
+
+    let cajaRes;
+    if (terminalId) {
+      cajaRes = await client.query(
+        `SELECT * FROM caja WHERE UPPER(estado) = $1 AND terminal_id = $2 ORDER BY id DESC LIMIT 1 FOR UPDATE`,
+        [ESTADO_ABIERTA, terminalId]
+      );
+      if (!cajaRes.rowCount) {
+        cajaRes = await client.query(
+          `SELECT * FROM caja WHERE UPPER(estado) = $1 AND terminal_id IS NULL ORDER BY id DESC LIMIT 1 FOR UPDATE`,
+          [ESTADO_ABIERTA]
+        );
+      }
+    } else {
+      cajaRes = await client.query(
+        `SELECT * FROM caja WHERE UPPER(estado) = $1 ORDER BY id DESC LIMIT 1 FOR UPDATE`,
+        [ESTADO_ABIERTA]
+      );
+    }
+
+    if (!cajaRes.rowCount) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({ error: "No hay caja abierta" });
+    }
+    const caja = cajaRes.rows[0];
+
+    // 3: Bloquear cierre si hay ventas EN_ESPERA para esta terminal
+    const enEsperaRes = await client.query(
+      `SELECT COUNT(*) AS cnt FROM venta
+       WHERE estado = 'EN_ESPERA' AND ($1::bigint IS NULL OR terminal_id = $1)`,
+      [terminalId || null]
+    );
+    const enEspera = Number(enEsperaRes.rows[0].cnt);
+    if (enEspera > 0) {
+      await client.query("ROLLBACK");
+      return res.status(409).json({
+        error: `Hay ${enEspera} venta(s) EN ESPERA. Reanudalas o cancelalas antes de cerrar.`,
+        en_espera: enEspera
+      });
+    }
+
+    // getCajaResumen y cotizaciones ahora dentro de la transaccion
+    const sys = await getCajaResumen(client, caja.id);
+    const cot = await getCotizaciones(client);
 
     const inicial = getMontosInicialesCaja(caja);
     const esp_gs = inicial.gs + parseFloat(sys.efectivo || 0);
@@ -1867,15 +1915,17 @@ router.post("/cerrar", requirePermisoVentaRapida("caja_cerrar"), async (req, res
     const dif_pix = parseFloat(monto_contado_pix || 0) - esp_pix;
     const dif_total = dif_gs + dif_brl * cot.brl + dif_usd * cot.usd;
 
-    await client.query("BEGIN");
-
+    // 2c: Guardar monto_final, monto_final_real y monto_final_dolar
     await client.query(
       `
       UPDATE caja
-      SET estado = $1, fecha_cierre = NOW(), monto_final = $2
-      WHERE id = $3
+      SET estado = $1, fecha_cierre = NOW(),
+          monto_final       = $2,
+          monto_final_real  = $3,
+          monto_final_dolar = $4
+      WHERE id = $5
       `,
-      [ESTADO_CERRADA, Number(monto_contado) || 0, caja.id]
+      [ESTADO_CERRADA, Number(monto_contado) || 0, Number(monto_contado_real) || 0, Number(monto_contado_dolar) || 0, caja.id]
     );
 
     const sesion = await getSesionAbierta(client, caja.id, terminalId);
