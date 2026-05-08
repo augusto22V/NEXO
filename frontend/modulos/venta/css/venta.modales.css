@@ -510,3 +510,51 @@ button {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* === STEPPER DE CANTIDAD (+/-) === */
+.qty-stepper {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.qty-stepper input[type="number"] {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 700;
+  padding: 8px 4px;
+  border: 1px solid #cfd6dd;
+  border-radius: 6px;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+.qty-stepper input[type="number"]::-webkit-outer-spin-button,
+.qty-stepper input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+
+.qty-stepper .qty-btn {
+  flex: 0 0 46px;
+  background: #1a6474;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: background 0.15s, transform 0.05s;
+}
+.qty-stepper .qty-btn:hover  { background: #0f4a58; }
+.qty-stepper .qty-btn:active { transform: scale(0.94); }
+.qty-stepper .qty-minus      { background: #c62828; }
+.qty-stepper .qty-minus:hover{ background: #b71c1c; }
+

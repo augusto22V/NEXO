@@ -211,7 +211,11 @@
       <h3>Editar Producto</h3>
 
       <label>Cantidad</label>
-      <input type="number" id="editCantidad" inputmode="numeric">
+      <div class="qty-stepper">
+        <button type="button" class="qty-btn qty-minus" onclick="ajustarCantidadEdit(-1)" title="Restar">−</button>
+        <input type="number" id="editCantidad" inputmode="numeric" min="0">
+        <button type="button" class="qty-btn qty-plus" onclick="ajustarCantidadEdit(1)" title="Sumar">+</button>
+      </div>
 
       <label>Precio</label>
       <input type="text" id="editPrecio" inputmode="numeric">

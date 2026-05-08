@@ -951,8 +951,21 @@ function formatearGs(valor) {
   }).format(valor || 0);
 }
 
+function normalizarBusqueda(s) {
+  return String(s || "")
+    .toLowerCase()
+    .replace(/[áàâä]/g, "a")
+    .replace(/[éèêë]/g, "e")
+    .replace(/[íìîï]/g, "i")
+    .replace(/[óòôö]/g, "o")
+    .replace(/[úùûü]/g, "u")
+    .replace(/ñ/g, "n")
+    .replace(/ç/g, "c")
+    .trim();
+}
+
 function filtrarProductosRapido(valor) {
-  const txt = String(valor || "").trim().toLowerCase();
+  const txt = normalizarBusqueda(valor);
   if (!txt) {
     productosFiltrados = [];
     renderProductos();
@@ -960,13 +973,24 @@ function filtrarProductosRapido(valor) {
   }
 
   productosFiltrados = productos.filter((p) => {
-    const nombre = String(p?.nombre || "").toLowerCase();
+    const nombre = normalizarBusqueda(p?.nombre);
     const codigo = String(p?.codigo_barra || "");
     const id = String(p?.id || "");
     return nombre.includes(txt) || codigo.includes(txt) || id === txt;
   });
 
   renderProductos();
+}
+
+function ajustarCantidadEdit(delta) {
+  const input = document.getElementById("editCantidad");
+  if (!input) return;
+  const actual = parseFloat(input.value) || 0;
+  const paso = parseFloat(input.step) || 1;
+  const nuevo = Math.max(0, actual + (delta * paso));
+  input.value = Number.isInteger(nuevo) ? String(nuevo) : nuevo.toFixed(2).replace(/\.?0+$/, "");
+  input.focus();
+  input.dispatchEvent(new Event("input", { bubbles: true }));
 }
 
 /* =========================
