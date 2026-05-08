@@ -2,10 +2,10 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <link rel="manifest" href="/manifest.json">
-  <title>LibreríaSys | Caja</title>
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="/manifest.json">
+  <title>LibreríaSys | Cobro</title>
   <link rel="stylesheet" href="../../compartido/css/base.css">
   <link rel="stylesheet" href="./caja.css">
 </head>
@@ -13,89 +13,114 @@
 
   <!-- TOPBAR -->
   <div class="topbar">
-    <button class="btn-cancelar">
-       Cancelar
-    </button>
+    <button class="btn-cancelar" onclick="window.close()">Cancelar</button>
+    <div class="titulo"><span>Cobro</span></div>
+    <div class="topbar-info"><span id="cajaFecha"></span></div>
+  </div>
 
-    <div class="titulo">
-      <span>Caja</span>
+  <!-- TOTALES HEADER -->
+  <div class="cobro-header">
+    <div class="cobro-total-row">
+      <span class="cobro-label">Total:</span>
+      <span class="cobro-moneda-tag">🇵🇾 PYG</span>
+      <span id="totalHeaderGs" class="cobro-monto">0</span>
+      <span class="cobro-moneda-tag">🇧🇷</span>
+      <span id="totalHeaderBrl" class="cobro-monto">0,00</span>
+      <span class="cobro-moneda-tag">🇺🇸</span>
+      <span id="totalHeaderUsd" class="cobro-monto">0,00</span>
     </div>
-
-    <div class="topbar-info">
-      <span id="cajaFecha"></span>
+    <div class="cobro-total-row cobro-apagar-row">
+      <span class="cobro-label">A pagar:</span>
+      <span class="cobro-moneda-tag">🇵🇾 PYG</span>
+      <span id="aPagarGs" class="cobro-monto">0</span>
+      <span class="cobro-moneda-tag">🇧🇷</span>
+      <span id="aPagarBrl" class="cobro-monto">0,00</span>
+      <span class="cobro-moneda-tag">🇺🇸</span>
+      <span id="aPagarUsd" class="cobro-monto">0,00</span>
     </div>
   </div>
 
-  <!-- CONTENEDOR PRINCIPAL -->
-  <div class="caja-container">
+  <!-- BODY PRINCIPAL -->
+  <div class="cobro-body">
 
-    <div class="caja-simple">
+    <!-- IZQUIERDA: cliente + items -->
+    <div class="cobro-izq">
 
-      <!-- BUSCAR VENTA -->
-      <div class="busqueda-row">
-        
-       <input type="text" id="nroVenta" readonly>
-        <button onclick="buscarVentaPorCodigoTop()">Buscar</button>
+      <!-- RUC / CLIENTE -->
+      <div class="cliente-row">
+        <div class="cliente-field cliente-ruc">
+          <label>RUC</label>
+          <input type="text" id="rucInput" placeholder="RUC o Cédula"
+                 onkeydown="buscarClientePorRuc(event)">
+        </div>
+        <div class="cliente-field cliente-nombre">
+          <label>Cliente</label>
+          <input type="text" id="clienteNombre" placeholder="Nombre del cliente" readonly>
+        </div>
+        <button class="btn-cliente-clear" onclick="limpiarCliente()" title="Limpiar">×</button>
       </div>
 
-      <!-- LISTA PRODUCTOS -->
-      <div class="productos-box">
-        <div id="carritoBody">
-          <div class="carrito-vacio">
-            Ingresá un número de venta
-          </div>
+      <!-- ITEMS -->
+      <div class="items-header">
+        Ítems (<span id="cantItems">0</span>)
+      </div>
+      <div class="items-scroll">
+        <div id="itemsBody">
+          <div class="items-vacio">Cargando...</div>
         </div>
       </div>
 
-            <!-- MÉTODOS DE PAGO -->
-      <div class="metodos-pago">
-        <button class="metodo activo" data-metodo="efectivo">💵 Efectivo</button>
-        <button class="metodo" data-metodo="debito">💳 Débito</button>
-        <button class="metodo" data-metodo="credito">💳 Crédito</button>
-        <button class="metodo" data-metodo="qr">📷 QR</button>
-        <button class="metodo" data-metodo="pix">🔷 PIX</button>
-        <button class="metodo" data-metodo="transferencia">🏦 Transfer.</button>
+    </div>
+
+    <!-- DERECHA: ingreso de pago + lista -->
+    <div class="cobro-der">
+
+      <!-- INGRESO DE PAGO -->
+      <div class="pago-input-row">
+        <select id="metodoPagoSel" class="pago-select">
+          <option value="EFECTIVO">EFECTIVO</option>
+          <option value="TARJETA">TARJETA</option>
+          <option value="TRANSFERENCIA">TRANSFERENCIA</option>
+        </select>
+        <select id="monedaSel" class="pago-select">
+          <option value="PYG">GUARANÍ</option>
+          <option value="BRL">REAL</option>
+          <option value="USD">DÓLAR</option>
+        </select>
+        <input type="number" id="montoInput" class="pago-monto-input"
+               placeholder="0" min="0" step="any"
+               onkeydown="if(event.key==='Enter') agregarPago()">
+        <button class="btn-agregar-pago" onclick="agregarPago()">+</button>
       </div>
 
-      <!-- TOTAL -->
-<!-- TOTAL BASE -->
-<div class="total-base">
-  Total Base (Gs):
-  <span id="totalBase">0</span>
-</div>
-
-<!-- TABLA MONEDAS -->
-<div class="tabla-monedas">
-
-  <div class="columna">
-    <div class="titulo-moneda">Guaraní (Gs)</div>
-    <div>Total: <span id="totalGs">0</span></div>
-    <input type="number" id="pagoGs" placeholder="Recibido" oninput="calcularColumnas()">
-    <div>Vuelto: <span id="vueltoGs">0</span></div>
-  </div>
-
-  <div class="columna">
-    <div class="titulo-moneda">Real (R$)</div>
-    <div>Total: <span id="totalBrl">0</span></div>
-    <input type="number" id="pagoBrl" placeholder="Recibido" oninput="calcularColumnas()">
-    <div>Vuelto: <span id="vueltoBrl">0</span></div>
-  </div>
-
-  <div class="columna">
-    <div class="titulo-moneda">Dólar (US$)</div>
-    <div>Total: <span id="totalUsd">0</span></div>
-    <input type="number" id="pagoUsd" placeholder="Recibido" oninput="calcularColumnas()">
-    <div>Vuelto: <span id="vueltoUsd">0</span></div>
-  </div>
-
-</div>
-
-<button class="btn-confirmar" onclick="efectivizar()">
-  Confirmar
-</button>
+      <!-- TABLA DE PAGOS -->
+      <div class="pagos-tabla-wrap">
+        <table class="pagos-tabla">
+          <thead>
+            <tr>
+              <th>Vuelto</th>
+              <th>Forma de cobro</th>
+              <th>Moneda</th>
+              <th>Valor</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="pagosBody">
+            <tr class="pagos-vacio-row">
+              <td colspan="5">Lista vacía</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
     </div>
 
+  </div>
+
+  <!-- FOOTER -->
+  <div class="cobro-footer">
+    <button class="btn-sin-ticket" onclick="efectivizar(false)">Sin ticket</button>
+    <button class="btn-finalizar" id="btnFinalizar" onclick="efectivizar(true)">Finalizar</button>
   </div>
 
   <!-- SPINNER -->
@@ -106,7 +131,6 @@
     </div>
   </div>
 
-
   <!-- TOAST -->
   <div id="toastContainer" class="toast-container"></div>
 
@@ -114,7 +138,7 @@
   <script src="/compartido/js/session.manager.js?v=2026.04.17.03"></script>
   <script src="/compartido/js/cache.bootstrap.js?v=2026.04.17.03"></script>
   <script src="/compartido/js/seguridad.js?v=2026.04.17.03"></script>
-  <script src="caja.js"></script>
+  <script src="caja.js?v=2026.05.08.02"></script>
 
 </body>
 </html>

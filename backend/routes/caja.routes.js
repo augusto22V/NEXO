@@ -1373,7 +1373,7 @@ router.post("/cobrar", requirePermisoVentaRapida("venta_rapida_efectivizar"), as
       await insertarDetallePago(client, movimientoId, pagosVenta);
 
       await client.query(
-        `UPDATE venta SET estado = 'EFECTIVADO', estado_caja = 'COBRADO' WHERE id = $1`,
+        `UPDATE venta SET estado = 'EFECTIVADO', estado_caja = 'COBRADO', efectivizado_en = NOW() WHERE id = $1`,
         [venta.id]
       );
       await clearMesaByVentaId(client, venta.id, getMesaScopeFromReq(req));
@@ -1458,22 +1458,6 @@ router.post("/cobrar", requirePermisoVentaRapida("venta_rapida_efectivizar"), as
         moneda: "GS",
         monto: Number(resumenVenta.pago_transferencia || 0),
         tipo_nombre: "Cobro transferencia venta",
-        documento: documentoVenta || null,
-        referencia_id: movimientoId,
-        observacion: observacionVenta
-      });
-      pushHistorialEntry(historialVenta, {
-        fecha: new Date(),
-        caja_id: caja.id,
-        sesion_id: sesion?.id || null,
-        terminal_id: terminalId || caja.terminal_id || null,
-        empresa_id: empresaId || null,
-        usuario_id: usuarioId || null,
-        origen: "VENTA",
-        operacion: "CREDITO",
-        moneda: "GS",
-        monto: Number(resumenVenta.pago_pix || 0),
-        tipo_nombre: "Cobro PIX venta",
         documento: documentoVenta || null,
         referencia_id: movimientoId,
         observacion: observacionVenta
@@ -1679,7 +1663,7 @@ router.post("/cobrar-legacy", requirePermisoVentaRapida("venta_rapida_efectiviza
       const movimientoId = movimientoRes.rows[0]?.id || null;
 
       await client.query(
-        `UPDATE venta SET estado = 'EFECTIVADO', estado_caja = 'COBRADO' WHERE id = $1`,
+        `UPDATE venta SET estado = 'EFECTIVADO', estado_caja = 'COBRADO', efectivizado_en = NOW() WHERE id = $1`,
         [venta.id]
       );
       await clearMesaByVentaId(client, venta.id, getMesaScopeFromReq(req));
