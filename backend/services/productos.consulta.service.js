@@ -89,7 +89,13 @@ function buildWhereAndParams(filters) {
   }
 
   if (filters.descripcion) {
-    add("(LOWER(p.nombre) LIKE LOWER($?) OR LOWER(COALESCE(p.descripcion, '')) LIKE LOWER($?))", `%${filters.descripcion}%`);
+    // Búsqueda case-insensitive y accent-insensitive (translate() reemplaza tildes)
+    const ACENTOS_DE = "áàâäéèêëíìîïóòôöúùûüñçÁÀÂÄÉÈÊËÍÌÎÏÓÒÔÖÚÙÛÜÑÇ";
+    const ACENTOS_A  = "aaaaeeeeiiiioooouuuuncAAAAEEEEIIIIOOOOUUUUNC";
+    add(
+      `(translate(LOWER(p.nombre), '${ACENTOS_DE}', '${ACENTOS_A}') LIKE translate(LOWER($?), '${ACENTOS_DE}', '${ACENTOS_A}') OR translate(LOWER(COALESCE(p.descripcion, '')), '${ACENTOS_DE}', '${ACENTOS_A}') LIKE translate(LOWER($?), '${ACENTOS_DE}', '${ACENTOS_A}'))`,
+      `%${filters.descripcion}%`
+    );
   }
 
   if (filters.codigo_barra) {
