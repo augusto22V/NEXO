@@ -91,9 +91,21 @@ async function ensureCajaSchema() {
         END IF;
       END $$;
     `);
-    await db.query(`ALTER TABLE caja_sesiones ADD COLUMN IF NOT EXISTS monto_apertura NUMERIC(12,2) DEFAULT 0`);
-    await db.query(`ALTER TABLE caja_sesiones ADD COLUMN IF NOT EXISTS monto_apertura_real NUMERIC(12,2) DEFAULT 0`);
+    await db.query(`ALTER TABLE caja_sesiones ADD COLUMN IF NOT EXISTS monto_apertura       NUMERIC(12,2) DEFAULT 0`);
+    await db.query(`ALTER TABLE caja_sesiones ADD COLUMN IF NOT EXISTS monto_apertura_real  NUMERIC(12,2) DEFAULT 0`);
     await db.query(`ALTER TABLE caja_sesiones ADD COLUMN IF NOT EXISTS monto_apertura_dolar NUMERIC(12,2) DEFAULT 0`);
+    await db.query(`ALTER TABLE caja_sesiones ADD COLUMN IF NOT EXISTS cotizacion_real       NUMERIC(18,6)`);
+    await db.query(`ALTER TABLE caja_sesiones ADD COLUMN IF NOT EXISTS cotizacion_dolar      NUMERIC(18,6)`);
+    await db.query(`ALTER TABLE caja_sesiones ADD COLUMN IF NOT EXISTS usuario_apertura      BIGINT`);
+    await db.query(`ALTER TABLE caja_sesiones ADD COLUMN IF NOT EXISTS estado                VARCHAR(20)`);
+    await db.query(`ALTER TABLE caja_sesiones ADD COLUMN IF NOT EXISTS observacion           TEXT`);
+    await db.query(`ALTER TABLE caja_sesiones ADD COLUMN IF NOT EXISTS monto_contado         NUMERIC(12,2)`);
+    await db.query(`ALTER TABLE caja_sesiones ADD COLUMN IF NOT EXISTS monto_contado_real    NUMERIC(12,2)`);
+    await db.query(`ALTER TABLE caja_sesiones ADD COLUMN IF NOT EXISTS monto_contado_dolar   NUMERIC(12,2)`);
+    await db.query(`ALTER TABLE caja_sesiones ADD COLUMN IF NOT EXISTS diferencia            NUMERIC(12,2)`);
+    await db.query(`ALTER TABLE caja_sesiones ADD COLUMN IF NOT EXISTS diferencia_real       NUMERIC(12,2)`);
+    await db.query(`ALTER TABLE caja_sesiones ADD COLUMN IF NOT EXISTS diferencia_dolar      NUMERIC(12,2)`);
+    await db.query(`ALTER TABLE caja_sesiones ADD COLUMN IF NOT EXISTS total_ventas          NUMERIC(14,2)`);
 
     await db.query(`
       CREATE TABLE IF NOT EXISTS caja_movimiento_tipo (
