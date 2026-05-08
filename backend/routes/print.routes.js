@@ -1377,6 +1377,116 @@
 
   return lineas;
   }
+  /* ==============================================
+     GET /api/print-preview/venta/:id
+     Preview HTML del ticket de venta — abre en nueva pestaña y auto-imprime
+  ============================================== */
+  router.get("/venta/:id", async (req, res) => {
+    const id = Number(req.params.id);
+    if (!id) return res.status(400).send("ID inválido");
+
+    try {
+      const cabRes = await pool.query(
+        `SELECT v.id, v.numero, v.fecha, v.total,
+                COALESCE(v.cliente_nombre, c.nombre, 'Ocasional') AS cliente
+         FROM venta v
+         LEFT JOIN cliente c ON c.id = v.cliente_id
+         WHERE v.id = $1 LIMIT 1`,
+        [id]
+      );
+      if (!cabRes.rowCount) return res.status(404).send("Venta no encontrada");
+      const v = cabRes.rows[0];
+
+      const detRes = await pool.query(
+        `SELECT vd.cantidad, vd.precio, vd.subtotal, p.nombre AS descripcion
+         FROM venta_detalle vd
+         JOIN producto p ON p.id = vd.producto_id
+         WHERE vd.venta_id = $1 ORDER BY vd.id`,
+        [id]
+      );
+
+      let empresaNombre = "NEXO", empresaDireccion = "";
+      try {
+        const empRes = await pool.query(`SELECT nombre, direccion FROM empresa LIMIT 1`);
+        if (empRes.rowCount) { empresaNombre = empRes.rows[0].nombre; empresaDireccion = empRes.rows[0].direccion || ""; }
+      } catch (_) {}
+
+      let cotBrl = 0, cotUsd = 0;
+      try {
+        const cotRes = await pool.query(`SELECT moneda, valor_indice FROM cotizacion WHERE activa = true`);
+        cotRes.rows.forEach(c => {
+          if (c.moneda === "REAL")  cotBrl = Number(c.valor_indice);
+          if (c.moneda === "DOLAR") cotUsd = Number(c.valor_indice);
+        });
+      } catch (_) {}
+
+      const gs   = n => Number(n || 0).toLocaleString("es-PY");
+      const dec2 = n => Number(n || 0).toFixed(2).replace(".", ",");
+      const total = Number(v.total || 0);
+      const fecha = new Date(v.fecha).toLocaleString("es-PY");
+
+      let itemsHtml = "";
+      detRes.rows.forEach(i => {
+        const sub = Number(i.subtotal || 0);
+        itemsHtml += `
+          <tr>
+            <td>${Number(i.cantidad)}x ${i.descripcion}</td>
+            <td class="r">${gs(i.precio)}</td>
+            <td class="r">${gs(sub)}</td>
+          </tr>`;
+      });
+
+      const brlHtml = cotBrl > 0
+        ? `<tr><td>R$</td><td class="r">${dec2(total / cotBrl)}</td></tr>` : "";
+      const usdHtml = cotUsd > 0
+        ? `<tr><td>US$</td><td class="r">${dec2(total / cotUsd)}</td></tr>` : "";
+
+      const html = `<!DOCTYPE html><html lang="es"><head>
+<meta charset="UTF-8">
+<title>Ticket #${v.numero}</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: monospace; font-size: 12px; width: 300px; margin: 0 auto; padding: 10px; }
+  h2 { text-align:center; font-size:14px; margin-bottom:2px; }
+  .sub { text-align:center; font-size:11px; color:#555; margin-bottom:6px; }
+  hr { border:none; border-top:1px dashed #000; margin:6px 0; }
+  table { width:100%; border-collapse:collapse; }
+  td { padding:2px 0; vertical-align:top; }
+  .r { text-align:right; white-space:nowrap; }
+  .total-row td { font-weight:bold; font-size:13px; border-top:1px dashed #000; padding-top:4px; }
+  .footer { text-align:center; margin-top:8px; font-size:11px; }
+  @media print { body { width:100%; } button { display:none; } }
+</style>
+</head><body>
+<h2>${empresaNombre}</h2>
+${empresaDireccion ? `<div class="sub">${empresaDireccion}</div>` : ""}
+<hr>
+<div>Pedido: <strong>#${v.numero}</strong></div>
+<div>Fecha: ${fecha}</div>
+<div>Cliente: ${v.cliente}</div>
+<hr>
+<table>
+  <thead><tr><th style="text-align:left">Descripción</th><th class="r">P/U Gs</th><th class="r">Sub Gs</th></tr></thead>
+  <tbody>${itemsHtml}</tbody>
+  <tfoot>
+    <tr class="total-row"><td colspan="2">TOTAL Gs</td><td class="r">${gs(total)}</td></tr>
+    ${brlHtml ? `<tr><td colspan="2">R$</td><td class="r">${dec2(total / cotBrl)}</td></tr>` : ""}
+    ${usdHtml ? `<tr><td colspan="2">US$</td><td class="r">${dec2(total / cotUsd)}</td></tr>` : ""}
+  </tfoot>
+</table>
+<hr>
+<div class="footer">Gracias por su preferencia</div>
+<script>window.onload = function(){ window.print(); };</script>
+</body></html>`;
+
+      res.setHeader("Content-Type", "text/html; charset=utf-8");
+      res.send(html);
+    } catch (err) {
+      console.error("GET /print-preview/venta:", err);
+      res.status(500).send("Error generando preview");
+    }
+  });
+
   module.exports = router;
 
   //ver factura sin impresora por ahora porque hendy
