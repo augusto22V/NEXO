@@ -520,6 +520,62 @@ router.post("/agregar-item", requirePermisoVentaRapida("venta_rapida_ver"), asyn
     }
 
     // =====================================
+    // ACUMULACION — mismo producto suma cantidad
+    // =====================================
+    const acumular = req.body?.acumular !== false;
+
+    if (acumular) {
+      const existente = await client.query(
+        `SELECT id, cantidad, precio, precio_gs
+         FROM venta_detalle
+         WHERE venta_id = $1 AND producto_id = $2
+         LIMIT 1
+         FOR UPDATE`,
+        [ventaId, productoId]
+      );
+
+      if (existente.rowCount > 0) {
+        const item = existente.rows[0];
+        const nuevaCantidad = Number(item.cantidad) + cantidadValue;
+        const precioExistente = Number(item.precio_gs || item.precio);
+        const nuevoSubtotal = nuevaCantidad * precioExistente;
+
+        await client.query(
+          `UPDATE venta_detalle SET cantidad = $1, subtotal = $2 WHERE id = $3`,
+          [nuevaCantidad, nuevoSubtotal, item.id]
+        );
+
+        if (controlaStock) {
+          await client.query(
+            `UPDATE producto SET stock = stock - $1 WHERE id = $2`,
+            [cantidadValue, productoId]
+          );
+
+          await registrarStockMovimientoVenta(client, {
+            productoId,
+            empresaId: getEmpresaIdFromReq(req),
+            tipo: "SALIDA",
+            cantidad: cantidadValue,
+            costo: precioExistente,
+            referenciaId: item.id,
+            referenciaTipo: "VENTA_DETALLE"
+          });
+        }
+
+        const { totalVenta, comision } = await recalculateVentaCommission(client, ventaId);
+        await client.query("COMMIT");
+
+        return res.json({
+          ok: true,
+          total: totalVenta,
+          comision,
+          item_id: item.id,
+          acumulado: true
+        });
+      }
+    }
+
+    // =====================================
     // INSERTAR ITEM
     // =====================================
     const insert = await client.query(`
@@ -576,6 +632,7 @@ router.post("/agregar-item", requirePermisoVentaRapida("venta_rapida_ver"), asyn
         empresaId: getEmpresaIdFromReq(req),
         tipo: "SALIDA",
         cantidad: cantidadValue,
+        costo: precioCanonicoGs,
         referenciaId: itemId,
         referenciaTipo: "VENTA_DETALLE"
       });
@@ -621,6 +678,205 @@ router.post("/agregar-item", requirePermisoVentaRapida("venta_rapida_ver"), asyn
 
 });
 
+
+// ============================================================
+// AGREGAR POR CODIGO DE BARRAS — match exacto, agrega directo
+// ============================================================
+router.post("/agregar-por-codigo", requirePermisoVentaRapida("venta_rapida_ver"), async (req, res) => {
+  const {
+    venta_id,
+    codigo_barra,
+    cantidad = 1,
+    precio_nivel = 1,
+    moneda_id,
+    acumular = true
+  } = req.body || {};
+
+  const ventaId = Number(venta_id || 0);
+  const cantidadValue = Number(cantidad);
+  const codigoBarra = String(codigo_barra || "").trim();
+
+  if (!ventaId || !codigoBarra || !Number.isFinite(cantidadValue) || cantidadValue <= 0) {
+    return res.status(400).json({ error: "Datos invalidos" });
+  }
+
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    // Buscar producto por código de barras exacto
+    const prodRes = await client.query(
+      `SELECT p.id, p.nombre, p.stock, p.no_control_stock, p.facturacion_directa,
+              COALESCE(pp.precio_venta, 0)        AS precio_venta,
+              COALESCE(pp.precio_minimo, 0)       AS precio_minimo,
+              COALESCE(pp.precio_promocional, 0)  AS precio_promocional
+       FROM producto p
+       LEFT JOIN producto_precio pp ON pp.producto_id = p.id AND pp.activo = true
+       WHERE TRIM(p.codigo_barra) = $1
+       ORDER BY pp.id DESC
+       LIMIT 1
+       FOR UPDATE OF p`,
+      [codigoBarra]
+    );
+
+    if (!prodRes.rowCount) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ error: "Producto no encontrado para ese código de barras" });
+    }
+
+    const prod = prodRes.rows[0];
+    const productoId = Number(prod.id);
+
+    // Seleccionar precio según nivel
+    const nivel = Number(precio_nivel);
+    let precioSeleccionado = Number(prod.precio_venta);
+    if (nivel === 2 && prod.precio_minimo > 0) precioSeleccionado = Number(prod.precio_minimo);
+    if (nivel === 3 && prod.precio_promocional > 0) precioSeleccionado = Number(prod.precio_promocional);
+
+    if (precioSeleccionado <= 0) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({ error: "El producto no tiene precio configurado" });
+    }
+
+    // Verificar venta editable
+    const ventaCheck = await client.query(
+      `SELECT estado FROM venta WHERE id = $1`,
+      [ventaId]
+    );
+    if (!ventaCheck.rowCount) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ error: "Venta no encontrada" });
+    }
+    if (!ventaEditable(ventaCheck.rows[0].estado)) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({ error: "La venta no es editable" });
+    }
+
+    // Control de stock
+    const controlaStock = !prod.no_control_stock;
+    if (controlaStock && Number(prod.stock) < cantidadValue) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({ error: "Stock insuficiente" });
+    }
+
+    const cotizacion = await getCotizacionActiva(client);
+    const monedaIdResuelto = resolveMonedaId(moneda_id, MONEDA_IDS.PYG);
+    const conversion = buildPrecioMonedaPayload({
+      monto: precioSeleccionado,
+      monedaId: monedaIdResuelto,
+      cotizacion
+    });
+    const precioGs = Number(conversion.monto_gs ?? precioSeleccionado);
+
+    // Intentar acumular si el producto ya está en el carrito
+    if (acumular) {
+      const existente = await client.query(
+        `SELECT id, cantidad, precio_gs, precio
+         FROM venta_detalle
+         WHERE venta_id = $1 AND producto_id = $2
+         LIMIT 1
+         FOR UPDATE`,
+        [ventaId, productoId]
+      );
+
+      if (existente.rowCount > 0) {
+        const item = existente.rows[0];
+        const nuevaCantidad = Number(item.cantidad) + cantidadValue;
+        const precioExistente = Number(item.precio_gs || item.precio);
+        const nuevoSubtotal = nuevaCantidad * precioExistente;
+
+        await client.query(
+          `UPDATE venta_detalle SET cantidad = $1, subtotal = $2 WHERE id = $3`,
+          [nuevaCantidad, nuevoSubtotal, item.id]
+        );
+
+        if (controlaStock) {
+          await client.query(
+            `UPDATE producto SET stock = stock - $1 WHERE id = $2`,
+            [cantidadValue, productoId]
+          );
+          await registrarStockMovimientoVenta(client, {
+            productoId,
+            empresaId: getEmpresaIdFromReq(req),
+            tipo: "SALIDA",
+            cantidad: cantidadValue,
+            costo: precioExistente,
+            referenciaId: item.id,
+            referenciaTipo: "VENTA_DETALLE"
+          });
+        }
+
+        const { totalVenta, comision } = await recalculateVentaCommission(client, ventaId);
+        await client.query("COMMIT");
+
+        return res.json({
+          ok: true,
+          total: totalVenta,
+          comision,
+          item_id: item.id,
+          producto_id: productoId,
+          producto_nombre: prod.nombre,
+          acumulado: true
+        });
+      }
+    }
+
+    // Insertar nueva línea
+    const subtotal = precioGs * cantidadValue;
+    const insert = await client.query(
+      `INSERT INTO venta_detalle
+        (venta_id, producto_id, cantidad, precio, subtotal,
+         precio_moneda_id, precio_moneda_origen, precio_gs, precio_brl, precio_usd,
+         cotizacion_id, cotizacion_brl, cotizacion_usd)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+       RETURNING id`,
+      [
+        ventaId, productoId, cantidadValue, precioGs, subtotal,
+        conversion.moneda_id, conversion.monto_origen, conversion.monto_gs,
+        conversion.monto_brl, conversion.monto_usd,
+        conversion.cotizacion_id, conversion.cotizacion_brl, conversion.cotizacion_usd
+      ]
+    );
+
+    const itemId = insert.rows[0].id;
+
+    if (controlaStock) {
+      await client.query(
+        `UPDATE producto SET stock = stock - $1 WHERE id = $2`,
+        [cantidadValue, productoId]
+      );
+      await registrarStockMovimientoVenta(client, {
+        productoId,
+        empresaId: getEmpresaIdFromReq(req),
+        tipo: "SALIDA",
+        cantidad: cantidadValue,
+        costo: precioGs,
+        referenciaId: itemId,
+        referenciaTipo: "VENTA_DETALLE"
+      });
+    }
+
+    const { totalVenta, comision } = await recalculateVentaCommission(client, ventaId);
+    await client.query("COMMIT");
+
+    res.json({
+      ok: true,
+      total: totalVenta,
+      comision,
+      item_id: itemId,
+      producto_id: productoId,
+      producto_nombre: prod.nombre,
+      acumulado: false
+    });
+
+  } catch (err) {
+    await client.query("ROLLBACK");
+    res.status(400).json({ error: err.message || "Error al agregar por código" });
+  } finally {
+    client.release();
+  }
+});
 
 router.put("/editar-item-legacy/:id", requirePermisoVentaRapida("venta_rapida_ver"), async (req, res) => {
 
@@ -758,9 +1014,31 @@ router.put("/efectivizar/:id", requirePermisoVentaRapida("venta_rapida_efectiviz
     await ensureMesaSchema();
     await client.query("BEGIN");
 
+    const ventaCheck = await client.query(
+      `SELECT estado FROM venta WHERE id = $1 FOR UPDATE`,
+      [ventaId]
+    );
+
+    if (!ventaCheck.rowCount) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ error: "Venta no encontrada" });
+    }
+
+    const estadoActual = String(ventaCheck.rows[0].estado || "").toUpperCase();
+
+    if (estadoActual === "EFECTIVADO") {
+      await client.query("ROLLBACK");
+      return res.status(400).json({ error: "La venta ya fue efectivada" });
+    }
+
+    if (estadoActual === "CANCELADO") {
+      await client.query("ROLLBACK");
+      return res.status(400).json({ error: "No se puede efectivar una venta cancelada" });
+    }
+
     await client.query(`
       UPDATE venta
-      SET estado = 'EFECTIVADO'
+      SET estado = 'EFECTIVADO', efectivizado_en = NOW()
       WHERE id = $1
     `, [ventaId]);
 
@@ -1472,7 +1750,7 @@ router.post("/cancelar/:id", requirePermisoVentaRapida("venta_rapida_cancelar"),
 if (estado === "CONCLUIDO" || estado === "EFECTIVADO") {
 
   const detalle = await client.query(`
-    SELECT producto_id, cantidad
+    SELECT producto_id, cantidad, precio_gs, precio
     FROM venta_detalle
     WHERE venta_id = $1
   `, [id]);
@@ -1498,6 +1776,7 @@ if (estado === "CONCLUIDO" || estado === "EFECTIVADO") {
         empresaId: getEmpresaIdFromReq(req),
         tipo: "ENTRADA",
         cantidad: item.cantidad,
+        costo: item.precio_gs ?? item.precio,
         referenciaId: id,
         referenciaTipo: "VENTA_CANCELADA"
       });

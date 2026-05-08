@@ -313,7 +313,7 @@ await registrarFacturaVentas(client, factura.rows[0].id, [ventaId]);
 // =========================
 await client.query(`
   UPDATE venta
-  SET estado = 'EFECTIVADO'
+  SET estado = 'EFECTIVADO', efectivizado_en = NOW()
   WHERE id = $1
 `, [ventaId]);
 
@@ -509,7 +509,7 @@ tipo_comprobante, estado, moneda)
     for (const ventaId of ventasUnicas) {
       await client.query(`
         UPDATE venta
-        SET estado = 'EFECTIVADO'
+        SET estado = 'EFECTIVADO', efectivizado_en = NOW()
         WHERE id = $1
       `, [ventaId]);
     }

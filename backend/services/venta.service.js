@@ -70,7 +70,7 @@ async function registrarStockMovimientoVenta(client, payload = {}) {
       empresaId,
       payload.tipo,
       cantidad,
-      0,
+      toNumber(payload.costo),
       payload.referenciaId || null,
       payload.referenciaTipo || "VENTA",
       null,
@@ -207,6 +207,7 @@ async function actualizarDetalleVenta(client, detalleId, payload, options = {}) 
       empresaId: options.empresa_id,
       tipo: diferenciaCantidad > 0 ? "SALIDA" : "ENTRADA",
       cantidad: Math.abs(diferenciaCantidad),
+      costo: detalle.precio_gs ?? detalle.precio,
       referenciaId: detalle.id,
       referenciaTipo: "VENTA_DETALLE_AJUSTE"
     });
@@ -290,6 +291,7 @@ async function eliminarDetalleVenta(client, detalleId, options = {}) {
       empresaId: options.empresa_id,
       tipo: "ENTRADA",
       cantidad: detalle.cantidad,
+      costo: detalle.precio_gs ?? detalle.precio,
       referenciaId: detalle.id,
       referenciaTipo: "VENTA_DETALLE_ELIMINADO"
     });

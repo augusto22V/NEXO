@@ -1,13 +1,11 @@
 const METODOS_COMPATIBLES = new Set([
   "EFECTIVO",
   "TARJETA",
-  "TRANSFERENCIA",
-  "PIX",
-  "GIRO"
+  "TRANSFERENCIA"
 ]);
 
 const MONEDAS_COMPATIBLES = new Set(["PYG", "BRL", "USD"]);
-const METODOS_SOLO_PYG = new Set(["TARJETA", "TRANSFERENCIA", "PIX", "GIRO"]);
+const METODOS_SOLO_PYG = new Set(["TARJETA", "TRANSFERENCIA"]);
 
 function toNumber(value) {
   const number = Number(value);
@@ -112,11 +110,6 @@ function resumirPagos(pagos) {
       if (pago.metodo === "EFECTIVO" && pago.moneda === "USD") acc.pago_efectivo_dolar += pago.monto;
       if (pago.metodo === "TARJETA") acc.pago_tarjeta += pago.monto_gs;
       if (pago.metodo === "TRANSFERENCIA") acc.pago_transferencia += pago.monto_gs;
-      if (pago.metodo === "GIRO") {
-        acc.pago_transferencia += pago.monto_gs;
-        acc.pago_giro += pago.monto_gs;
-      }
-      if (pago.metodo === "PIX") acc.pago_pix += pago.monto_gs;
       acc.total_pagado_gs += pago.monto_gs;
       return acc;
     },
@@ -126,7 +119,6 @@ function resumirPagos(pagos) {
       pago_efectivo_dolar: 0,
       pago_tarjeta: 0,
       pago_transferencia: 0,
-      pago_giro: 0,
       pago_pix: 0,
       total_pagado_gs: 0
     }

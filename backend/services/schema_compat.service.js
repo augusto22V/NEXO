@@ -129,6 +129,11 @@ async function ensureVentaColumnsForInsert(client) {
 
   await client.query(`
     ALTER TABLE venta
+    ADD COLUMN IF NOT EXISTS efectivizado_en TIMESTAMPTZ
+  `);
+
+  await client.query(`
+    ALTER TABLE venta
     ALTER COLUMN prioridad_espera SET DEFAULT 1
   `).catch(() => {});
 }
