@@ -7,37 +7,15 @@
   <link rel="manifest" href="/manifest.json">
   <title>LibreríaSys | Cobro</title>
   <link rel="stylesheet" href="../../compartido/css/base.css">
-  <link rel="stylesheet" href="./caja.css">
+  <link rel="stylesheet" href="./caja.css?v=2026.05.08.05">
 </head>
 <body>
 
   <!-- TOPBAR -->
   <div class="topbar">
-    <button class="btn-cancelar" onclick="window.close()">Cancelar</button>
+    <button class="btn-cancelar" onclick="window.close()">&#8592; Cancelar</button>
     <div class="titulo"><span>Cobro</span></div>
     <div class="topbar-info"><span id="cajaFecha"></span></div>
-  </div>
-
-  <!-- TOTALES HEADER -->
-  <div class="cobro-header">
-    <div class="cobro-total-row">
-      <span class="cobro-label">Total:</span>
-      <span class="cobro-moneda-tag">🇵🇾 PYG</span>
-      <span id="totalHeaderGs" class="cobro-monto">0</span>
-      <span class="cobro-moneda-tag">🇧🇷</span>
-      <span id="totalHeaderBrl" class="cobro-monto">0,00</span>
-      <span class="cobro-moneda-tag">🇺🇸</span>
-      <span id="totalHeaderUsd" class="cobro-monto">0,00</span>
-    </div>
-    <div class="cobro-total-row cobro-apagar-row">
-      <span class="cobro-label">A pagar:</span>
-      <span class="cobro-moneda-tag">🇵🇾 PYG</span>
-      <span id="aPagarGs" class="cobro-monto">0</span>
-      <span class="cobro-moneda-tag">🇧🇷</span>
-      <span id="aPagarBrl" class="cobro-monto">0,00</span>
-      <span class="cobro-moneda-tag">🇺🇸</span>
-      <span id="aPagarUsd" class="cobro-monto">0,00</span>
-    </div>
   </div>
 
   <!-- BODY PRINCIPAL -->
@@ -72,8 +50,28 @@
 
     </div>
 
-    <!-- DERECHA: ingreso de pago + lista -->
+    <!-- DERECHA: totales + pago -->
     <div class="cobro-der">
+
+      <!-- TOTALES CARD -->
+      <div class="totales-card">
+        <div class="totales-row">
+          <span class="totales-label">Total</span>
+          <div class="totales-montos">
+            <span class="tm-gs"><span class="tm-flag">&#x1F1F5;&#x1F1FE;</span><span id="totalHeaderGs">0</span></span>
+            <span class="tm-brl"><span class="tm-flag">&#x1F1E7;&#x1F1F7;</span><span id="totalHeaderBrl">0,00</span></span>
+            <span class="tm-usd"><span class="tm-flag">&#x1F1FA;&#x1F1F8;</span><span id="totalHeaderUsd">0,00</span></span>
+          </div>
+        </div>
+        <div class="totales-row totales-apagar" id="filaPagar">
+          <span class="totales-label">A pagar</span>
+          <div class="totales-montos">
+            <span class="tm-gs"><span class="tm-flag">&#x1F1F5;&#x1F1FE;</span><span id="aPagarGs">0</span></span>
+            <span class="tm-brl"><span class="tm-flag">&#x1F1E7;&#x1F1F7;</span><span id="aPagarBrl">0,00</span></span>
+            <span class="tm-usd"><span class="tm-flag">&#x1F1FA;&#x1F1F8;</span><span id="aPagarUsd">0,00</span></span>
+          </div>
+        </div>
+      </div>
 
       <!-- INGRESO DE PAGO -->
       <div class="pago-input-row">
@@ -99,7 +97,7 @@
           <thead>
             <tr>
               <th>Vuelto</th>
-              <th>Forma de cobro</th>
+              <th>Cobro</th>
               <th>Moneda</th>
               <th>Valor</th>
               <th></th>
@@ -138,7 +136,7 @@
   <script src="/compartido/js/session.manager.js?v=2026.04.17.03"></script>
   <script src="/compartido/js/cache.bootstrap.js?v=2026.04.17.03"></script>
   <script src="/compartido/js/seguridad.js?v=2026.04.17.03"></script>
-  <script src="caja.js?v=2026.05.08.03"></script>
+  <script src="caja.js?v=2026.05.08.05"></script>
 
 </body>
 </html>

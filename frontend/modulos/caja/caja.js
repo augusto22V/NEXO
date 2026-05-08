@@ -168,7 +168,7 @@ function actualizarHeader() {
   setEl("aPagarBrl", cotizacion.brl > 0 && pendienteGs > 0 ? (pendienteGs / cotizacion.brl).toFixed(2).replace(".", ",") : "0,00");
   setEl("aPagarUsd", cotizacion.usd > 0 && pendienteGs > 0 ? (pendienteGs / cotizacion.usd).toFixed(2).replace(".", ",") : "0,00");
 
-  const apRow = document.querySelector(".cobro-apagar-row");
+  const apRow = document.getElementById("filaPagar");
   if (apRow) {
     apRow.classList.toggle("apagar-ok",    pendienteGs <= 0);
     apRow.classList.toggle("apagar-falta", pendienteGs > 0);
