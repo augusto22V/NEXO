@@ -1247,8 +1247,13 @@ params
     res.json(r.rows);
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Error al listar venta" });
+    console.error("[ERROR LISTAR VENTA]", err);
+    res.status(500).json({
+      error: "Error al listar venta",
+      detalle: err.message,
+      codigo: err.code || null,
+      hint: err.hint || null
+    });
   }
 
 });
