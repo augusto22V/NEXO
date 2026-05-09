@@ -2,28 +2,74 @@ const express = require("express");
 const router = express.Router();
 const db = require("../db");
 const authMiddleware = require("../Auth.middleware");
+const { ensureClienteSchema, parseRuc } = require("../services/cliente.service");
 
-
-
+// Aplica las migraciones de SIFEN antes de servir cualquier ruta
+router.use(async (_req, res, next) => {
+  try {
+    await ensureClienteSchema();
+    next();
+  } catch (err) {
+    console.error("No se pudo preparar esquema de cliente:", err);
+    res.status(500).json({ error: "No se pudo preparar esquema de cliente" });
+  }
+});
 
 function toUpperSafe(valor) {
   return valor ? valor.trim().toUpperCase() : null;
 }
 
+// Heurística para detectar si parece persona jurídica.
+function detectarNaturaleza(razonSocial, nombre, dv) {
+  const txt = String(razonSocial || nombre || "").toUpperCase();
+  if (/(S\.?A\.?|SRL|S\.R\.L|EIRL|LTDA|LIMITADA|CIA|S\.A\.E\.C\.A|SOCIEDAD)/.test(txt)) return "JURIDICA";
+  if (dv) return "JURIDICA";
+  return "FISICA";
+}
+
+// Selección estándar — incluye todos los campos SIFEN.
+const SELECT_CLIENTE = `
+  SELECT id, nombre, razon_social, ruc, telefono, direccion, email,
+         numero_documento, dv, tipo_documento, naturaleza, tipo_contribuyente,
+         departamento_id, distrito_id, ciudad_id, numero_casa
+`;
+
 /* =========================
    CREAR CLIENTE
 ========================= */
 router.post("/", authMiddleware, async (req, res) => {
-  const { nombre, razon_social, ruc, telefono, direccion, email } = req.body;
+  const {
+    nombre, razon_social, ruc, telefono, direccion, email,
+    numero_documento, dv, tipo_documento, naturaleza, tipo_contribuyente,
+    departamento_id, distrito_id, ciudad_id, numero_casa
+  } = req.body;
 
   if (!nombre || !nombre.trim()) {
     return res.status(400).json({ error: "Nombre obligatorio" });
   }
 
+  // Si vino RUC pero no numero_documento, parsearlo automáticamente
+  let nroDoc = numero_documento;
+  let dvFinal = dv;
+  if ((!nroDoc || !dvFinal) && ruc) {
+    const parsed = parseRuc(ruc);
+    nroDoc = nroDoc || parsed.numero || null;
+    dvFinal = dvFinal || parsed.dv || null;
+  }
+
+  // Defaults inteligentes
+  const tipoDoc = tipo_documento || (dvFinal ? "RUC" : "CI");
+  const tipoContr = tipo_contribuyente || (dvFinal ? "CONTRIBUYENTE" : "NO_CONTRIBUYENTE");
+  const naturalezaFinal = naturaleza || detectarNaturaleza(razon_social, nombre, dvFinal);
+
   try {
     const result = await db.query(
-      `INSERT INTO cliente (nombre, razon_social, ruc, telefono, direccion, email)
-       VALUES ($1,$2,$3,$4,$5,$6)
+      `INSERT INTO cliente (
+         nombre, razon_social, ruc, telefono, direccion, email,
+         numero_documento, dv, tipo_documento, naturaleza, tipo_contribuyente,
+         departamento_id, distrito_id, ciudad_id, numero_casa
+       )
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
        RETURNING *`,
       [
         toUpperSafe(nombre),
@@ -31,7 +77,16 @@ router.post("/", authMiddleware, async (req, res) => {
         ruc || null,
         telefono || null,
         toUpperSafe(direccion),
-        email || null
+        email || null,
+        nroDoc || null,
+        dvFinal || null,
+        tipoDoc,
+        naturalezaFinal,
+        tipoContr,
+        departamento_id || null,
+        distrito_id || null,
+        ciudad_id || null,
+        numero_casa || null
       ]
     );
 
@@ -53,12 +108,13 @@ router.get("/", async (req, res) => {
   const offset = Number(req.query.offset) || 0;
 
   try {
-    const r = await db.query(`
-      SELECT id, nombre, razon_social, ruc, telefono, direccion, email
-      FROM cliente
-      ORDER BY id DESC
-      LIMIT $1 OFFSET $2
-    `, [limit, offset]);
+    const r = await db.query(
+      `${SELECT_CLIENTE}
+       FROM cliente
+       ORDER BY id DESC
+       LIMIT $1 OFFSET $2`,
+      [limit, offset]
+    );
 
     res.json(r.rows);
 
@@ -100,21 +156,31 @@ const axios = require("axios");
 router.get("/ruc/:ruc", async (req, res) => {
 
   const rucInput = req.params.ruc;
-  const rucBase = rucInput.split("-")[0];
+  const { numero: rucBase, dv: dvInput } = parseRuc(rucInput);
+
+  if (!rucBase) {
+    return res.status(400).json({ error: "RUC/cedula vacio" });
+  }
 
   try {
 
-    // 1. Buscar en BD
+    // 1. Buscar en BD: por numero_documento exacto, o por ruc LIKE base%
+    //    (cubre clientes viejos que tienen el dato solo en `ruc`)
     const local = await db.query(
-      "SELECT * FROM cliente WHERE ruc LIKE $1",
-      [rucBase + "%"]
+      `${SELECT_CLIENTE}
+       FROM cliente
+       WHERE numero_documento = $1
+          OR ruc LIKE $2
+       ORDER BY (numero_documento = $1) DESC, id ASC
+       LIMIT 1`,
+      [rucBase, rucBase + "%"]
     );
 
     if (local.rows.length > 0) {
       return res.json(local.rows[0]);
     }
 
-    // 2. Consultar TuRuc
+    // 2. Consultar TuRuc (solo funciona para contribuyentes, no para CI sola)
     const response = await axios.get(
       `https://turuc.com.py/api/contribuyente/${rucBase}`
     );
@@ -125,11 +191,28 @@ router.get("/ruc/:ruc", async (req, res) => {
       return res.json(null);
     }
 
-    // 🔥 SOLO DEVUELVE (NO GUARDA)
+    // Parsear el RUC devuelto en numero + dv
+    const { numero: nroDoc, dv: dvApi } = parseRuc(data.ruc);
+    const dvFinal = dvApi || dvInput || null;
+    const naturaleza = detectarNaturaleza(data.razonSocial, data.razonSocial, dvFinal);
+
+    // Devuelve los campos pre-rellenados para que el frontend pueda guardar
+    // un cliente nuevo con datos válidos para SIFEN.
     return res.json({
       ruc: data.ruc,
       razon_social: data.razonSocial,
-      nombre: data.razonSocial
+      nombre: data.razonSocial,
+      numero_documento: nroDoc,
+      dv: dvFinal,
+      tipo_documento: dvFinal ? "RUC" : "CI",
+      tipo_contribuyente: dvFinal ? "CONTRIBUYENTE" : "NO_CONTRIBUYENTE",
+      naturaleza,
+      departamento_id: null,
+      distrito_id: null,
+      ciudad_id: null,
+      numero_casa: null,
+      _origen: "turuc",
+      _existe_en_bd: false
     });
 
   } catch (err) {
@@ -151,9 +234,7 @@ router.get("/:id", async (req, res) => {
   try {
     const id = Number(req.params.id);
     const r = await db.query(
-      `SELECT id, nombre, razon_social, ruc, telefono, direccion, email
-       FROM cliente
-       WHERE id = $1`,
+      `${SELECT_CLIENTE} FROM cliente WHERE id = $1`,
       [id]
     );
 
@@ -172,11 +253,28 @@ router.get("/:id", async (req, res) => {
 ========================= */
 router.put("/:id", authMiddleware, async (req, res) => {
   const id = Number(req.params.id);
-  const { nombre, razon_social, ruc, telefono, direccion, email } = req.body;
+  const {
+    nombre, razon_social, ruc, telefono, direccion, email,
+    numero_documento, dv, tipo_documento, naturaleza, tipo_contribuyente,
+    departamento_id, distrito_id, ciudad_id, numero_casa
+  } = req.body;
 
   if (!nombre || !nombre.trim()) {
     return res.status(400).json({ error: "Nombre obligatorio" });
   }
+
+  // Si vino RUC pero no numero_documento, parsearlo automáticamente
+  let nroDoc = numero_documento;
+  let dvFinal = dv;
+  if ((!nroDoc || !dvFinal) && ruc) {
+    const parsed = parseRuc(ruc);
+    nroDoc = nroDoc || parsed.numero || null;
+    dvFinal = dvFinal || parsed.dv || null;
+  }
+
+  const tipoDoc   = tipo_documento     || (dvFinal ? "RUC" : "CI");
+  const tipoContr = tipo_contribuyente || (dvFinal ? "CONTRIBUYENTE" : "NO_CONTRIBUYENTE");
+  const natural   = naturaleza         || detectarNaturaleza(razon_social, nombre, dvFinal);
 
   try {
     const r = await db.query(
@@ -186,8 +284,17 @@ router.put("/:id", authMiddleware, async (req, res) => {
         ruc = $3,
         telefono = $4,
         direccion = $5,
-        email = $6
-       WHERE id = $7
+        email = $6,
+        numero_documento = $7,
+        dv = $8,
+        tipo_documento = $9,
+        naturaleza = $10,
+        tipo_contribuyente = $11,
+        departamento_id = $12,
+        distrito_id = $13,
+        ciudad_id = $14,
+        numero_casa = $15
+       WHERE id = $16
        RETURNING *`,
       [
         toUpperSafe(nombre),
@@ -196,6 +303,15 @@ router.put("/:id", authMiddleware, async (req, res) => {
         telefono || null,
         toUpperSafe(direccion),
         email || null,
+        nroDoc || null,
+        dvFinal || null,
+        tipoDoc,
+        natural,
+        tipoContr,
+        departamento_id || null,
+        distrito_id || null,
+        ciudad_id || null,
+        numero_casa || null,
         id
       ]
     );
