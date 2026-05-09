@@ -49,7 +49,16 @@ async function ensureClienteSchema() {
       )
     `);
 
-    // Estas son criticas — si fallan algo grave hay (no las protejo con safeRun).
+    // Si la tabla ya existia con otra estructura (BD migrada/legacy),
+    // garantizamos que existan TODAS las columnas base que usa el codigo.
+    await db.query(`ALTER TABLE cliente ADD COLUMN IF NOT EXISTS nombre       VARCHAR(200)`);
+    await db.query(`ALTER TABLE cliente ADD COLUMN IF NOT EXISTS razon_social VARCHAR(200)`);
+    await db.query(`ALTER TABLE cliente ADD COLUMN IF NOT EXISTS ruc          VARCHAR(30)`);
+    await db.query(`ALTER TABLE cliente ADD COLUMN IF NOT EXISTS telefono     VARCHAR(60)`);
+    await db.query(`ALTER TABLE cliente ADD COLUMN IF NOT EXISTS direccion    VARCHAR(300)`);
+    await db.query(`ALTER TABLE cliente ADD COLUMN IF NOT EXISTS email        VARCHAR(150)`);
+
+    // Columnas SIFEN.
     await db.query(`ALTER TABLE cliente ADD COLUMN IF NOT EXISTS numero_documento   VARCHAR(30)`);
     await db.query(`ALTER TABLE cliente ADD COLUMN IF NOT EXISTS dv                 VARCHAR(2)`);
     await db.query(`ALTER TABLE cliente ADD COLUMN IF NOT EXISTS tipo_documento     VARCHAR(30)`);
