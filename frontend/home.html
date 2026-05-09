@@ -60,7 +60,7 @@
 <header class="home-header">
   <div class="home-header-top">
     <div class="home-brand">
-      <img src="/recursos/img/default.png?v=2026.04.17.03" class="logo-img" alt="NEXO">
+      <img id="logoEmpresa" src="/recursos/img/default.png?v=2026.04.17.03" class="logo-img" alt="NEXO">
       <span class="brand-text">NEXO</span>
     </div>
 
@@ -673,6 +673,17 @@ async function init() {
     document.getElementById("usuarioRol").textContent = String(user.rol || "").toUpperCase();
     document.getElementById("usuarioRol").className = `rol-tag rol-${String(user.rol || "").toLowerCase()}`;
     document.getElementById("empresaNombre").textContent = user.empresa_nombre;
+
+    // Logo: si la empresa tiene uno cargado lo muestra, si no muestra el fallback NEXO
+    const logoEl = document.getElementById("logoEmpresa");
+    if (logoEl) {
+      const logoFile = String(user.empresa_logo || "").trim();
+      logoEl.src = logoFile
+        ? `/recursos/img/${logoFile}?v=${Date.now()}`
+        : "/recursos/img/Logo1.png";
+      logoEl.alt = user.empresa_nombre || "NEXO";
+      logoEl.onerror = () => { logoEl.onerror = null; logoEl.src = "/recursos/img/Logo1.png"; };
+    }
 
     renderDashboardOperativo(user);
     actualizarAccesosCabecera(user);
