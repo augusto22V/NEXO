@@ -281,9 +281,25 @@ async function buscarClientePorRuc(event) {
     // 1) Busqueda local en BD (acepta RUC con o sin DV, o solo cedula)
     const res = await fetch(`/api/clientes/ruc/${encodeURIComponent(ruc)}`, { credentials: "include" });
     let cliente = null;
+    let errorDetalle = null;
+
     if (res.ok) {
       const data = await res.json();
       cliente = Array.isArray(data) ? data[0] : data;
+    } else {
+      // Capturamos el detalle real del error del backend para diagnosticar
+      try {
+        const errData = await res.json();
+        errorDetalle = errData?.detalle || errData?.error || `HTTP ${res.status}`;
+        console.error("[BUSCAR CLIENTE] error backend:", errData);
+      } catch (_) {
+        errorDetalle = `HTTP ${res.status}`;
+      }
+    }
+
+    if (errorDetalle) {
+      mostrarToast(`Error: ${errorDetalle}`, "error");
+      return;
     }
 
     if (!cliente) {
