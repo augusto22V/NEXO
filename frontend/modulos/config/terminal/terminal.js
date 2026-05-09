@@ -77,12 +77,25 @@ async function cargarEmpresas() {
       return;
     }
 
+    // Opcion "Todas" para ver terminales de todas las empresas a la vez
+    if (empresas.length > 1) {
+      const optAll = document.createElement("option");
+      optAll.value = "__TODAS__";
+      optAll.textContent = "Todas las empresas";
+      selectEmpresa.appendChild(optAll);
+    }
+
     empresas.forEach(emp => {
       const option = document.createElement("option");
       option.value = emp.id;
       option.textContent = emp.nombre;
       selectEmpresa.appendChild(option);
     });
+
+    // Si hay mas de una empresa, arrancamos con "Todas"
+    if (empresas.length > 1) {
+      selectEmpresa.value = "__TODAS__";
+    }
   } catch (err) {
     console.error(err);
     mostrarMensaje("No se pudieron cargar las empresas", "err");
@@ -97,13 +110,26 @@ async function cargarTerminales() {
 
   try {
 
-    const res = await fetch(`/api/terminal/${empresa_id}`, {
-      credentials: "include"
-    });
-
-    const data = await res.json();
-
-    terminales = Array.isArray(data) ? data : [];
+    if (empresa_id === "__TODAS__") {
+      // Trae las terminales de TODAS las empresas en paralelo
+      const lotes = await Promise.all(
+        empresas.map(async (emp) => {
+          try {
+            const r = await fetch(`/api/terminal/${emp.id}`, { credentials: "include" });
+            if (!r.ok) return [];
+            const d = await r.json();
+            return Array.isArray(d) ? d : [];
+          } catch (_) {
+            return [];
+          }
+        })
+      );
+      terminales = lotes.flat();
+    } else {
+      const res = await fetch(`/api/terminal/${empresa_id}`, { credentials: "include" });
+      const data = await res.json();
+      terminales = Array.isArray(data) ? data : [];
+    }
 
     renderTabla();
 
