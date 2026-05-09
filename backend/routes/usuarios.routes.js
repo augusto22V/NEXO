@@ -3,6 +3,22 @@ const router = express.Router();
 const pool = require("../db");
 const bcrypt = require("bcrypt");
 const { ensurePermisosUsuario } = require("../services/permisos.service");
+const { ensureUsuarioSchema } = require("../services/usuario.service");
+
+// Aplica las migraciones de la tabla usuario antes de servir requests
+router.use(async (_req, res, next) => {
+  try {
+    await ensureUsuarioSchema();
+    next();
+  } catch (err) {
+    console.error("[USUARIO SCHEMA ERROR]", err);
+    res.status(500).json({
+      error: "No se pudo preparar esquema de usuario",
+      detalle: err.message,
+      codigo: err.code || null
+    });
+  }
+});
 
 const ROLES_VALIDOS = new Set([
   "super",
@@ -42,8 +58,12 @@ res.json(result.rows);
 
 }catch(err){
 
-console.error(err);
-res.status(500).json({error:"Error al listar usuarios"});
+console.error("[ERROR LISTAR USUARIOS]", err);
+res.status(500).json({
+  error: "Error al listar usuarios",
+  detalle: err.message,
+  codigo: err.code || null
+});
 
 }
 
@@ -116,8 +136,14 @@ res.json({ok:true, id: inserted.rows[0].id});
 
 }catch(err){
 
-console.error(err);
-res.status(500).json({error:"Error al crear usuario"});
+console.error("[ERROR CREAR USUARIO]", err);
+res.status(500).json({
+  error: "Error al crear usuario",
+  detalle: err.message,
+  codigo: err.code || null,
+  hint: err.hint || null,
+  detail: err.detail || null
+});
 
 }
 
@@ -221,8 +247,13 @@ const mc = modo_confirmacion ?? false;
     res.json({ ok: true, id: Number(updated.rows[0]?.id || req.params.id) });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Error al actualizar usuario" });
+    console.error("[ERROR ACTUALIZAR USUARIO]", err);
+    res.status(500).json({
+      error: "Error al actualizar usuario",
+      detalle: err.message,
+      codigo: err.code || null,
+      detail: err.detail || null
+    });
   }
 });
 
@@ -247,8 +278,12 @@ res.json({ok:true});
 
 }catch(err){
 
-console.error(err);
-res.status(500).json({error:"Error al eliminar usuario"});
+console.error("[ERROR ELIMINAR USUARIO]", err);
+res.status(500).json({
+  error: "Error al eliminar usuario",
+  detalle: err.message,
+  codigo: err.code || null
+});
 
 }
 

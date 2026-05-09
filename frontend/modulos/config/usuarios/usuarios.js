@@ -318,7 +318,10 @@ async function guardarUsuario() {
     }
 
     if (!res.ok) {
-      throw new Error(data?.error || "Error guardando usuario");
+      const detalle = data?.detalle || data?.detail || data?.hint || "";
+      const msg = data?.error || "Error guardando usuario";
+      console.error("[USUARIOS] backend:", data);
+      throw new Error(detalle ? `${msg}: ${detalle}` : msg);
     }
 
     const usuarioId = state.editandoId || Number(data?.id || 0);
