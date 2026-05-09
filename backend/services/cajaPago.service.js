@@ -52,13 +52,19 @@ function construirPagosDesdePayload(body, cotizaciones) {
   }
 
   const pagos = [];
-  const pagoGs = toNumber(body.pago_gs);
-  const pagoBrl = toNumber(body.pago_brl);
-  const pagoUsd = toNumber(body.pago_usd);
+  const pagoGs            = toNumber(body.pago_gs);
+  const pagoBrl           = toNumber(body.pago_brl);
+  const pagoUsd           = toNumber(body.pago_usd);
+  const pagoTarjeta       = toNumber(body.pago_tarjeta);
+  const pagoTransferencia = toNumber(body.pago_transferencia);
+  const pagoPix           = toNumber(body.pago_pix);
 
-  if (pagoGs > 0) pagos.push({ metodo: "EFECTIVO", moneda: "PYG", monto: pagoGs });
-  if (pagoBrl > 0) pagos.push({ metodo: "EFECTIVO", moneda: "BRL", monto: pagoBrl });
-  if (pagoUsd > 0) pagos.push({ metodo: "EFECTIVO", moneda: "USD", monto: pagoUsd });
+  if (pagoGs > 0)            pagos.push({ metodo: "EFECTIVO",       moneda: "PYG", monto: pagoGs });
+  if (pagoBrl > 0)           pagos.push({ metodo: "EFECTIVO",       moneda: "BRL", monto: pagoBrl });
+  if (pagoUsd > 0)           pagos.push({ metodo: "EFECTIVO",       moneda: "USD", monto: pagoUsd });
+  if (pagoTarjeta > 0)       pagos.push({ metodo: "TARJETA",        moneda: "PYG", monto: pagoTarjeta });
+  if (pagoTransferencia > 0) pagos.push({ metodo: "TRANSFERENCIA",  moneda: "PYG", monto: pagoTransferencia });
+  if (pagoPix > 0)           pagos.push({ metodo: "PIX",            moneda: "PYG", monto: pagoPix });
 
   if (!pagos.length && toNumber(body.total_pagado_gs) > 0) {
     pagos.push({ metodo: "EFECTIVO", moneda: "PYG", monto: toNumber(body.total_pagado_gs) });
