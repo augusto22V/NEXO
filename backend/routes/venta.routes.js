@@ -985,8 +985,12 @@ router.put("/editar-item/:id", requirePermisoVentaRapida("venta_rapida_ver"), as
 
   } catch (err) {
     await client.query("ROLLBACK");
+    console.error("[ERROR EDITAR ITEM]", err);
     return res.status(400).json({
-      error: err.message || "Error actualizando item"
+      error: err.message || "Error actualizando item",
+      codigo: err.code || null,
+      hint: err.hint || null,
+      detail: err.detail || null
     });
   } finally {
     client.release();

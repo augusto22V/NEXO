@@ -1716,7 +1716,13 @@ async function guardarEdicion() {
     });
 
     if (!res.ok) {
-      throw new Error("No se pudo guardar el cambio");
+      let detalle = `HTTP ${res.status}`;
+      try {
+        const errData = await res.json();
+        detalle = errData?.error || errData?.detalle || detalle;
+        console.error("[EDITAR ITEM] backend:", errData);
+      } catch (_) {}
+      throw new Error(detalle);
     }
 
     item.cantidad = cantidad;
@@ -1728,7 +1734,7 @@ async function guardarEdicion() {
     renderPedido();
 
   } catch (err) {
-    mostrarMensaje("No se pudo guardar el cambio. IntentÃ¡ de nuevo", "error");
+    mostrarMensaje(`No se pudo guardar: ${err.message}`, "error");
   } finally {
     finalizarPersistenciaDetalle();
   }
