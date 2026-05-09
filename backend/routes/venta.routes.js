@@ -37,6 +37,7 @@ const {
   ensureFacturaVentaSchema,
   ventaTieneFactura
 } = require("../services/factura_venta.service");
+const { ensureTipoPedidoSchema } = require("../services/tipoPedido.service");
 
 
 /*
@@ -1193,6 +1194,7 @@ router.get("/", requirePermisoVentaRapida("venta_rapida_ver"), async (req, res) 
 
    await ensureMesaSchema();
    await ensureFacturaVentaSchema();
+   await ensureTipoPedidoSchema();
 
    const mesaScope = getMesaScopeFromReq(req);
    let mesaJoin = "LEFT JOIN mesa m ON m.venta_id = v.id";
