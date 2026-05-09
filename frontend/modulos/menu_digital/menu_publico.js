@@ -111,7 +111,7 @@ function renderMenu(payload) {
                   ? `<img src="${escapeHtml(config.logo_url)}" alt="Logo ${escapeHtml(config.nombre_publico || "")}">`
                   : `<div class="md-public-brand-fallback"><i class="fa-solid fa-utensils"></i></div>`}
                 <div>
-                  <small>${escapeHtml(config.empresa_nombre || "LibreríaSys")}</small>
+                  <small>${escapeHtml(config.empresa_nombre || "NEXO")}</small>
                   <h1>${escapeHtml(config.nombre_publico || "Menú Digital")}</h1>
                 </div>
               </div>

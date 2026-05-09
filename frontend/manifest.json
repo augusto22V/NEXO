@@ -1,6 +1,6 @@
 ﻿{
-  "name": "LibreríaSys",
-  "short_name": "LibreríaSys",
+  "name": "NEXO",
+  "short_name": "NEXO",
   "description": "Ventas, stock y catálogo para librerías",
   "start_url": "/modulos/venta/venta_rapida.html",
   "scope": "/",

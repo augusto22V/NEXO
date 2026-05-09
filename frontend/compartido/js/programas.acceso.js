@@ -1,5 +1,5 @@
 /* =========================================================
-   LibreríaSys — Programas / accesos
+   NEXO — Programas / accesos
    ---------------------------------------------------------
    Persistencia principal: PostgreSQL via /api/programas.
    Cache local: solo memoria de la sesion actual.
