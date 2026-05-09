@@ -2,11 +2,17 @@
    MOVIMIENTO VENTA - PRO UI STYLE
 ===================================== */
 
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
 body {
   font-family: "Segoe UI", sans-serif;
   background: linear-gradient(to bottom, #eef2f5, #f8fafc);
-  margin: 0;
   color: #2c2c2c;
+  display: flex;
+  flex-direction: column;
 }
 
 * {
@@ -42,7 +48,11 @@ body {
 .mv-container {
   width: 98%;
   max-width: 1500px;
-  margin: 40px auto 15px; /* 🔥 más arriba */
+  margin: 40px auto 15px;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   background: #ffffff;
   padding: 16px 20px;
   border-radius: 16px;
@@ -107,7 +117,8 @@ body {
 /* ================= TABLA ================= */
 
 .mv-listado {
-  height: 340px;
+  flex: 1;
+  min-height: 200px;
   overflow-y: auto;
   border: 1px solid #ddd;
   border-radius: 10px;
@@ -197,6 +208,9 @@ body {
 /* ================= DETALLE ================= */
 
 .mv-detalle {
+  flex: 0 0 auto;
+  max-height: 180px;
+  overflow-y: auto;
   background: #fafafa;
   border-radius: 10px;
   padding: 10px;
