@@ -115,9 +115,14 @@ function renderUsuarios() {
     const rol = nombreRol(u.rol);
     const resumen = resumenProgramasUsuario(u);
 
+    const empresaCell = u.empresa_nombre
+      ? `${u.empresa_id} - ${u.empresa_nombre}`
+      : (u.empresa_id || "-");
+
     tr.innerHTML = `
       <td>${u.usuario || "-"}</td>
       <td>${u.nombre || "-"}</td>
+      <td>${empresaCell}</td>
       <td><span class="tag-rol">${rol}</span></td>
       <td>${u.activo ? "SI" : "NO"}</td>
       <td class="resumen-programas">${resumen}</td>
@@ -183,7 +188,30 @@ function cerrarModal() {
   if (modal) modal.style.display = "none";
 }
 
-function nuevoUsuario() {
+async function cargarEmpresasEnSelect(seleccionarId = null) {
+  const sel = document.getElementById("nuevaEmpresa");
+  if (!sel) return;
+  sel.innerHTML = `<option value="">Cargando...</option>`;
+  try {
+    const res = await fetch("/api/empresa", { credentials: "include" });
+    if (!res.ok) throw new Error("No se pudo cargar empresas");
+    const empresas = await res.json();
+    const lista = Array.isArray(empresas) ? empresas : [];
+    if (!lista.length) {
+      sel.innerHTML = `<option value="">(sin empresas — creá una primero)</option>`;
+      return;
+    }
+    sel.innerHTML = lista
+      .map(e => `<option value="${e.id}">${e.id} - ${e.nombre || "(sin nombre)"}</option>`)
+      .join("");
+    if (seleccionarId) sel.value = String(seleccionarId);
+  } catch (err) {
+    console.error("[USUARIOS] cargar empresas:", err);
+    sel.innerHTML = `<option value="">(error cargando empresas)</option>`;
+  }
+}
+
+async function nuevoUsuario() {
   state.editandoId = null;
   document.getElementById("usuarioIdActual").value = "";
   document.getElementById("tituloModal").innerText = "Nuevo Usuario";
@@ -197,12 +225,14 @@ function nuevoUsuario() {
   document.getElementById("nuevoModoImpresion").value = "AUTO";
   document.getElementById("nuevoModoConfirmacion").checked = false;
 
+  await cargarEmpresasEnSelect();
+
   actualizarSugerenciaRol();
   actualizarEstadoBotonProgramas();
   mostrarModalUsuario();
 }
 
-function editarUsuarioByRow(usuario) {
+async function editarUsuarioByRow(usuario) {
   state.editandoId = Number(usuario.id);
   document.getElementById("usuarioIdActual").value = String(usuario.id || "");
   document.getElementById("tituloModal").innerText = "Editar Usuario";
@@ -218,6 +248,8 @@ function editarUsuarioByRow(usuario) {
   document.getElementById("nuevoModoFactura").value = (usuario.modo_factura || "PREGUNTAR").toUpperCase();
   document.getElementById("nuevoModoImpresion").value = (usuario.modo_impresion || "AUTO").toUpperCase();
   document.getElementById("nuevoModoConfirmacion").checked = Boolean(usuario.modo_confirmacion);
+
+  await cargarEmpresasEnSelect(usuario.empresa_id);
 
   actualizarSugerenciaRol();
   actualizarEstadoBotonProgramas();
@@ -280,10 +312,17 @@ async function guardarUsuario() {
     return;
   }
 
+  const empresaId = Number(document.getElementById("nuevaEmpresa")?.value || 0) || null;
+  if (!empresaId) {
+    alert("Debe seleccionar una empresa");
+    return;
+  }
+
   const body = {
     usuario,
     nombre,
     rol,
+    empresa_id: empresaId,
     activo: document.getElementById("nuevoActivo").checked,
     modo_factura: document.getElementById("nuevoModoFactura").value,
     modo_impresion: document.getElementById("nuevoModoImpresion").value,

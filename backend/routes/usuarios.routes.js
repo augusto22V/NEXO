@@ -41,17 +41,20 @@ router.get("/", async (req,res)=>{
 try{
 
 const result = await pool.query(`
-SELECT 
-  id,
-  usuario,
-  nombre,
-  rol,
-  activo,
-  modo_factura,
-  modo_impresion,
-  modo_confirmacion
-FROM usuario
-ORDER BY id
+SELECT
+  u.id,
+  u.usuario,
+  u.nombre,
+  u.rol,
+  u.activo,
+  u.empresa_id,
+  e.nombre AS empresa_nombre,
+  u.modo_factura,
+  u.modo_impresion,
+  u.modo_confirmacion
+FROM usuario u
+LEFT JOIN empresa e ON e.id = u.empresa_id
+ORDER BY u.empresa_id, u.id
 `);
 
 res.json(result.rows);
@@ -84,6 +87,7 @@ const {
   password,
   nombre,
   rol,
+  empresa_id,
   activo,
   modo_factura,
   modo_impresion,
@@ -92,6 +96,7 @@ const {
 
 const usuarioUpper = usuario?.toUpperCase();
 const rolLower = String(rol || "").trim().toLowerCase();
+const empresaIdFinal = Number(empresa_id) > 0 ? Number(empresa_id) : 1;
 
 if (!ROLES_VALIDOS.has(rolLower)) {
   return res.status(400).json({ error: "Rol invalido" });
@@ -101,13 +106,20 @@ if(!usuario || !password){
   return res.status(400).json({error:"Usuario y contraseña requeridos"});
 }
 
+// Validar que la empresa exista
+const empresaExiste = await pool.query(`SELECT id FROM empresa WHERE id = $1`, [empresaIdFinal]);
+if (!empresaExiste.rowCount) {
+  return res.status(400).json({ error: `La empresa ${empresaIdFinal} no existe` });
+}
+
+// El nombre de usuario es UNICO por empresa (no global)
 const existe = await pool.query(
-  `SELECT id FROM usuario WHERE usuario=$1`,
-  [usuarioUpper]
+  `SELECT id FROM usuario WHERE usuario=$1 AND empresa_id=$2`,
+  [usuarioUpper, empresaIdFinal]
 );
 
 if(existe.rows.length > 0){
-  return res.status(400).json({error:"El usuario ya existe"});
+  return res.status(400).json({error:"El usuario ya existe en esta empresa"});
 }
 
 const hash = await bcrypt.hash(password,10);
@@ -116,7 +128,7 @@ const inserted = await pool.query(`
 INSERT INTO usuario
 (usuario,password,nombre,rol,activo,empresa_id,
  modo_factura,modo_impresion,modo_confirmacion)
-VALUES ($1,$2,$3,$4,$5,1,$6,$7,$8)
+VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
 RETURNING id
 `,
 [
@@ -125,6 +137,7 @@ RETURNING id
   nombre,
   rolLower,
   activo,
+  empresaIdFinal,
   (modo_factura || "PREGUNTAR").toUpperCase(),
   (modo_impresion || "AUTO").toUpperCase(),
   modo_confirmacion ?? false
