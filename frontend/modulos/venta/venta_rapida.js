@@ -2246,7 +2246,17 @@ async function procesarVenta(modo = "detallado") {
 
   procesando = true;
   try {
-    const totalPagar = calcularTotalPedido();
+    // Trae el total actualizado del backend (puede diferir del local si hubo
+    // descuentos, conversiones de moneda, edicion de items, etc.)
+    let totalPagar = calcularTotalPedido();
+    try {
+      const ventaRes = await fetch(`/api/venta/${ventaActual.id}`, { credentials: "include" });
+      if (ventaRes.ok) {
+        const ventaDB = await ventaRes.json();
+        const totalDB = Number(ventaDB?.total) || 0;
+        if (totalDB > 0) totalPagar = Math.round(totalDB);
+      }
+    } catch (_) { /* fallback al total local */ }
 
     const res = await fetch("/api/caja/cobrar", {
       method: "POST",
