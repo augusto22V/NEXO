@@ -269,6 +269,12 @@ body {
   color: #333;
 }
 .pago-select:focus { border-color: #1a6474; }
+.pago-select.moneda-bloqueada {
+  background: #f3f4f6;
+  color: #777;
+  cursor: not-allowed;
+  border-style: dashed;
+}
 
 #metodoPagoSel { flex: 0 0 86px; }
 #monedaSel     { flex: 0 0 72px; }

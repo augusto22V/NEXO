@@ -16,7 +16,37 @@ document.addEventListener("DOMContentLoaded", async () => {
   await cargarVentaDesdeURL();
   actualizarHora();
   setInterval(actualizarHora, 1000);
+
+  // Cuando cambia el método de pago, ajusta dinámicamente las monedas válidas
+  document.getElementById("metodoPagoSel")?.addEventListener("change", aplicarMonedasSegunMetodo);
+  aplicarMonedasSegunMetodo();
 });
+
+/* === MONEDA SEGÚN MÉTODO === */
+// TARJETA y TRANSFERENCIA solo aceptan PYG → bloqueamos BRL/USD en el selector
+function aplicarMonedasSegunMetodo() {
+  const metodoSel = document.getElementById("metodoPagoSel");
+  const monedaSel = document.getElementById("monedaSel");
+  if (!metodoSel || !monedaSel) return;
+
+  const soloPYG = metodoSel.value === "TARJETA" || metodoSel.value === "TRANSFERENCIA";
+
+  Array.from(monedaSel.options).forEach((opt) => {
+    if (opt.value === "BRL" || opt.value === "USD") {
+      opt.disabled = soloPYG;
+      opt.hidden   = soloPYG;
+    }
+  });
+
+  if (soloPYG) {
+    monedaSel.value = "PYG";
+    monedaSel.classList.add("moneda-bloqueada");
+    monedaSel.title = `${metodoSel.value} solo acepta PYG`;
+  } else {
+    monedaSel.classList.remove("moneda-bloqueada");
+    monedaSel.title = "";
+  }
+}
 
 /* === CENTRAR VENTANA === */
 function centrarVentana() {
@@ -339,6 +369,16 @@ async function efectivizar(imprimirTicket = true) {
   if (cobrando) return;
   if (!ventaActual) { mostrarToast("Sin venta cargada", "error"); return; }
   if (!pagos.length) { mostrarToast("Agregue al menos un pago", "error"); return; }
+
+  // Cliente obligatorio si hay pagos por tarjeta o transferencia (para SIFEN/respaldo)
+  const tienePagoElectronico = pagos.some(
+    (p) => p.metodo === "TARJETA" || p.metodo === "TRANSFERENCIA"
+  );
+  if (tienePagoElectronico && !clienteActual) {
+    mostrarToast("Cargue un cliente (RUC o cédula) — obligatorio para tarjeta/transferencia", "error");
+    document.getElementById("rucInput")?.focus();
+    return;
+  }
 
   const totalGs  = Number(ventaActual.total);
   const pagadoGs = pagos.reduce((s, p) => s + p.montoGs, 0);
