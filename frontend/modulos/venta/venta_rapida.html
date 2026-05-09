@@ -71,7 +71,7 @@
               <h3>Venta</h3>
               <span>N°</span>
 
-              <input type="text" id="pedidoNumero" placeholder="N° Pedido" readonly onclick="abrirTecladoPedido()"
+              <input type="text" id="pedidoNumero" placeholder="N° Venta" readonly onclick="abrirTecladoPedido()"
                 ontouchend="event.preventDefault(); abrirTecladoPedido()">
 
               <button class="btn-buscar-pedido" onclick="buscarMovimiento()">
@@ -254,7 +254,7 @@
       <input
         type="text"
         id="mesaSimpleFiltro"
-        placeholder="Filtrar por numero, estado o pedido..."
+        placeholder="Filtrar por numero, estado o venta..."
         oninput="renderMesasSimple()"
       >
 
@@ -273,7 +273,7 @@
   <div id="modalPedido" class="modal">
     <div class="modal-content teclado-numerico">
 
-      <h3>Número de Pedido</h3>
+      <h3>Número de Venta</h3>
       <input type="text" id="pedidoTemp" readonly>
 
       <div class="grid-teclado">
@@ -416,7 +416,7 @@
   <script src="/compartido/js/session.manager.js?v=2026.04.17.03"></script>
   <script src="/compartido/js/cache.bootstrap.js?v=2026.04.17.03"></script>
   <script src="tipo_pedido.shared.js?v=2026.04.19.01"></script>
-  <script src="venta_rapida.js?v=2026.05.09.02"></script>
+  <script src="venta_rapida.js?v=2026.05.09.03"></script>
   <script src="/compartido/js/seguridad.js?v=2026.04.17.03"></script>
 
 </body>

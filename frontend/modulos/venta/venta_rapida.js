@@ -491,7 +491,7 @@ function ventaTieneEnvioCocinaBloqueado() {
     mostrarMensaje("Sin conexion con la impresora de cocina. Puede reintentar desde Imprimir Preparo", "aviso");
     return true;
   }
-  mostrarMensaje("Este pedido sigue pendiente de cocina. Se reintentara automaticamente", "aviso");
+  mostrarMensaje("Esta venta sigue pendiente de cocina. Se reintentará automáticamente", "aviso");
   return true;
 }
 
@@ -3043,7 +3043,7 @@ async function printPreparo() {
   }
 
   if (pedidoActual.estado === "CANCELADO") {
-    mostrarMensaje("Este pedido esta cancelado y no puede enviarse a cocina", "error");
+    mostrarMensaje("Esta venta está cancelada y no puede enviarse a cocina", "error");
     return;
   }
 
@@ -3066,7 +3066,7 @@ async function printPreparo() {
   if (pedidoActual.estado === "CONCLUIDO") {
 
     mostrarConfirmar(
-      "Este pedido ya fue enviado a cocina.\nÂ¿Deseas reimprimir la comanda?",
+      "Esta venta ya fue enviada a cocina.\n¿Deseas reimprimir la comanda?",
       async () => {
 
         if (!validarPersistenciaAntesDeImprimir()) {
@@ -3120,7 +3120,7 @@ async function printPreparo() {
     if (btn) btn.disabled = false;
 
     mostrarConfirmar(
-      "Este pedido no tiene productos de preparo.\nÂ¿Queres efectivizar directamente?",
+      "Esta venta no tiene productos de preparo.\n¿Querés efectivizar directamente?",
       () => {
         if (!tienePermisoVentaRapida("venta_rapida_efectivizar")) {
           mostrarMensaje("No tiene permiso para efectivizar ventas", "error");
@@ -3138,7 +3138,7 @@ async function printPreparo() {
   if (envioPendiente && Number(envioPendiente.reintentos || 0) < COCINA_REINTENTOS_MAX) {
     cocinaPendienteLocalVentaId = Number(pedidoActual.id || 0);
     actualizarEstadoPreparoUI("pendiente");
-    mostrarMensaje("Este pedido ya esta pendiente. Se reintentara automaticamente", "aviso");
+    mostrarMensaje("Esta venta ya está pendiente. Se reintentará automáticamente", "aviso");
     imprimiendoCocina = false;
     if (btn) btn.disabled = false;
     return;
@@ -3294,7 +3294,7 @@ async function cancelarPedido() {
   }
 
   mostrarConfirmar(
-    "ï¿½Confirmas que queres cancelar este pedido?",
+    "¿Confirmas que querés cancelar esta venta?",
     async () => {
       try {
         const res = await fetch(`/api/venta/cancelar/${pedidoActual.id}`, {
@@ -3305,16 +3305,16 @@ async function cancelarPedido() {
 
         if (!res.ok) {
           const errores = {
-            "Venta ya cancelada": "Este pedido ya fue cancelado anteriormente",
-            "Venta no existe": "No se encontro el pedido",
+            "Venta ya cancelada": "Esta venta ya fue cancelada anteriormente",
+            "Venta no existe": "No se encontró la venta",
           };
-          const msg = errores[data.error] || "No se pudo cancelar el pedido";
+          const msg = errores[data.error] || "No se pudo cancelar la venta";
           mostrarMensaje(msg, "error");
           return;
         }
 
         vaciarPOS();
-        mostrarMensaje("ï¿½ Pedido cancelado", "ok");
+        mostrarMensaje("✓ Venta cancelada", "ok");
 
       } catch (err) {
         mostrarMensaje("Sin conexion. Verifica que el sistema esta activo", "error");
