@@ -197,6 +197,14 @@ app.use(express.static(path.join(__dirname, "../frontend"), {
 }));
 
 /* ==============================
+   ERROR HANDLER GLOBAL
+   Red de seguridad: captura errores no manejados y devuelve detalle
+   util (codigo PostgreSQL + explicacion) en vez de 500 silencioso.
+============================== */
+const { globalErrorMiddleware } = require("./services/errorFormatter.service");
+app.use(globalErrorMiddleware);
+
+/* ==============================
    PUERTO SERVIDOR
 ============================== */
 
