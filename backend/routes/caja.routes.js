@@ -1320,7 +1320,19 @@ router.post("/cobrar", requirePermisoVentaRapida("venta_rapida_efectivizar"), as
     const resumenPagos = resumirPagos(pagos);
 
     if (resumenPagos.total_pagado_gs < totalGeneral) {
-      throw new Error("Monto insuficiente");
+      const falta = Math.round(totalGeneral - resumenPagos.total_pagado_gs);
+      let detalle = `Monto insuficiente — falta Gs ${falta.toLocaleString("es-PY")}`;
+      // Si la diferencia es por cotizacion en cero, decirlo claramente
+      if (cot.brl <= 0 || cot.usd <= 0) {
+        detalle += ` (cotizacion BRL=${cot.brl}, USD=${cot.usd} — cargá las cotizaciones en Herramientas › Cotización)`;
+      }
+      console.warn("[COBRAR] insuficiente", {
+        total_venta: totalGeneral,
+        total_pagado: resumenPagos.total_pagado_gs,
+        cotizacion: cot,
+        pagos
+      });
+      throw new Error(detalle);
     }
 
     const vuelto = resolverVueltoMoneda(pagos, totalGeneral, cot);
