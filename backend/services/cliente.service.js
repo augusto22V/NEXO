@@ -26,6 +26,19 @@ async function ensureClienteSchema() {
   if (schemaPromise) return schemaPromise;
 
   schemaPromise = (async () => {
+    // Garantiza la tabla base. Si ya existe se ignora.
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS cliente (
+        id           BIGSERIAL PRIMARY KEY,
+        nombre       VARCHAR(200),
+        razon_social VARCHAR(200),
+        ruc          VARCHAR(30),
+        telefono     VARCHAR(60),
+        direccion    VARCHAR(300),
+        email        VARCHAR(150)
+      )
+    `);
+
     await db.query(`ALTER TABLE cliente ADD COLUMN IF NOT EXISTS numero_documento   VARCHAR(30)`);
     await db.query(`ALTER TABLE cliente ADD COLUMN IF NOT EXISTS dv                 VARCHAR(2)`);
     await db.query(`ALTER TABLE cliente ADD COLUMN IF NOT EXISTS tipo_documento     VARCHAR(30)`);
