@@ -65,22 +65,51 @@ async function mostrarEstadoActual() {
   }
 }
 
+async function safeDelete(label, sql) {
+  try {
+    await pool.query(sql);
+    log(`  · ${label} borrados`);
+  } catch (err) {
+    if (err.code === "42P01") {
+      log(`  · ${label}: la tabla no existe (omitido)`, COLOR_YELLOW);
+    } else {
+      log(`  · ${label}: error ${err.message}`, COLOR_YELLOW);
+    }
+  }
+}
+
 async function borrarTodo() {
   log("\n========== BORRANDO ==========", COLOR_RED);
-  await pool.query(`DELETE FROM permisos_usuario`);
-  log("  · permisos_usuario borrados");
-  await pool.query(`DELETE FROM usuario`);
-  log("  · usuarios borrados");
-  await pool.query(`DELETE FROM terminal`);
-  log("  · terminales borradas");
-  await pool.query(`DELETE FROM empresa`);
-  log("  · empresas borradas");
 
-  // Reiniciamos las secuencias para que los nuevos IDs empiecen en 1
-  await pool.query(`ALTER SEQUENCE empresa_id_seq RESTART WITH 1`).catch(() => {});
-  await pool.query(`ALTER SEQUENCE terminal_id_seq RESTART WITH 1`).catch(() => {});
-  await pool.query(`ALTER SEQUENCE usuario_id_seq RESTART WITH 1`).catch(() => {});
-  log("  · secuencias reiniciadas");
+  // TRUNCATE ... RESTART IDENTITY CASCADE limpia las tablas Y todas las
+  // dependencias (FKs) Y reinicia las secuencias en una sola operacion.
+  // Mucho mas robusto que ir tabla por tabla.
+  try {
+    await pool.query(`TRUNCATE TABLE empresa, terminal, usuario RESTART IDENTITY CASCADE`);
+    log("  · empresa + terminal + usuario (CASCADE) — secuencias reiniciadas");
+  } catch (err) {
+    log(`  ! TRUNCATE CASCADE fallo: ${err.message}`, COLOR_YELLOW);
+    log(`  Intentando borrado manual tabla por tabla...`, COLOR_YELLOW);
+
+    // Fallback: ir tabla por tabla con orden inverso de dependencias
+    const tablas = [
+      "permisos_usuario", "permisos_venta_rapida", "usuario_programa",
+      "stock_movimiento", "stock_lote",
+      "auditoria",
+      "caja_movimiento_manual", "caja_movimiento", "caja_sesiones", "caja",
+      "venta_detalle", "venta_cocina_envio", "venta",
+      "factura_detalle", "factura_venta", "factura",
+      "mesa",
+      "usuario", "terminal", "empresa"
+    ];
+    for (const t of tablas) {
+      await safeDelete(t, `DELETE FROM ${t}`);
+    }
+
+    for (const seq of ["empresa_id_seq", "terminal_id_seq", "usuario_id_seq"]) {
+      await pool.query(`ALTER SEQUENCE ${seq} RESTART WITH 1`).catch(() => {});
+    }
+  }
 }
 
 async function crearEmpresa({ codigo, nombre }) {
@@ -121,7 +150,7 @@ async function crearUsuario({ usuario, password, nombre, rol, empresaId }) {
   try {
     await ensurePermisosUsuario(id);
   } catch (err) {
-    log(`    (no se pudieron inicializar permisos: ${err.message})`, COLOR_YELLOW);
+    log(`    (permisos no inicializados — la tabla quizas no existe aun: ${err.code || err.message})`, COLOR_YELLOW);
   }
   return id;
 }
