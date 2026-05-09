@@ -235,9 +235,21 @@ function renderPagos() {
 
   tbody.innerHTML = pagos.map((p, i) => {
     acumGs += p.montoGs;
-    const vueltoGs  = Math.max(0, acumGs - totalGs);
-    const vueltoStr = vueltoGs > 0 ? `Gs ${Math.round(vueltoGs).toLocaleString("es-PY")}` : "—";
-    const montoFmt  = p.moneda === "PYG"
+    const vueltoGs = Math.max(0, acumGs - totalGs);
+
+    let vueltoStr = "—";
+    if (vueltoGs > 0) {
+      const vGs  = Math.round(vueltoGs).toLocaleString("es-PY");
+      const vBrl = cotizacion.brl > 0 ? (vueltoGs / cotizacion.brl).toFixed(2).replace(".", ",") : null;
+      const vUsd = cotizacion.usd > 0 ? (vueltoGs / cotizacion.usd).toFixed(2).replace(".", ",") : null;
+      vueltoStr = `<div class="vuelto-multi">
+        <span class="vm-row"><span class="vm-flag">🇵🇾</span>${vGs}</span>
+        ${vBrl ? `<span class="vm-row"><span class="vm-flag">🇧🇷</span>${vBrl}</span>` : ""}
+        ${vUsd ? `<span class="vm-row"><span class="vm-flag">🇺🇸</span>${vUsd}</span>` : ""}
+      </div>`;
+    }
+
+    const montoFmt = p.moneda === "PYG"
       ? Math.round(p.monto).toLocaleString("es-PY")
       : p.monto.toFixed(2).replace(".", ",");
 

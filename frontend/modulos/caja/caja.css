@@ -353,9 +353,25 @@ body {
   font-style: italic;
 }
 
-.vuelto-col { font-weight: 700; color: #bdbdbd; }
+.vuelto-col { font-weight: 700; color: #bdbdbd; vertical-align: middle; }
 .vuelto-positivo { color: #2e7d32 !important; }
 .valor-col { font-weight: 700; text-align: right; color: #333; }
+
+.vuelto-multi {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  line-height: 1.25;
+}
+.vuelto-multi .vm-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.vuelto-multi .vm-row:first-child { font-size: 13px; }
+.vuelto-multi .vm-flag { font-size: 10px; opacity: 0.85; }
 
 .btn-quitar-pago {
   background: none;
