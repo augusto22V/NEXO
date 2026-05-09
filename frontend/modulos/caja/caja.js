@@ -276,17 +276,34 @@ async function buscarClientePorRuc(event) {
   const ruc = String(document.getElementById("rucInput")?.value || "").trim();
   if (!ruc) return;
 
+  mostrarSpinner(true, "Buscando cliente...");
   try {
-    const res = await fetch(`/api/cliente/buscar?ruc=${encodeURIComponent(ruc)}`, { credentials: "include" });
-    if (!res.ok) { mostrarToast("Cliente no encontrado", "error"); return; }
-    const data = await res.json();
-    const cliente = Array.isArray(data) ? data[0] : data;
-    if (!cliente) { mostrarToast("Cliente no encontrado", "error"); return; }
+    // 1) Busqueda local en BD (acepta RUC con o sin DV, o solo cedula)
+    const res = await fetch(`/api/clientes/ruc/${encodeURIComponent(ruc)}`, { credentials: "include" });
+    let cliente = null;
+    if (res.ok) {
+      const data = await res.json();
+      cliente = Array.isArray(data) ? data[0] : data;
+    }
+
+    if (!cliente) {
+      mostrarToast("Cliente no encontrado", "warning");
+      return;
+    }
+
     clienteActual = cliente;
     const nombreEl = document.getElementById("clienteNombre");
     if (nombreEl) nombreEl.value = cliente.nombre || cliente.razon_social || "";
+    // Si vino sin DV de la API externa, completar el input con el RUC formal
+    if (cliente.ruc) {
+      const rucEl = document.getElementById("rucInput");
+      if (rucEl) rucEl.value = cliente.ruc;
+    }
+    mostrarToast(`✔ ${cliente.nombre || cliente.razon_social || "Cliente"}`, "success");
   } catch (_) {
     mostrarToast("Error buscando cliente", "error");
+  } finally {
+    mostrarSpinner(false);
   }
 }
 
