@@ -26,6 +26,16 @@ async function ensureClienteSchema() {
   if (schemaPromise) return schemaPromise;
 
   schemaPromise = (async () => {
+    // Helper: ejecuta una migración tolerando errores individuales
+    // (registra en consola pero no rompe toda la cadena).
+    const safeRun = async (label, sql) => {
+      try {
+        await db.query(sql);
+      } catch (err) {
+        console.warn(`[cliente.schema] ${label} fallo (se continua):`, err.message);
+      }
+    };
+
     // Garantiza la tabla base. Si ya existe se ignora.
     await db.query(`
       CREATE TABLE IF NOT EXISTS cliente (
@@ -39,6 +49,7 @@ async function ensureClienteSchema() {
       )
     `);
 
+    // Estas son criticas — si fallan algo grave hay (no las protejo con safeRun).
     await db.query(`ALTER TABLE cliente ADD COLUMN IF NOT EXISTS numero_documento   VARCHAR(30)`);
     await db.query(`ALTER TABLE cliente ADD COLUMN IF NOT EXISTS dv                 VARCHAR(2)`);
     await db.query(`ALTER TABLE cliente ADD COLUMN IF NOT EXISTS tipo_documento     VARCHAR(30)`);
@@ -49,34 +60,30 @@ async function ensureClienteSchema() {
     await db.query(`ALTER TABLE cliente ADD COLUMN IF NOT EXISTS ciudad_id          INT`);
     await db.query(`ALTER TABLE cliente ADD COLUMN IF NOT EXISTS numero_casa        VARCHAR(30)`);
 
-    // Index para acelerar búsquedas por documento
-    await db.query(`CREATE INDEX IF NOT EXISTS idx_cliente_numero_documento ON cliente(numero_documento)`);
+    await safeRun("idx numero_documento",
+      `CREATE INDEX IF NOT EXISTS idx_cliente_numero_documento ON cliente(numero_documento)`);
 
-    // Backfill: separar el campo `ruc` histórico en numero_documento + dv
-    await db.query(`
+    // Backfills — toleran fallos (en BD vacia no hacen nada).
+    await safeRun("backfill numero_documento+dv", `
       UPDATE cliente
       SET numero_documento = SPLIT_PART(ruc, '-', 1),
           dv               = NULLIF(SPLIT_PART(ruc, '-', 2), '')
-      WHERE numero_documento IS NULL
-        AND ruc IS NOT NULL
-        AND ruc <> ''
+      WHERE numero_documento IS NULL AND ruc IS NOT NULL AND ruc <> ''
     `);
 
-    // Si tiene DV → es RUC. Si no → asumimos CI.
-    await db.query(`
+    await safeRun("backfill tipo_documento", `
       UPDATE cliente
       SET tipo_documento = CASE WHEN dv IS NOT NULL AND dv <> '' THEN 'RUC' ELSE 'CI' END
       WHERE tipo_documento IS NULL AND numero_documento IS NOT NULL
     `);
 
-    await db.query(`
+    await safeRun("backfill tipo_contribuyente", `
       UPDATE cliente
       SET tipo_contribuyente = CASE WHEN dv IS NOT NULL AND dv <> '' THEN 'CONTRIBUYENTE' ELSE 'NO_CONTRIBUYENTE' END
       WHERE tipo_contribuyente IS NULL AND numero_documento IS NOT NULL
     `);
 
-    // Heurística simple: si la razón social tiene "S.A." / "SRL" / "EIRL" / "LTDA" → JURIDICA
-    await db.query(`
+    await safeRun("backfill naturaleza", `
       UPDATE cliente
       SET naturaleza = CASE
         WHEN UPPER(COALESCE(razon_social, nombre, '')) ~ '(S\\.?A\\.?|SRL|S\\.R\\.L|EIRL|LTDA|LIMITADA|CIA|S\\.A\\.E\\.C\\.A|SOCIEDAD)' THEN 'JURIDICA'
@@ -85,7 +92,11 @@ async function ensureClienteSchema() {
       END
       WHERE naturaleza IS NULL AND numero_documento IS NOT NULL
     `);
-  })();
+  })().catch(err => {
+    // Si la promise raiz falla, reset el cache para reintentar la proxima request
+    schemaPromise = null;
+    throw err;
+  });
 
   return schemaPromise;
 }

@@ -10,8 +10,13 @@ router.use(async (_req, res, next) => {
     await ensureClienteSchema();
     next();
   } catch (err) {
-    console.error("No se pudo preparar esquema de cliente:", err);
-    res.status(500).json({ error: "No se pudo preparar esquema de cliente" });
+    console.error("[CLIENTE SCHEMA ERROR]", err);
+    res.status(500).json({
+      error: "No se pudo preparar esquema de cliente",
+      detalle: err.message,
+      codigo: err.code || null,
+      hint: err.hint || null
+    });
   }
 });
 
@@ -217,8 +222,14 @@ router.get("/ruc/:ruc", async (req, res) => {
 
   } catch (err) {
 
-    console.error("ERROR RUC:", err.message);
-    return res.json(null);
+    console.error("[ERROR RUC]", err);
+    // Devolvemos detalle real para poder diagnosticar (era 500 silencioso)
+    return res.status(500).json({
+      error: "Error buscando cliente por RUC",
+      detalle: err.message,
+      codigo: err.code || null,
+      stack: process.env.NODE_ENV === "production" ? undefined : err.stack
+    });
 
   }
 
