@@ -60,7 +60,7 @@
 <header class="home-header">
   <div class="home-header-top">
     <div class="home-brand">
-      <img id="logoEmpresa" src="/recursos/img/default.png?v=2026.04.17.03" class="logo-img" alt="ALPX Systems">
+      <img id="logoEmpresa" src="/recursos/img/alpx-logo.png" class="logo-img" alt="ALPX Systems">
       <span class="brand-text">ALPX</span>
     </div>
 
@@ -680,9 +680,9 @@ async function init() {
       const logoFile = String(user.empresa_logo || "").trim();
       logoEl.src = logoFile
         ? `/recursos/img/${logoFile}?v=${Date.now()}`
-        : "/recursos/img/Logo1.png";
-      logoEl.alt = user.empresa_nombre || "NEXO";
-      logoEl.onerror = () => { logoEl.onerror = null; logoEl.src = "/recursos/img/Logo1.png"; };
+        : "/recursos/img/alpx-logo.png";
+      logoEl.alt = user.empresa_nombre || "ALPX Systems";
+      logoEl.onerror = () => { logoEl.onerror = null; logoEl.src = "/recursos/img/alpx-logo.png"; };
     }
 
     renderDashboardOperativo(user);
