@@ -147,8 +147,15 @@ router.post("/", authMiddleware, upload.single("logo"), async (req, res) => {
     res.json({ ok: true, id });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "error al guardar empresa" });
+    console.error("[ERROR GUARDAR EMPRESA]", err);
+    res.status(500).json({
+      error: "Error al guardar empresa",
+      detalle: err.message,
+      codigo: err.code || null,
+      hint: err.hint || null,
+      column: err.column || null,
+      table: err.table || null
+    });
   }
 });
 
@@ -252,8 +259,16 @@ router.put("/:id", authMiddleware, upload.single("logo"), async (req, res) => {
     res.json({ ok: true });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "error actualizando empresa" });
+    console.error("[ERROR EDITAR EMPRESA]", err);
+    res.status(500).json({
+      error: "Error actualizando empresa",
+      detalle: err.message,
+      codigo: err.code || null,
+      hint: err.hint || null,
+      column: err.column || null,
+      table: err.table || null,
+      constraint: err.constraint || null
+    });
   }
 });
 

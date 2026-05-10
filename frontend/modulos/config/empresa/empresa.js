@@ -175,7 +175,10 @@ async function guardarEmpresa(){
     const data = await res.json()
 
     if(!res.ok){
-      mostrarMensaje(data.error || "No se pudo guardar","err")
+      const detalle = data.detalle || data.detail || data.hint || ""
+      const msg = data.error || "No se pudo guardar"
+      console.error("[GUARDAR EMPRESA] backend:", data)
+      mostrarMensaje(detalle ? `${msg}: ${detalle}` : msg, "err")
       return
     }
 
