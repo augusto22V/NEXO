@@ -242,7 +242,7 @@ border-collapse:collapse;
 }
 
 .badge-efectivada { background: #e8f5e9; color: #16616b; }
-.badge-guardada   { background: #e3f2fd; color: #1565c0; }
+.badge-guardada   { background: #e3f2fd; color: #5E4F8E; }
 .badge-abierta    { background: #fff8e1; color: #f57f17; }
 
 
@@ -785,7 +785,7 @@ display:table-row-group;
 }
 
 .btn-excel:hover {
-  background: #1565C0;
+  background: #5E4F8E;
   transform: translateY(-1px);
 }
 

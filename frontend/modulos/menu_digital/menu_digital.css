@@ -8,9 +8,9 @@
   --md-radius-lg: 28px;
   --md-radius-md: 18px;
   --md-radius-sm: 12px;
-  --md-brand: #147696;
+  --md-brand: #7B6BAD;
   --md-brand-soft: #d8ebf0;
-  --md-accent: #418f9e;
+  --md-accent: #5E4F8E;
 }
 
 * {
@@ -248,7 +248,7 @@ textarea {
   border-radius: var(--md-radius-lg);
   background:
     linear-gradient(135deg, rgba(20, 118, 150, 0.96), rgba(65, 143, 158, 0.92)),
-    linear-gradient(135deg, #147696, #418f9e);
+    linear-gradient(135deg, #7B6BAD, #5E4F8E);
   color: #f8fbfd;
   box-shadow: 0 26px 60px rgba(20, 118, 150, 0.22);
 }

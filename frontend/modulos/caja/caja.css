@@ -21,12 +21,12 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #1a6474;
+  background: #5E4F8E;
   padding: 0 12px;
   color: white;
   flex-shrink: 0;
   height: 46px;
-  border-bottom: 2px solid #0f4a58;
+  border-bottom: 2px solid #3F3463;
 }
 
 .btn-cancelar {
@@ -76,11 +76,11 @@ body {
 
 /* === TOTALES CARD (lado derecho) === */
 .totales-card {
-  background: #1a6474;
+  background: #5E4F8E;
   color: white;
   padding: 10px 14px 8px;
   flex-shrink: 0;
-  border-bottom: 2px solid #0f4a58;
+  border-bottom: 2px solid #3F3463;
 }
 
 .totales-row {
@@ -163,7 +163,7 @@ body {
   background: white;
   font-family: inherit;
 }
-.cliente-field input:focus { border-color: #1a6474; box-shadow: 0 0 0 2px rgba(26,100,116,0.12); }
+.cliente-field input:focus { border-color: #5E4F8E; box-shadow: 0 0 0 2px rgba(26,100,116,0.12); }
 
 .cliente-ruc { flex: 0 0 auto; }
 .cliente-ruc input { width: 100px; }
@@ -232,7 +232,7 @@ body {
   white-space: nowrap;
 }
 
-.item-qty { font-weight: 700; color: #1a6474; }
+.item-qty { font-weight: 700; color: #5E4F8E; }
 
 .item-montos {
   display: flex;
@@ -268,7 +268,7 @@ body {
   font-family: inherit;
   color: #333;
 }
-.pago-select:focus { border-color: #1a6474; }
+.pago-select:focus { border-color: #5E4F8E; }
 .pago-select.moneda-bloqueada {
   background: #f3f4f6;
   color: #777;
@@ -290,14 +290,14 @@ body {
   text-align: right;
   outline: none;
   font-family: inherit;
-  color: #1a6474;
+  color: #5E4F8E;
 }
-.pago-monto-input:focus { border-color: #1a6474; box-shadow: 0 0 0 2px rgba(26,100,116,0.12); }
+.pago-monto-input:focus { border-color: #5E4F8E; box-shadow: 0 0 0 2px rgba(26,100,116,0.12); }
 .pago-monto-input::placeholder { color: #ccc; font-weight: 400; font-size: 13px; }
 
 .btn-agregar-pago {
   flex-shrink: 0;
-  background: #1a6474;
+  background: #5E4F8E;
   color: white;
   border: none;
   border-radius: 5px;
@@ -311,7 +311,7 @@ body {
   justify-content: center;
   line-height: 1;
 }
-.btn-agregar-pago:hover { background: #0f4a58; }
+.btn-agregar-pago:hover { background: #3F3463; }
 
 /* === PAGOS TABLA === */
 .pagos-tabla-wrap {
@@ -407,9 +407,9 @@ body {
 .btn-sin-ticket {
   flex: 1;
   padding: 12px 8px;
-  border: 2px solid #1a6474;
+  border: 2px solid #5E4F8E;
   background: white;
-  color: #1a6474;
+  color: #5E4F8E;
   border-radius: 7px;
   font-size: 13px;
   font-weight: 700;
@@ -451,7 +451,7 @@ body {
 .spinner {
   width: 34px; height: 34px;
   border: 4px solid #e0e0e0;
-  border-top-color: #1a6474;
+  border-top-color: #5E4F8E;
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
@@ -477,7 +477,7 @@ body {
 }
 .toast-item.success { background: #2e7d32; }
 .toast-item.error   { background: #c62828; }
-.toast-item.info    { background: #1565c0; }
+.toast-item.info    { background: #5E4F8E; }
 .toast-item.warning { background: #e65100; }
 
 .toast-out { animation: toastOut 0.2s ease forwards; }

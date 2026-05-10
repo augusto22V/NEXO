@@ -238,7 +238,7 @@ body {
   height: clamp(50px, 7vw, 56px);
   border: none;
   border-radius: 12px;
-  background: #147696;
+  background: #7B6BAD;
   color: #ffffff;
   font-size: clamp(16px, 2.8vw, 17px);
   font-weight: 700;
@@ -248,7 +248,7 @@ body {
 }
 
 .btn-login:hover {
-  background: #418f9e;
+  background: #5E4F8E;
   transform: translateY(-1px);
   box-shadow: 0 6px 18px rgba(65, 143, 158, 0.4);
 }
@@ -461,7 +461,7 @@ body {
 }
 
 #btnLicenciaConfirmar {
-  background: #147696;
+  background: #7B6BAD;
 }
 
 #btnLicenciaContinuar {

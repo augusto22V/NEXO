@@ -104,7 +104,7 @@
   font-size: 12px;
   font-weight: 700;
 }
-.cot-chip.brl { background: #e3f2fd; color: #1565c0; }
+.cot-chip.brl { background: #e3f2fd; color: #5E4F8E; }
 .cot-chip.usd { background: #fff8e1; color: #f57f17; }
 .cot-hint { margin-left: auto; font-size: 11px; color: #bdbdbd; }
 
@@ -130,7 +130,7 @@
 }
 .gc-stat-val { font-size: 18px; font-weight: 700; color: #212121; }
 .gc-stat-val.c-gs  { color: #2e7d32; }
-.gc-stat-val.c-brl { color: #1565c0; }
+.gc-stat-val.c-brl { color: #5E4F8E; }
 .gc-stat-val.c-usd { color: #f57f17; }
 .gc-stat-val.c-neg { color: #c62828; }
 
@@ -162,7 +162,7 @@
 }
 .gc-form-group input:focus    { border-color: #2e7d32; background: #fff; }
 .gc-form-group textarea       { resize: vertical; min-height: 70px; font-size: 14px; }
-.gc-form-group .inp-brl:focus { border-color: #1565c0 !important; }
+.gc-form-group .inp-brl:focus { border-color: #5E4F8E !important; }
 .gc-form-group .inp-usd:focus { border-color: #f57f17 !important; }
 
 /* WARN */
@@ -211,7 +211,7 @@
   transition: all 0.18s;
 }
 .mtab.gs.active,  .mtab.gs:hover  { background: #e8f5e9; color: #2e7d32; border-color: #a5d6a7; }
-.mtab.brl.active, .mtab.brl:hover { background: #e3f2fd; color: #1565c0; border-color: #90caf9; }
+.mtab.brl.active, .mtab.brl:hover { background: #e3f2fd; color: #5E4F8E; border-color: #90caf9; }
 .mtab.usd.active, .mtab.usd:hover { background: #fff8e1; color: #f57f17; border-color: #ffe082; }
 
 /* PANEL MONEDA */
@@ -270,7 +270,7 @@
 .dif-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px; }
 .dif-box { border-radius: 10px; padding: 14px; border-left: 4px solid #ccc; }
 .dif-box.gs-bg  { background: #f1f8e9; border-left-color: #2e7d32; }
-.dif-box.brl-bg { background: #e3f2fd; border-left-color: #1565c0; }
+.dif-box.brl-bg { background: #e3f2fd; border-left-color: #5E4F8E; }
 .dif-box.usd-bg { background: #fff8e1; border-left-color: #f57f17; }
 .dif-box.neg    { border-left-color: #c62828 !important; }
 .dif-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #9e9e9e; margin-bottom: 6px; }
@@ -281,7 +281,7 @@
 
 /* COLORES MONEDA */
 .c-gs  { color: #2e7d32; }
-.c-brl { color: #1565c0; }
+.c-brl { color: #5E4F8E; }
 .c-usd { color: #f57f17; }
 .c-neg { color: #c62828; }
 
@@ -609,7 +609,7 @@
 }
 .cd-gs  { color: #2e7d32; }
 .cd-brl { color: #6a1b9a; }
-.cd-usd { color: #1565c0; }
+.cd-usd { color: #5E4F8E; }
 .cd-item input {
   width: 60px;
   padding: 5px 8px;
@@ -804,7 +804,7 @@
 }
 
 .hf-op-ref {
-  color: #1565c0;
+  color: #5E4F8E;
   background: #e3f2fd;
 }
 

@@ -549,7 +549,7 @@ button {
   flex: 0 0 46px !important;
   width: 46px !important;
   height: auto !important;
-  background: #1a6474 !important;
+  background: #5E4F8E !important;
   color: white !important;
   border: none !important;
   border-radius: 6px !important;
@@ -565,7 +565,7 @@ button {
   padding: 0 !important;
   transition: background 0.15s, transform 0.05s !important;
 }
-.qty-stepper .qty-btn:hover   { background: #0f4a58 !important; }
+.qty-stepper .qty-btn:hover   { background: #3F3463 !important; }
 .qty-stepper .qty-btn:active  { transform: scale(0.94); }
 .qty-stepper .qty-minus       { background: #c62828 !important; }
 .qty-stepper .qty-minus:hover { background: #b71c1c !important; }
