@@ -7,6 +7,10 @@ const PERMISOS_DEFAULT = Object.freeze({
   venta_rapida_imprimir_venta: true
 });
 
+// Headers comunes para todos los fetch — definido a nivel de modulo
+// para que sea accesible desde cualquier funcion del archivo.
+const baseHeaders = { "Content-Type": "application/json" };
+
 const STORAGE_KEYS = Object.freeze({
   vendedor: "vendedorSeleccionado",
   cliente: "clienteSeleccionado",
@@ -1462,7 +1466,6 @@ async function cargarDefaultsCabecera() {
 async function guardarCabeceraEnVentaActual() {
   if (!state.pedido.id) return;
   syncPedidoDesdeCabecera();
-  const baseHeaders = { "Content-Type": "application/json" };
   const requests = [
     fetch("/api/venta/vendedor", { method: "POST", headers: baseHeaders, body: JSON.stringify({ venta_id: state.pedido.id, vendedor_id: state.pedido.vendedor_id, vendedor_nombre: state.pedido.vendedor_nombre }) }),
     fetch("/api/venta/cliente", { method: "POST", headers: baseHeaders, body: JSON.stringify({ venta_id: state.pedido.id, cliente_id: state.pedido.cliente_id, cliente_nombre: state.pedido.cliente_nombre }) }),
