@@ -1717,16 +1717,14 @@ function finalizarPostCobroSinFactura() {
   mostrarMensaje("Venta finalizada", "ok");
 }
 
-function preguntarFacturaPostCobro() {
+function preguntarFacturaPostCobro({ ventaIdGuardada = null } = {}) {
+  // Recordamos la venta cobrada por si el usuario decide facturar
+  // (despues de resetPedidoLocal el state.pedido.id queda en null)
+  if (ventaIdGuardada) state.ventaCobradaParaFacturar = ventaIdGuardada;
+
   const modo = (state.permisos?.modo_factura || "PREGUNTAR").toString().trim().toUpperCase();
-  if (modo === "NUNCA") {
-    finalizarPostCobroSinFactura();
-    return;
-  }
-  if (modo === "SIEMPRE") {
-    abrirModalFactura();
-    return;
-  }
+  if (modo === "NUNCA") return;            // ya reseteamos antes — no hace falta nada
+  if (modo === "SIEMPRE") { abrirModalFactura(); return; }
   abrirModal("vmModalConfirmFactura");
 }
 
@@ -1770,6 +1768,11 @@ async function cobrarPedido() {
   const original = refs.cobrarBtn.textContent;
   refs.cobrarBtn.textContent = "Abriendo Caja...";
   try {
+    // Por defecto es modo detallado. Si vino de cobroRapidoBtn / cobroRapidoTicketBtn
+    // ese ya seteo "rapido" o "rapido_ticket" antes de llegar aca.
+    if (!localStorage.getItem("vmModoCobro")) {
+      localStorage.setItem("vmModoCobro", "detallado");
+    }
     await guardarCabeceraEnVentaActual();
     await prepararVentaParaCobro();
     state.postCobroPendiente = true;
@@ -2119,9 +2122,10 @@ function manejarCobroConfirmadoDesdeCaja(ventasRaw) {
   if (ids.length && !ids.includes(pedidoId)) return;
   state.ventaBloqueada = true;
   state.postCobroPendiente = true;
-  mostrarMensaje("Venta cobrada correctamente", "ok");
+  mostrarMensaje("Venta cobrada correctamente — listo para nueva venta", "ok");
   const modo = String(localStorage.getItem("vmModoCobro") || "detallado");
   localStorage.removeItem("vmModoCobro");
+
   if (modo === "rapido") {
     finalizarPostCobroSinFactura();
     return;
@@ -2134,7 +2138,13 @@ function manejarCobroConfirmadoDesdeCaja(ventasRaw) {
     }).finally(() => finalizarPostCobroSinFactura());
     return;
   }
-  preguntarFacturaPostCobro();
+
+  // Modo "detallado": guardamos el id antes de resetear (lo necesitamos
+  // si el usuario decide facturar). Reseteamos AHORA para liberar la
+  // pantalla y permitir nueva venta de inmediato — no esperamos al modal.
+  const ventaIdParaFactura = state.pedido.id;
+  preguntarFacturaPostCobro({ ventaIdGuardada: ventaIdParaFactura });
+  resetPedidoLocal();
 }
 
 window.postCobroDesdeCaja = manejarCobroConfirmadoDesdeCaja;
@@ -2623,9 +2633,16 @@ async function init() {
   const params = new URLSearchParams(window.location.search);
   const ventaId = params.get("venta_id");
   const pedidoNumero = params.get("pedido");
-  if (ventaId) await cargarVentaPorId(ventaId);
-  else if (pedidoNumero) { refs.pedidoNumero.value = String(pedidoNumero); await buscarPedidoPorNumero(); }
-  else await consumirMovimientoSeleccionado();
+  const esPostCobro = params.get("post_cobro") === "1";
+
+  // Si venimos de un post-cobro NO cargamos la venta (ya esta cobrada);
+  // dejamos el form limpio y consumirPostCobroPendiente muestra el toast
+  // "venta cobrada" + dispara el flujo de factura si corresponde.
+  if (!esPostCobro) {
+    if (ventaId) await cargarVentaPorId(ventaId);
+    else if (pedidoNumero) { refs.pedidoNumero.value = String(pedidoNumero); await buscarPedidoPorNumero(); }
+    else await consumirMovimientoSeleccionado();
+  }
 
   consumirPostCobroPendiente();
 
