@@ -1713,6 +1713,7 @@ function abrirCaja(ventaId) {
 function finalizarPostCobroSinFactura() {
   cerrarModal("vmModalConfirmFactura");
   cerrarModal("vmModalFactura");
+  state.ventaCobradaSnapshot = null;  // ya no la necesitamos
   resetPedidoLocal();
   mostrarMensaje("Venta finalizada", "ok");
 }
@@ -2139,11 +2140,14 @@ function manejarCobroConfirmadoDesdeCaja(ventasRaw) {
     return;
   }
 
-  // Modo "detallado": guardamos el id antes de resetear (lo necesitamos
-  // si el usuario decide facturar). Reseteamos AHORA para liberar la
+  // Modo "detallado": guardamos un snapshot de la venta cobrada
+  // (id + total) antes de resetear. Reseteamos AHORA para liberar la
   // pantalla y permitir nueva venta de inmediato — no esperamos al modal.
-  const ventaIdParaFactura = state.pedido.id;
-  preguntarFacturaPostCobro({ ventaIdGuardada: ventaIdParaFactura });
+  state.ventaCobradaSnapshot = {
+    id:    state.pedido.id,
+    total: calcularTotalPedido()
+  };
+  preguntarFacturaPostCobro();
   resetPedidoLocal();
 }
 
@@ -2189,11 +2193,23 @@ function limpiarFormularioFactura() {
   refs.numeroFacturaPreview.value = "";
 }
 
+// Devuelve el id de la venta a facturar — pedido actual O la cobrada
+// hace un instante (post-cobro: state.pedido.id ya fue reseteado).
+function getVentaIdParaFactura() {
+  return toInt(state.pedido.id, 0) || toInt(state.ventaCobradaSnapshot?.id, 0) || 0;
+}
+
+function getTotalParaFactura() {
+  const totalActual = calcularTotalPedido();
+  if (totalActual > 0) return totalActual;
+  return Number(state.ventaCobradaSnapshot?.total) || 0;
+}
+
 function abrirModalFactura() {
-  if (!state.pedido.id) { mostrarMensaje("No hay venta activa para facturar", "error"); return; }
+  if (!getVentaIdParaFactura()) { mostrarMensaje("No hay venta activa para facturar", "error"); return; }
   cerrarModal("vmModalConfirmFactura");
   limpiarFormularioFactura();
-  refs.totalFacturaPreview.innerText = formatearGs(calcularTotalPedido());
+  refs.totalFacturaPreview.innerText = formatearGs(getTotalParaFactura());
   abrirModal("vmModalFactura");
   fetch("/api/factura/preview-numero")
     .then((r) => safeJson(r, {}))
@@ -2247,7 +2263,7 @@ function abrirBuscadorClienteFactura() {
 }
 
 async function confirmarFactura() {
-  const ventaId = toInt(state.pedido.id, 0);
+  const ventaId = getVentaIdParaFactura();
   if (!ventaId) { mostrarMensaje("No hay venta activa", "error"); return; }
   const ruc = refs.rucFacturaInput.value.trim() || null;
   const nombre = refs.nombreFacturaInput.value.trim();
@@ -2268,6 +2284,7 @@ async function confirmarFactura() {
     const facturaId = toInt(data.id, 0);
     state.postCobroPendiente = false;
     state.ventaBloqueada = false;
+    state.ventaCobradaSnapshot = null;  // factura emitida, ya no la necesitamos
     cerrarModal("vmModalFactura");
     resetPedidoLocal();
     if (facturaId > 0) window.location.href = `/modulos/factura/factura_ticket.html?id=${facturaId}`;
