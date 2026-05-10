@@ -577,7 +577,7 @@ async function cargarCotizacionPOS() {
 
   } catch (err) {
 
-    console.log("No se pudo cargar cotizaciÃ³n");
+    console.log("No se pudo cargar cotización");
 
   }
 
@@ -1227,7 +1227,7 @@ function seleccionarSabor(sabor) {
     saboresSeleccionados = saboresSeleccionados.filter(s => s.id !== sabor.id);
   } else {
     if (saboresSeleccionados.length >= max) {
-      mostrarMensaje("MÃ¡ximo " + max + " sabores", "aviso");
+      mostrarMensaje("Máximo " + max + " sabores", "aviso");
       return;
     }
     saboresSeleccionados.push(sabor);
@@ -1320,7 +1320,7 @@ async function agregarProducto(prod, cantidadSolicitada = 1) {
 
     if (itemExistente) {
 
-      //  EVITAR si aÃºn no tiene ID real
+      //  EVITAR si aún no tiene ID real
   if (itemExistente.loading) {
   mostrarMensaje("Espere un momento...", "aviso");
   return;
@@ -1402,7 +1402,7 @@ async function agregarProducto(prod, cantidadSolicitada = 1) {
       }
 
       if (!data?.item_id) {
-        throw new Error("Respuesta invÃ¡lida");
+        throw new Error("Respuesta inválida");
       }
 
       nuevoItem.id = Number(data.item_id);
@@ -1604,7 +1604,7 @@ async function removeItem(i) {
 
   const item = pedidoActual.items[i];
 
-  // Si el item tiene id de DB, borrarlo del backend tambiÃ©n
+  // Si el item tiene id de DB, borrarlo del backend también
   if (item && item.id > 0) {
     iniciarPersistenciaDetalle();
     try {
@@ -1615,7 +1615,7 @@ async function removeItem(i) {
         return;
       }
     } catch (err) {
-      mostrarMensaje("Sin conexiÃ³n. VerificÃ¡ que el sistema estÃ© activo", "error");
+      mostrarMensaje("Sin conexión. Verificá que el sistema esté activo", "error");
       return;
     } finally {
       finalizarPersistenciaDetalle();
@@ -2390,7 +2390,7 @@ function preguntarFacturaPostCobro() {
   if (modo === "PREGUNTAR") {
 
     mostrarConfirmar(
-      "Â¿Desea generar factura?",
+      "¿Desea generar factura?",
       () => abrirModalFactura(),
       () => vaciarPOS()
     );
@@ -2571,7 +2571,7 @@ document.getElementById("rucFacturaInput")
 
     const partes = valor.split("-");
 
-    //  evitar mÃ¡s de un guion
+    //  evitar más de un guion
     if (partes.length > 2) {
       valor = partes[0] + "-" + partes[1];
     }
@@ -2626,7 +2626,7 @@ async function confirmarFactura() {
     try {
       clienteData = await resCliente.json();
     } catch {
-      mostrarMensaje("Respuesta invÃ¡lida del servidor", "error");
+      mostrarMensaje("Respuesta inválida del servidor", "error");
       return;
     }
 
@@ -2703,7 +2703,7 @@ async function confirmarFactura() {
 
   } catch (err) {
     console.error(err);
-    mostrarMensaje("Error de conexiÃ³n", "error");
+    mostrarMensaje("Error de conexión", "error");
   }
 }
 
@@ -2751,7 +2751,7 @@ function buscarClienteFactura() {
 
 /* =========================
   IMPRIMIR PREPARO (COCINA)
-  Flujo: /api/print/imprimir-cocina/:id (normal y reimpresiÃ³n)
+  Flujo: /api/print/imprimir-cocina/:id (normal y reimpresión)
 ========================= */
 
 function crearEnvioCocinaDesdePedido({ reimprimir = false } = {}) {
@@ -3178,7 +3178,7 @@ async function printPreparo() {
 
 /* =========================
   IMPRIMIR VENTA (TICKET)
-  FIX: imprime el ticket y luego efectiviza y vacÃ­a, sin doble apertura de caja
+  FIX: imprime el ticket y luego efectiviza y vacía, sin doble apertura de caja
 ========================= */
 async function printVenta() {
   if (!validarPermisoVentaRapida("venta_rapida_imprimir_venta", "No tiene permiso para imprimir venta")) {
@@ -3630,7 +3630,7 @@ function mostrarMensaje(texto, tipo = "error") {
   div.innerText = `${icono}  ${texto}`;
   div.className = "mensaje-sistema mostrar " + tipo;
 
-  // Limpiar timer anterior si habÃ­a uno activo
+  // Limpiar timer anterior si había uno activo
   if (div._timer) clearTimeout(div._timer);
 
   div._timer = setTimeout(() => {
@@ -4289,7 +4289,7 @@ renderPedido(); //  FALTABA ESTO
     });
   });
 
-  // Solo nÃºmeros en cÃ³digo
+  // Solo números en código
   function soloNumeros(input) {
     input.addEventListener("input", function () {
       this.value = this.value.replace(/[^0-9]/g, "");

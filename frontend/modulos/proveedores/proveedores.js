@@ -170,7 +170,7 @@ function volverSeguro() {
 
     baseModalOpenConfirmGeneric({
       titulo: "Salir",
-      mensaje: "Hay cambios sin guardar. Â¿Desea salir?",
+      mensaje: "Hay cambios sin guardar. ¿Desea salir?",
       onConfirm: () => {
         permitirSalida = true;
         window.location.href = "../../home.html";
@@ -204,7 +204,7 @@ function render(data) {
   const row = document.createElement("div");
   row.className = "tabla-row";
 
-  //  si estÃ¡ inactivo agregamos clase
+  //  si está inactivo agregamos clase
   if (p.activo === false) {
     row.classList.add("inactivo");
   }
@@ -268,7 +268,7 @@ codigoProveedor.addEventListener("keydown", async (e) => {
 
   const valor = codigoProveedor.value.trim();
 
-  // ENTER vacÃ­o â†’ next-id
+  // ENTER vacío â†’ next-id
   if (!valor) {
     try {
       const nextId = await obtenerProximoId();
@@ -276,7 +276,7 @@ codigoProveedor.addEventListener("keydown", async (e) => {
       await modoNuevo(false);
       setTimeout(() => nombreProveedor.focus(), 50);
     } catch {
-      mostrarAdvertencia("Error obteniendo cÃ³digo", codigoProveedor);
+      mostrarAdvertencia("Error obteniendo código", codigoProveedor);
     }
     return;
   }
@@ -295,7 +295,7 @@ codigoProveedor.addEventListener("keydown", async (e) => {
     }
 
     // NO EXISTE â†’ advertir y NO avanzar
-    mostrarAdvertencia(`No existe proveedor con cÃ³digo ${id}`, codigoProveedor);
+    mostrarAdvertencia(`No existe proveedor con código ${id}`, codigoProveedor);
     return;
 
   } catch (err) {
@@ -682,11 +682,11 @@ document.addEventListener("keydown", (e) => {
 
 if (e.key === "Escape") {
 
-  // si modal advertencia estÃ¡ abierto â†’ no salir
+  // si modal advertencia está abierto â†’ no salir
   const modal = document.getElementById("modalAdvertencia");
   if (modal && !modal.classList.contains("hidden")) return;
 
-  // si modal eliminar estÃ¡ abierto â†’ no salir
+  // si modal eliminar está abierto â†’ no salir
   const modalEliminar = document.getElementById("modalEliminar");
   if (modalEliminar && !modalEliminar.classList.contains("hidden")) return;
 
@@ -730,7 +730,7 @@ window.seleccionarProveedor = seleccionarProveedor;
 // ===== INIT =====
 window.onload = () => {
 
-  // Detectar modo selecciÃ³n
+  // Detectar modo selección
   const urlParams = new URLSearchParams(window.location.search);
   const searchParam = urlParams.get('search');
   const modoSeleccion = urlParams.get("modo") === "seleccion";
@@ -741,7 +741,7 @@ window.onload = () => {
     document.getElementById("moduloTitulo").textContent = "Seleccionar Proveedor";
     btnSeleccionar.style.display = "inline-flex";
     btnSeleccionar.disabled = true;
-    // Mantener todos los botones visibles en modo selecciÃ³n
+    // Mantener todos los botones visibles en modo selección
 
     if (searchParam) {
       buscar.value = searchParam;

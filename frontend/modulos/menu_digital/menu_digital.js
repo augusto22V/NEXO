@@ -274,7 +274,7 @@ function refreshPublicationPreview() {
 
   $("configPublicBaseHint").textContent = customBase
     ? `Vista previa: ${customBase}`
-    : `Base automÃ¡tica actual: ${publication.resolved_base_url || "sin resolver"}`;
+    : `Base automática actual: ${publication.resolved_base_url || "sin resolver"}`;
 
   $("publicMenuLink").value = publicUrl;
 }

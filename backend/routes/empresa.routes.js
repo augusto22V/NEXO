@@ -191,7 +191,7 @@ router.put("/:id", authMiddleware, upload.single("logo"), async (req, res) => {
 
     if (existe.rows.length > 0) {
       return res.status(400).json({
-        error: "El cÃ³digo ya existe en otra empresa"
+        error: "El código ya existe en otra empresa"
       });
     }
 

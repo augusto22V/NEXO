@@ -177,7 +177,7 @@ function estadoInicial() {
 
   codigoInput.disabled = false;
   codigoInput.value = "";
-  codigoInput.placeholder = "Ingrese cÃ³digo o Enter";
+  codigoInput.placeholder = "Ingrese código o Enter";
 
   permiteMultiSaborInput.checked = false;
   maxSaboresInput.value = 1;
@@ -364,7 +364,7 @@ function volverSeguro() {
 
     baseModalOpenConfirmGeneric({
       titulo: "Salir",
-      mensaje: "Hay cambios sin guardar. Â¿Desea salir?",
+      mensaje: "Hay cambios sin guardar. ¿Desea salir?",
       onConfirm: () => {
         window.location.href = "../../home.html";
       }
@@ -533,7 +533,7 @@ async function seleccionarProducto(id) {
     precioVentaInput.title = "";
   }
 
-  // liberar preview anterior si existÃ­a
+  // liberar preview anterior si existía
   if (previewURL) {
     URL.revokeObjectURL(previewURL);
     previewURL = null;
@@ -618,7 +618,7 @@ function generarCodigoBarra() {
 
   let codigo = String(base + Number(numero));
 
-  // asegurar 13 dÃ­gitos
+  // asegurar 13 dígitos
   codigo = codigo.padStart(13, "0");
 
   codigoBarraInput.value = codigo;
@@ -633,7 +633,7 @@ codigoInput.addEventListener("keydown", async (e) => {
 
   const valor = codigoInput.value.trim();
 
-  // ENTER vacÃ­o â†’ prÃ³ximo ID
+  // ENTER vacío â†’ próximo ID
   if (!valor) {
 
     try {
@@ -653,7 +653,7 @@ codigoInput.addEventListener("keydown", async (e) => {
       nombreInput.focus({ preventScroll: true });
 
     } catch {
-      mostrarAdvertencia("Error obteniendo cÃ³digo", codigoInput);
+      mostrarAdvertencia("Error obteniendo código", codigoInput);
     }
 
     return;
@@ -671,7 +671,7 @@ codigoInput.addEventListener("keydown", async (e) => {
     }
 
     //  NO EXISTE  MOSTRAR ADVERTENCIA
-    mostrarAdvertencia(`No existe producto con cÃ³digo ${id}`, codigoInput);
+    mostrarAdvertencia(`No existe producto con código ${id}`, codigoInput);
 
   } catch {
     mostrarAdvertencia("Error consultando servidor", codigoInput);
@@ -765,7 +765,7 @@ form.addEventListener("submit", async (e) => {
   let precioLimpio = precioVentaInput.value.replace(/[^\d]/g, "");
   data.set("precio_venta", precioLimpio);
 
-  //  IMPORTANTE â†’ enviar id en ediciÃ³n
+  //  IMPORTANTE â†’ enviar id en edición
   if (productoSeleccionado) {
     data.set("id", productoSeleccionado);
   }
@@ -837,7 +837,7 @@ function eliminarProducto() {
   productoAEliminar = productoSeleccionado;
 
   document.querySelector("#modalEliminar .modal-text").textContent =
-    "Â¿Desea eliminar el producto?";
+    "¿Desea eliminar el producto?";
 
   document.querySelector("#modalEliminar .modal-nombre").textContent =
     `#${productoSeleccionado}`;
@@ -902,7 +902,7 @@ async function cargarCategorias() {
     const res = await fetch(`/api/categorias`);
     const data = await res.json();
 
-    categoriaSelect.innerHTML = `<option value="">Seleccione categorÃ­a</option>`;
+    categoriaSelect.innerHTML = `<option value="">Seleccione categoría</option>`;
     categoriasMap = {};
 
     data.forEach(c => {
@@ -925,7 +925,7 @@ async function cargarDestinos() {
 
     destinoInput.innerHTML = "";
 
-    // opciÃ³n vacÃ­o (importante)
+    // opción vacío (importante)
     destinoInput.innerHTML += `<option value="">Ninguno</option>`;
 
     Object.keys(data).forEach(key => {
@@ -957,10 +957,10 @@ form.addEventListener("keydown", function (e) {
 
   const activo = document.activeElement;
 
-  //   permitir salto de lÃ­nea en descripciÃ³n con Shift+Enter
+  //   permitir salto de línea en descripción con Shift+Enter
   if (activo === descripcionInput && e.shiftKey) return;
 
-  //  evitar que Enter en botÃ³n haga cosas raras
+  //  evitar que Enter en botón haga cosas raras
   if (activo === btnGuardar) return;
 
   // ===== VALIDAR CATEGORIA =====
@@ -981,8 +981,8 @@ form.addEventListener("keydown", function (e) {
     if (!categoriasMap[id]) {
 
       baseModalOpenInfo({
-        titulo: "CategorÃ­a",
-        mensaje: "CategorÃ­a no encontrada",
+        titulo: "Categoría",
+        mensaje: "Categoría no encontrada",
         onClose: () => {
           categoriaIdInput.value = "";
           categoriaSelect.value = "";
@@ -1024,7 +1024,7 @@ form.addEventListener("keydown", function (e) {
     return;
   }
 
-  // Ãºltimo campo â†’ guardar
+  // último campo â†’ guardar
   if (index === campos.length - 1) {
 
     if (!btnGuardar.disabled) btnGuardar.click();
@@ -1052,8 +1052,8 @@ categoriaIdInput.addEventListener("blur", function () {
   if (!categoriasMap[id]) {
 
     baseModalOpenInfo({
-      titulo: "CategorÃ­a",
-      mensaje: "CategorÃ­a no encontrada",
+      titulo: "Categoría",
+      mensaje: "Categoría no encontrada",
       onClose: () => {
         categoriaIdInput.value = "";
         categoriaSelect.value = "";
@@ -1104,7 +1104,7 @@ async function nuevoProducto() {
     }, 100);
 
   } catch {
-    mostrarAdvertencia("Error obteniendo cÃ³digo", codigoInput);
+    mostrarAdvertencia("Error obteniendo código", codigoInput);
   }
 }
 
@@ -1158,7 +1158,7 @@ function hayModalAbierto() {
 }
 
 function registrarAtajosProducto() {
-  // evitar duplicar listeners si recargÃ¡s scripts
+  // evitar duplicar listeners si recargás scripts
   if (window._productoHotkeysHandler) {
     document.removeEventListener("keydown", window._productoHotkeysHandler);
   }
@@ -1168,11 +1168,11 @@ function registrarAtajosProducto() {
     // si hay modal abierto, NO tocar nada
     if (hayModalAbierto()) return;
 
-    // NO manejar Escape aquÃ­ (lo maneja baseModal)
+    // NO manejar Escape aquí (lo maneja baseModal)
     if (e.key === "Escape") return;
 
-    // Si querÃ©s, podÃ©s evitar que se dispare mientras escribÃ­s en un textarea
-    // (por ejemplo, para que F3 guarde igual sÃ­ estÃ¡ OK, pero esto es opcional)
+    // Si querés, podés evitar que se dispare mientras escribís en un textarea
+    // (por ejemplo, para que F3 guarde igual sí está OK, pero esto es opcional)
     // const tag = (document.activeElement?.tagName || "").toLowerCase();
     // if (tag === "textarea") return;
 

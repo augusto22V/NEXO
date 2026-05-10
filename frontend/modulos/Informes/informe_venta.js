@@ -151,7 +151,7 @@ renderTabla(data,tipo);
 
 ocultarSpinner();
 console.error(err);
-toast("Error de conexiÃ³n","error");
+toast("Error de conexión","error");
 
 }
 

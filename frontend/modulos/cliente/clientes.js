@@ -158,7 +158,7 @@ function volverSeguro() {
 
     baseModalOpenConfirmGeneric({
       titulo: "Salir",
-      mensaje: "Hay cambios sin guardar. Â¿Desea salir?",
+      mensaje: "Hay cambios sin guardar. ¿Desea salir?",
       onConfirm: () => {
         permitirSalida = true;
         history.back();
@@ -276,7 +276,7 @@ codigoCliente.addEventListener("keydown", async (e) => {
 
   const valor = codigoCliente.value.trim();
 
-  // ENTER vacÃ­o  nuevo
+  // ENTER vacío  nuevo
   if (!valor) {
 
     e.preventDefault();
@@ -284,7 +284,7 @@ codigoCliente.addEventListener("keydown", async (e) => {
     const nextId = await obtenerProximoId();
 
     if (!nextId) {
-      mostrarAdvertencia("No se pudo obtener el cÃ³digo");
+      mostrarAdvertencia("No se pudo obtener el código");
       return;
     }
 
@@ -310,11 +310,11 @@ codigoCliente.addEventListener("keydown", async (e) => {
     return;
   }
 
-  //  SOLO acÃ¡ prevenimos y cortamos todo
+  //  SOLO acá prevenimos y cortamos todo
   e.preventDefault();
   e.stopImmediatePropagation();
 
-  mostrarAdvertencia(`No existe cliente con cÃ³digo ${id}`, codigoCliente);
+  mostrarAdvertencia(`No existe cliente con código ${id}`, codigoCliente);
 });
 
 // ===== SELECT =====
@@ -355,7 +355,7 @@ async function nuevo() {
   direccion.value = '';
   email.value = 'sincorreo@gmail.com';
 
-  // quitar selecciÃ³n de tabla
+  // quitar selección de tabla
   document.querySelectorAll('.tabla-row')
     .forEach(r => r.classList.remove('activo'));
 
@@ -370,14 +370,14 @@ async function nuevo() {
     const nextId = await obtenerProximoId();
 
     if (!nextId) {
-      mostrarAdvertencia("No se pudo obtener el cÃ³digo");
+      mostrarAdvertencia("No se pudo obtener el código");
       return;
     }
 
     codigoCliente.value = nextId;
 
   } catch {
-    mostrarAdvertencia("Error obteniendo cÃ³digo");
+    mostrarAdvertencia("Error obteniendo código");
   }
 
   setTimeout(() => {
@@ -402,7 +402,7 @@ function cancelar() {
   direccion.value = '';
   email.value = 'sincorreo@gmail.com';
 
-  // quitar selecciÃ³n de tabla
+  // quitar selección de tabla
   document.querySelectorAll('.tabla-row').forEach(r => r.classList.remove('activo'));
 
   // botones
@@ -414,7 +414,7 @@ function cancelar() {
   codigoCliente.focus();
   codigoCliente.select();
 
-  // foco en cÃ³digo
+  // foco en código
   setTimeout(() => {
     codigoCliente.focus();
     codigoCliente.select();
@@ -657,7 +657,7 @@ document.querySelector('.form-panel').addEventListener("keydown", (e) => {
 
   if (e.key !== "Enter") return;
 
-  // si estÃ¡ en cÃ³digo no intervenir
+  // si está en código no intervenir
   if (document.activeElement.id === "codigoCliente") return;
 
   e.preventDefault();
@@ -690,7 +690,7 @@ codigoCliente.addEventListener('input', () => {
 [nombre, razon, direccion].forEach(input => {
   input.addEventListener("input", () => {
 
-    //  convierte automÃ¡ticamente a MAYÃšSCULAS
+    //  convierte automáticamente a MAYÃšSCULAS
     input.value = input.value.toUpperCase();
 
     formDirty = true;

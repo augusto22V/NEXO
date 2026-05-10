@@ -113,7 +113,7 @@ function volverSeguro() {
 
     baseModalOpenConfirmGeneric({
       titulo: "Salir",
-      mensaje: "Hay cambios sin guardar. Â¿Desea salir?",
+      mensaje: "Hay cambios sin guardar. ¿Desea salir?",
       onConfirm: () => {
         history.back();
       }
@@ -290,7 +290,7 @@ function seleccionarCategoria(c) {
   categoriaId.value = c.id;
   nombreCategoria.value = c.nombre;
   ordenPantalla.value = c.orden_pantalla || 0;
- // liberar preview si existÃ­a
+ // liberar preview si existía
 if (previewURLCategoria) {
   URL.revokeObjectURL(previewURLCategoria);
   previewURLCategoria = null;
@@ -331,11 +331,11 @@ codigoCategoria.addEventListener("keydown", async (e) => {
     return;
   }
 
-  //  Si no existe â†’ cortar propagaciÃ³n
+  //  Si no existe â†’ cortar propagación
   e.preventDefault();
   e.stopImmediatePropagation();
 
-mostrarAdvertencia(`No existe categorÃ­a con cÃ³digo ${id}`, codigoCategoria);
+mostrarAdvertencia(`No existe categoría con código ${id}`, codigoCategoria);
 });
 
 
@@ -415,7 +415,7 @@ form.addEventListener("submit", async (e) => {
   });
 
   if (!res.ok) {
-    mostrarAdvertencia("Error al guardar la categorÃ­a");
+    mostrarAdvertencia("Error al guardar la categoría");
     return;
   }
 
@@ -504,7 +504,7 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "F4") { e.preventDefault(); if (!btnCancelar.disabled) cancelar(); }
   if (e.key === "Delete") { e.preventDefault(); if (!btnEliminar.disabled) eliminar(); }
 if (e.key === "Escape") {
-  // si el modalAdvertencia estÃ¡ abierto, no hacemos volverSeguro
+  // si el modalAdvertencia está abierto, no hacemos volverSeguro
   const abierto = !document.getElementById("modalAdvertencia")?.classList.contains("hidden");
   if (abierto) return;
 
@@ -541,7 +541,7 @@ async function validarOrdenDuplicado() {
     marcarErrorOrden();
 
     mostrarAdvertencia(
-      `Ya existe una categorÃ­a con orden ${orden}. 
+      `Ya existe una categoría con orden ${orden}. 
       Puede guardar igual o cambiar el orden.`,
       ordenPantalla
     );

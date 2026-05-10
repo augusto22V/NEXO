@@ -218,6 +218,22 @@ function editar(id){
   document.getElementById("telefono").value = emp.telefono || ""
   document.getElementById("email").value = emp.email || ""
 
+  // Limpiamos el input de archivo (sino el navegador conserva el del último upload)
+  const logoInput = document.getElementById("logo")
+  if (logoInput) logoInput.value = ""
+
+  // Indicador visual: cambia el título de la sección y el texto del botón
+  const titulo = document.querySelector(".empresa-form-title, .form-title, h2, h3")
+  if (titulo && !titulo.dataset.originalText) {
+    titulo.dataset.originalText = titulo.textContent
+  }
+  if (titulo) titulo.textContent = `Editando: ${emp.nombre}`
+
+  const btnGuardar = document.querySelector('button[onclick="guardarEmpresa()"]')
+  if (btnGuardar) btnGuardar.textContent = "Actualizar empresa"
+
+  mostrarMensaje(`Editando empresa: ${emp.nombre}`, "ok")
+
   window.scrollTo({top:0,behavior:"smooth"})
 }
 
@@ -232,9 +248,19 @@ function limpiar(){
   document.getElementById("direccion").value=""
   document.getElementById("telefono").value=""
   document.getElementById("email").value=""
+  const logoInput = document.getElementById("logo")
+  if (logoInput) logoInput.value = ""
 
   empresaEditando = null
   document.getElementById("empresaIdActual").value = ""
+
+  // Restaurar título y botón a estado "nuevo"
+  const titulo = document.querySelector(".empresa-form-title, .form-title, h2, h3")
+  if (titulo && titulo.dataset.originalText) {
+    titulo.textContent = titulo.dataset.originalText
+  }
+  const btnGuardar = document.querySelector('button[onclick="guardarEmpresa()"]')
+  if (btnGuardar) btnGuardar.innerHTML = '<i class="fa-solid fa-save"></i> Guardar empresa'
 
   obtenerCodigo()
 }

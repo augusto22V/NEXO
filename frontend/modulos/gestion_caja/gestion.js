@@ -303,7 +303,7 @@ async function apiGet(url) {
     if (!r.ok) throw new Error(await r.text());
     return await r.json();
   } catch (e) {
-    mostrarToast(e.message || 'Error de conexiÃ³n', 'error');
+    mostrarToast(e.message || 'Error de conexión', 'error');
     return null;
   }
 }
@@ -438,7 +438,7 @@ async function abrirCaja() {
   setBadge('ABIERTA');
   await cargarEstado();
 
-  //  PRIORIDAD 1: continuar cobro automÃ¡tico
+  //  PRIORIDAD 1: continuar cobro automático
   const ventaId = localStorage.getItem("ventaPendienteCobro");
 
   if (ventaId) {
@@ -683,7 +683,7 @@ async function confirmarCierre() {
       </thead>
       <tbody>
         <tr>
-          <td>â‚² GuaranÃ­</td><td>${fGs(eGs)}</td><td>${fGs(cGs)}</td>
+          <td>â‚² Guaraní</td><td>${fGs(eGs)}</td><td>${fGs(cGs)}</td>
           <td style="color:${color(cGs-eGs)}">${fGs(cGs - eGs)}</td>
         </tr>
         <tr>
@@ -691,7 +691,7 @@ async function confirmarCierre() {
           <td style="color:${color(cBrl-eBrl)}">${fBrl(cBrl - eBrl)}</td>
         </tr>
         <tr>
-          <td>US$ DÃ³lar</td><td>${fUsd(eUsd)}</td><td>${fUsd(cUsd)}</td>
+          <td>US$ Dólar</td><td>${fUsd(eUsd)}</td><td>${fUsd(cUsd)}</td>
           <td style="color:${color(cUsd-eUsd)}">${fUsd(cUsd - eUsd)}</td>
         </tr>
         <tr>
@@ -924,7 +924,7 @@ async function guardarMovimientoManual() {
    HISTORIAL
 ========================= */
 
-// ðŸ”¥ Setea Ãºltimos 7 dÃ­as automÃ¡ticamente
+// ðŸ”¥ Setea últimos 7 días automáticamente
 function setUltimos7Dias() {
   const hoy = new Date();
   const desde = new Date();
@@ -949,7 +949,7 @@ async function cargarHistorial() {
   let hasta = document.getElementById('histHasta')?.value;
   const estado = document.getElementById('histEstado')?.value || '';
 
-  // ðŸ§  Si no hay fechas â†’ usar Ãºltimos 7 dÃ­as
+  // ðŸ§  Si no hay fechas â†’ usar últimos 7 días
   if (!desde || !hasta) {
     setUltimos7Dias();
     desde = document.getElementById('histDesde').value;
@@ -1372,7 +1372,7 @@ async function cargarInforme() {
   const hasta = document.getElementById('infHasta').value;
 
   if (!desde || !hasta) {
-    mostrarToast('SeleccionÃ¡ un perÃ­odo', 'warning');
+    mostrarToast('Seleccioná un período', 'warning');
     return;
   }
 
@@ -1445,7 +1445,7 @@ const data = await apiGet(`${API}/informe?fecha_desde=${desde}&fecha_hasta=${has
         </tbody>
       </table>`;
   } else {
-    sesDiv.innerHTML = '<div class="gc-loading">Sin sesiones en el perÃ­odo</div>';
+    sesDiv.innerHTML = '<div class="gc-loading">Sin sesiones en el período</div>';
   }
 
     // Movimientos
@@ -1528,7 +1528,7 @@ function imprimirInforme() {
 
   const area = document.getElementById('infResultado');
   if (area.style.display === 'none') {
-    mostrarToast('ConsultÃ¡ el informe primero', 'warning');
+    mostrarToast('Consultá el informe primero', 'warning');
     return;
   }
   window.print();

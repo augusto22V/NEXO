@@ -47,7 +47,7 @@
   <p id="subtitulo" class="filtro-subtitulo" style="display:none"></p>
 
   <div id="resumen" class="inf-resumen" style="display:none">
-    <h4>Resumen del perÃ­odo</h4>
+    <h4>Resumen del período</h4>
     <table class="informe-tabla inf-resumen-tabla">
       <tbody>
         <tr><td>Cant. ventas</td><td class="text-right" id="cant_ventas">0</td></tr>
@@ -136,7 +136,7 @@ async function cargar() {
     document.getElementById("vuelto_total").textContent = "Gs " + Number(resumen.vuelto_total || 0).toLocaleString("es-PY");
 
     if (!movs.length) {
-      tbody.innerHTML = '<tr><td colspan="7" class="inf-cargando">Sin movimientos en el perÃ­odo</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" class="inf-cargando">Sin movimientos en el período</td></tr>';
       return;
     }
 

@@ -98,7 +98,7 @@ codigoVendedor.addEventListener("keydown", async (e) => {
 
     const id = Number(codigoVendedor.value);
     if (!id) {
-      await nuevo(); // si estÃ¡ vacÃ­o, sÃ­ crea secuencia
+      await nuevo(); // si está vacío, sí crea secuencia
       return;
     }
 
@@ -129,7 +129,7 @@ async function buscarPorId(id) {
   try {
     const res = await fetch(`${API}/${id}`);
     if (!res.ok) {
-      mostrarAdvertencia("No existe vendedor con ese cÃ³digo");
+      mostrarAdvertencia("No existe vendedor con ese código");
       return;
     }
 
@@ -208,7 +208,7 @@ if (c.activo === false) {
     return;
   }
 
-  // comportamiento normal del mÃ³dulo
+  // comportamiento normal del módulo
   document.querySelectorAll(".tabla-row")
     .forEach(r => r.classList.remove("activo"));
 
@@ -371,7 +371,7 @@ function eliminar() {
 
   baseModalOpenConfirm({
     titulo: "Eliminar vendedor",
-    mensaje: "Â¿Desea eliminar el vendedor?",
+    mensaje: "¿Desea eliminar el vendedor?",
     detalle: nombre.value,
     confirmText: "Eliminar",
     cancelText: "Cancelar",
@@ -421,7 +421,7 @@ async function obtenerProximoId() {
 // ===== MODAL ADVERTENCIA =====
 function mostrarAdvertencia(texto) {
   baseModalOpenInfo({
-    titulo: "AtenciÃ³n",
+    titulo: "Atención",
     mensaje: texto
   });
 }
@@ -483,7 +483,7 @@ nombre.addEventListener("keydown", async (e) => {
     e.preventDefault();
     if (!btnGuardar.disabled) {
       await guardar();
-      // DespuÃ©s de guardar, listo para el siguiente
+      // Después de guardar, listo para el siguiente
       codigoVendedor.focus();
     }
   }
