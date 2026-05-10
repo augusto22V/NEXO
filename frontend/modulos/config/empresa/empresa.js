@@ -208,8 +208,14 @@ EDITAR
 ============================ */
 function editar(id){
 
-  const emp = empresas.find(e => e.id === id)
-  if(!emp) return
+  // Comparacion no estricta: la API puede devolver id como string o number
+  const emp = empresas.find(e => Number(e.id) === Number(id))
+  if(!emp) {
+    console.error("[EDITAR EMPRESA] no se encontro id:", id, "empresas:", empresas)
+    mostrarMensaje(`No se encontró la empresa #${id}`, "err")
+    return
+  }
+  console.log("[EDITAR EMPRESA] cargando:", emp)
 
   empresaEditando = emp.id
   document.getElementById("empresaIdActual").value = emp.id
