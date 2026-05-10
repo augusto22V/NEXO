@@ -153,6 +153,23 @@ router.get("/verify", async (req, res) => {
   }
 
   try {
+    // Refrescamos datos de empresa desde la BD (no del JWT) — asi si se actualizo
+    // el logo o el nombre de la empresa, el home lo ve sin necesidad de relogin.
+    let datosEmpresaFrescos = {};
+    try {
+      const r = await db.query(
+        `SELECT nombre, codigo, logo FROM empresa WHERE id = $1 LIMIT 1`,
+        [payload.empresa_id]
+      );
+      if (r.rowCount) {
+        datosEmpresaFrescos = {
+          empresa_nombre: r.rows[0].nombre,
+          empresa_codigo: r.rows[0].codigo,
+          empresa_logo:   r.rows[0].logo
+        };
+      }
+    } catch (_) { /* fallback al payload si la query falla */ }
+
     const licencia = await licenciaService.getLicenseState(db, payload.empresa_id, { regenerateControl: false });
 
     if (licencia.vencida) {
@@ -163,6 +180,7 @@ router.get("/verify", async (req, res) => {
       ok: true,
       usuario: {
         ...payload,
+        ...datosEmpresaFrescos,
         licencia_vencida: licencia.vencida ? 1 : 0,
         licencia_vencimiento_num: licencia.fecha_vencimiento_num
       },

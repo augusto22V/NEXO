@@ -1,5 +1,5 @@
 /* =========================================================
-   NEXO — Programas / accesos
+   ALPX — Programas / accesos
    ---------------------------------------------------------
    Persistencia principal: PostgreSQL via /api/programas.
    Cache local: solo memoria de la sesion actual.

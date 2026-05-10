@@ -3,12 +3,28 @@
 ========================= */
 
 :root {
-  --color-principal: #147696;
-  --color-hover: #418F9E;
+  /* ============ PALETA ALPX SYSTEMS ============ */
+  /* Inspirada en el logo: lavanda + tan/marrón + crema */
 
-  --color-header: #1F1F1F;
-  --color-bg: #f4f6f5;
-  --color-texto: #1f1f1f;
+  --color-principal: #7B6BAD;   /* Lavanda profundo (principal) */
+  --color-hover:     #5E4F8E;   /* Lavanda oscuro (hover) */
+  --color-light:     #B0A0D8;   /* Lavanda suave */
+
+  --color-acento:       #998270;  /* Tan/marrón (acento) */
+  --color-acento-hover: #75614F;
+
+  --color-header: #2A2336;        /* Header oscuro casi negro */
+  --color-bg:     #F5F0EB;        /* Crema suave (fondo principal) */
+  --color-bg-soft:#ECE5DD;        /* Crema un poco más oscura */
+  --color-card:   #FFFFFF;
+
+  --color-texto:       #2A2336;
+  --color-texto-suave: #6B6177;
+
+  --color-success: #5E8B73;
+  --color-error:   #B85450;
+  --color-warn:    #C99850;
+  --color-info:    #5E7BAD;
 
   --radius: 16px;
 }

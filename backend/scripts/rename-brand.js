@@ -7,12 +7,19 @@ const path = require("path");
 
 const ROOT = path.join(__dirname, "..", "..", "frontend");
 const REPLACEMENTS = [
-  ["LIBRERÍASYS", "NEXO"],
-  ["LIBRERIASYS", "NEXO"],
-  ["LibreríaSys", "NEXO"],
-  ["LibreriaSys", "NEXO"],
-  ["libreriaSys", "nexo"],
-  ["libreriasys", "nexo"]
+  // primero las largas para que no se reemplacen parciales
+  ["NEXO | ", "ALPX | "],
+  [">NEXO<", ">ALPX<"],
+  ["alt=\"NEXO\"", "alt=\"ALPX Systems\""],
+  ["NEXO 2026", "ALPX Systems 2026"],
+  ["NEXO · sistema de gestión", "ALPX Systems · sistema de gestión"],
+  ["Cargando NEXO", "Cargando ALPX"],
+  ["Descargar NEXO Local", "Descargar ALPX Local"],
+  ["Descargar NEXO Casa", "Descargar ALPX Casa"],
+  ["NEXO Local", "ALPX Local"],
+  ["NEXO Casa", "ALPX Casa"],
+  ["NEXO · Administración", "ALPX Systems · Administración"],
+  ["NEXO — Programas", "ALPX — Programas"]
 ];
 
 const EXTENSIONES = [".html", ".js", ".css", ".json"];

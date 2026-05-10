@@ -1133,7 +1133,7 @@ function aplicarModoConsulta() {
   if (!modoConsulta) return;
 
   document.body.classList.add("precio-consulta");
-  document.title = "NEXO | Consulta de precio";
+  document.title = "ALPX | Consulta de precio";
 
   if (refs.topbarTitulo) refs.topbarTitulo.textContent = "Consulta de Precio";
   if (refs.btnVolver) refs.btnVolver.textContent = "Cerrar";
