@@ -1810,6 +1810,7 @@ async function manejarCodigoProducto(event) {
     let match = null;
     const asId = toNumber(codigo);
 
+    // Buscar por ID numérico exacto
     if (asId > 0 && String(asId) === codigo) {
       try {
         match = await api(`${API}/productos/${asId}`);
@@ -1818,21 +1819,30 @@ async function manejarCodigoProducto(event) {
       }
     }
 
+    // Buscar por código de barra o nombre
     if (!match) {
-      const rows = await api(`${API}/productos?buscar=${encodeURIComponent(codigo)}`);
-      if (Array.isArray(rows)) {
+      const rows = await api(`${API}/productos?buscar=${encodeURIComponent(codigo)}&limit=20`);
+      if (Array.isArray(rows) && rows.length > 0) {
         const needleNombre = codigo.toLowerCase();
         match = rows.find((row) => coincideProductoExacto(row, codigo))
           || rows.find((row) => String(row?.nombre || "").trim().toLowerCase() === needleNombre)
-          || null;
+          || (rows.length === 1 ? rows[0] : null); // resultado único: aplicarlo directamente
       }
     }
 
-    if (!match) throw new Error("Producto no encontrado");
+    if (!match) {
+      showError(`Producto "${codigo}" no encontrado`);
+      focusField("productoCodigo");
+      return;
+    }
+
     aplicarProductoSeleccionado(match);
     focusField("itemPrecio");
-  } catch (_) {
-    abrirBuscadorProducto(codigo);
+
+  } catch (err) {
+    console.error("Error buscando producto:", err);
+    showError(err.message || "Error al buscar el producto");
+    focusField("productoCodigo");
   }
 }
 
@@ -2082,7 +2092,13 @@ function recibirComprador(row) {
 function recibirProducto(row) {
   localStorage.removeItem(SELECTOR_KEYS.producto);
   if (!row?.id) return;
-  aplicarProductoSeleccionado(row);
+  try {
+    aplicarProductoSeleccionado(row);
+    focusField("itemPrecio");
+  } catch (err) {
+    console.error("Error aplicando producto seleccionado:", err);
+    showError("Error al cargar el producto: " + (err.message || err));
+  }
 }
 
 function consumirSeleccionesPendientes() {

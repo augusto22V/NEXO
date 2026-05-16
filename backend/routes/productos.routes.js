@@ -61,6 +61,52 @@ async function syncProductoMenuDigital(req, productoId) {
   }
 }
 
+/* ================= POS - BUSQUEDA GLOBAL ================= */
+router.get('/pos/buscar', async (req, res) => {
+  const q = String(req.query.q || '').trim();
+  if (!q) return res.json([]);
+
+  try {
+    await ensureComisionSchema();
+    const result = await pool.query(`
+      SELECT
+        p.id,
+        p.nombre,
+        p.imagen,
+        p.efectivacion_directa,
+        p.no_control_stock,
+        p.permite_multi_sabor,
+        p.max_sabores,
+        p.destino_impresion,
+        p.facturacion_directa,
+        p.es_insumo,
+        p.es_servicio,
+        p.codigo_barra,
+        COALESCE(pp.precio_venta, 0) AS precio
+      FROM producto p
+      LEFT JOIN producto_precio pp
+        ON pp.producto_id = p.id
+        AND pp.activo = true
+      WHERE p.activo = true
+        AND (
+          p.nombre ILIKE $1
+          OR p.codigo_barra ILIKE $1
+        )
+      ORDER BY p.nombre ASC
+      LIMIT 80
+    `, [`%${q}%`]);
+
+    const rows = POS_SIN_COCINA
+      ? result.rows.map((r) => ({ ...r, destino_impresion: null }))
+      : result.rows;
+
+    res.json(rows);
+  } catch (error) {
+    console.error('ERROR BUSCAR GLOBAL POS', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 /* ================= POS - PRODUCTOS POR CATEGORIA ================= */
 router.get('/pos/:categoria_id', async (req, res) => {
   const categoria_id = Number(req.params.categoria_id);
@@ -360,7 +406,7 @@ router.get('/', async (req, res) => {
         $3 = ''
         OR LOWER(p.nombre) LIKE LOWER($4)
         OR CAST(p.id AS TEXT) = $3
-        OR COALESCE(p.codigo_barra, '') LIKE $4
+        OR COALESCE(p.codigo_barra, '') ILIKE $4
       )
       AND ($5::int IS NULL OR p.categoria_id = $5)
       AND ($6::text IS NULL OR COALESCE(p.destino_impresion, '') ILIKE $6)
@@ -369,7 +415,7 @@ router.get('/', async (req, res) => {
       ORDER BY
         CASE
           WHEN $3 <> '' AND CAST(p.id AS TEXT) = $3 THEN 0
-          WHEN $3 <> '' AND COALESCE(p.codigo_barra, '') = $3 THEN 1
+          WHEN $3 <> '' AND LOWER(COALESCE(p.codigo_barra, '')) = LOWER($3) THEN 1
           WHEN $3 <> '' AND LOWER(p.nombre) = LOWER($3) THEN 2
           ELSE 3
         END,
@@ -749,6 +795,61 @@ router.put('/venta-medio/orden', authMiddleware, async (req, res) => {
     res.status(500).json({ error: "No se pudo guardar orden de productos" });
   } finally {
     client.release();
+  }
+});
+
+/* ================= AJUSTAR STOCK ================= */
+// Roles autorizados para ajustar stock manualmente
+const ROLES_AJUSTE_STOCK = new Set(["SUPER", "SUP", "SIS", "SISTEMA", "SUPER_SISTEMA"]);
+
+router.post('/:id/ajustar-stock', authMiddleware, async (req, res) => {
+  // Verificar que el usuario tiene rol permitido
+  const rolUsuario = String(req.usuario?.rol || "").trim().toUpperCase();
+  if (!ROLES_AJUSTE_STOCK.has(rolUsuario)) {
+    return res.status(403).json({ error: "No tiene permiso para ajustar stock" });
+  }
+
+  const id = Number(req.params.id);
+  if (!id) return res.status(400).json({ error: "ID inválido" });
+
+  const stockNuevo = Number(req.body.stock_nuevo);
+  if (!Number.isFinite(stockNuevo) || stockNuevo < 0) {
+    return res.status(400).json({ error: "Cantidad inválida" });
+  }
+
+  const motivo = String(req.body.motivo || "Ajuste manual").trim() || "Ajuste manual";
+
+  try {
+    const check = await pool.query(
+      `SELECT id, nombre, stock FROM producto WHERE id = $1 AND activo = true`,
+      [id]
+    );
+    if (check.rows.length === 0) {
+      return res.status(404).json({ error: "Producto no encontrado" });
+    }
+
+    const stockAnterior = Number(check.rows[0].stock || 0);
+
+    const result = await pool.query(
+      `UPDATE producto SET stock = $1 WHERE id = $2 RETURNING id, nombre, stock`,
+      [stockNuevo, id]
+    );
+
+    console.log(
+      `AJUSTE STOCK: producto=${id} (${check.rows[0].nombre}) | anterior=${stockAnterior} | nuevo=${stockNuevo} | motivo="${motivo}"`
+    );
+
+    res.json({
+      ok: true,
+      producto_id: id,
+      stock_anterior: stockAnterior,
+      stock_nuevo: stockNuevo,
+      motivo,
+      producto: result.rows[0]
+    });
+  } catch (error) {
+    console.error("ERROR AJUSTAR STOCK:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 

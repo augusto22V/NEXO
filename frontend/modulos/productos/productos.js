@@ -36,7 +36,36 @@ const filtroEsInsumoInput = document.getElementById("filtroEsInsumo");
 const btnGuardar = document.getElementById("btnGuardar");
 const btnEliminar = document.getElementById("btnEliminar");
 const btnCancelar = document.getElementById("btnCancelar");
+const btnAjustarStock = document.getElementById("btnAjustarStock");
 const CATEGORIA_STORAGE_KEY = "categoriaSeleccionada";
+
+// Roles que pueden ajustar stock manualmente
+// Para agregar ADMIN: añadí "ADMIN" y "ADM" a este Set
+const ROLES_AJUSTE_STOCK = new Set(["SUPER", "SUP", "SIS", "SISTEMA", "SUPER_SISTEMA"]);
+
+function rolPuedeAjustarStock() {
+  try {
+    // Intenta leer de múltiples fuentes
+    const raw = localStorage.getItem("usuario")
+      || localStorage.getItem("softsys_usuario")
+      || sessionStorage.getItem("usuario");
+    if (!raw) return false;
+    const user = JSON.parse(raw);
+    const rol = String(user?.rol || "").trim().toUpperCase();
+    return ROLES_AJUSTE_STOCK.has(rol);
+  } catch {
+    return false;
+  }
+}
+
+function aplicarVisibilidadBtnStock() {
+  if (!btnAjustarStock) return;
+  if (rolPuedeAjustarStock()) {
+    btnAjustarStock.style.display = "";
+  } else {
+    btnAjustarStock.style.display = "none";
+  }
+}
 const urlParamsProductos = new URLSearchParams(window.location.search);
 let page = 1;
 let limit = 30;
@@ -50,6 +79,7 @@ let categoriasMap = {};
 let sortField = "id";
 let sortDir = "desc";
 let estadoOriginal = null;
+let _stockActual = 0;
 
 
 
@@ -132,6 +162,15 @@ function textoVentaProducto(producto) {
   return textoMoneda(monedaId, precio);
 }
 
+function formatearStock(valor) {
+  const n = Number(valor ?? 0);
+  if (!Number.isFinite(n)) return "0";
+  return n.toLocaleString("es-PY", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 3
+  });
+}
+
 function toBoolUi(value) {
   if (typeof value === "boolean") return value;
   if (typeof value === "number") return value === 1;
@@ -151,6 +190,7 @@ function estadoInicial() {
   btnGuardar.disabled = true;
   btnEliminar.disabled = true;
   btnCancelar.disabled = true;
+  if (btnAjustarStock) btnAjustarStock.disabled = true;
 
   nombreInput.disabled = true;
   descripcionInput.disabled = true;
@@ -265,7 +305,7 @@ async function cargarProductos() {
         <span>${p.nombre ?? ""}</span>
         <span>${textoCostoProducto(p)}</span>
         <span>${textoVentaProducto(p)}</span>
-        <span>${p.stock ?? 0}</span>
+        <span>${formatearStock(p.stock)}</span>
         <span>${p.destino_impresion ?? "-"}</span>
         <span>${categoriasMap[String(p.categoria_id)] ?? "-"}</span>
         <span>${p.es_insumo ? "SI" : "NO"}</span>
@@ -475,6 +515,7 @@ async function seleccionarProducto(id) {
   }
   productoSeleccionado = id;
   window.productoSeleccionado = id;
+  _stockActual = Number(p.stock || 0);
   imagenInput.value = "";
   codigoInput.value = p.id;
   nombreInput.value = p.nombre;
@@ -572,6 +613,7 @@ function habilitarCampos() {
   destinoInput.disabled = false;
   imagenInput.disabled = false;
   btnGuardar.disabled = false;
+  if (btnAjustarStock && rolPuedeAjustarStock()) btnAjustarStock.disabled = false;
   facturacionDirectaInput.disabled = false;
   mostrarVentaMedioInput.disabled = false;
   mostrarMenuDigitalInput.disabled = false;
@@ -1149,11 +1191,13 @@ function hayModalAbierto() {
   const modalOverlay = document.getElementById("modalOverlay");      // modal nuevo (si existe)
   const modalEliminar = document.getElementById("modalEliminar");
   const modalAdvertencia = document.getElementById("modalAdvertencia");
+  const modalAjustarStock = document.getElementById("modalAjustarStock");
 
   return (
     (modalOverlay && !modalOverlay.classList.contains("hidden")) ||
     (modalEliminar && !modalEliminar.classList.contains("hidden")) ||
-    (modalAdvertencia && !modalAdvertencia.classList.contains("hidden"))
+    (modalAdvertencia && !modalAdvertencia.classList.contains("hidden")) ||
+    (modalAjustarStock && !modalAjustarStock.classList.contains("hidden"))
   );
 }
 
@@ -1209,12 +1253,94 @@ function registrarAtajosProducto() {
   document.addEventListener("keydown", window._productoHotkeysHandler);
 }
 
+/* ===== AJUSTAR STOCK ===== */
+function abrirModalAjustarStock() {
+  if (!productoSeleccionado) return;
+
+  const nombre = nombreInput.value.trim() || `Producto #${productoSeleccionado}`;
+  document.getElementById("ajusteNombreProducto").textContent = nombre;
+  document.getElementById("ajusteStockActual").value = formatearStock(_stockActual);
+  document.getElementById("ajusteStockNuevo").value = "";
+  document.getElementById("ajusteMotivo").value = "";
+
+  document.getElementById("modalAjustarStock").classList.remove("hidden");
+  setTimeout(() => document.getElementById("ajusteStockNuevo").focus(), 60);
+}
+
+function cerrarModalAjustarStock() {
+  document.getElementById("modalAjustarStock").classList.add("hidden");
+}
+
+async function confirmarAjusteStock() {
+  const rawNuevo = document.getElementById("ajusteStockNuevo").value;
+  const stockNuevo = Number(rawNuevo);
+  const motivo = document.getElementById("ajusteMotivo").value.trim() || "Ajuste manual";
+
+  if (rawNuevo === "" || !Number.isFinite(stockNuevo) || stockNuevo < 0) {
+    mostrarAdvertencia("Ingrese una cantidad válida (mayor o igual a 0).");
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API}/${productoSeleccionado}/ajustar-stock`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ stock_nuevo: stockNuevo, motivo })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      mostrarAdvertencia(err.error || "Error al ajustar el stock.");
+      return;
+    }
+
+    const data = await res.json();
+    _stockActual = data.stock_nuevo;
+
+    cerrarModalAjustarStock();
+
+    // Recargar producto y lista para reflejar el nuevo stock
+    await seleccionarProducto(productoSeleccionado);
+    await cargarProductos();
+
+  } catch (err) {
+    console.error("Error ajustando stock:", err);
+    mostrarAdvertencia("Error de conexión: " + (err.message || err));
+  }
+}
+
+// Cerrar modal ajuste con Escape
+document.addEventListener("keydown", function (e) {
+  const modal = document.getElementById("modalAjustarStock");
+  if (!modal || modal.classList.contains("hidden")) return;
+  if (e.key === "Escape") {
+    e.preventDefault();
+    cerrarModalAjustarStock();
+  }
+  if (e.key === "Enter") {
+    const activo = document.activeElement;
+    // Enter en el campo nueva cantidad o motivo confirma
+    if (
+      activo === document.getElementById("ajusteStockNuevo") ||
+      activo === document.getElementById("ajusteMotivo")
+    ) {
+      e.preventDefault();
+      confirmarAjusteStock();
+    }
+  }
+}, true);
+
 /* ===== INIT ===== */
 document.addEventListener("DOMContentLoaded", async () => {
 
   await cargarCategorias();
   await cargarProductos();
   await cargarDestinos();
+
+  // Mostrar botón Ajustar Stock solo para roles autorizados.
+  // Se verifica 2 veces: ahora (caché) y a los 1200ms (tras seguridad.js async).
+  aplicarVisibilidadBtnStock();
+  setTimeout(aplicarVisibilidadBtnStock, 1200);
 
   estadoInicial();
 

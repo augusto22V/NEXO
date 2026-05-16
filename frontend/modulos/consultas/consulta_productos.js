@@ -185,7 +185,7 @@ function isActivo(row) {
 
 function formatStock(value) {
   const n = Number(value || 0);
-  if (Number.isFinite(n)) return n.toLocaleString("es-PY", { maximumFractionDigits: 3 });
+  if (Number.isFinite(n)) return n.toLocaleString("es-PY", { minimumFractionDigits: 0, maximumFractionDigits: 3 });
   return String(value ?? "0");
 }
 
@@ -222,21 +222,31 @@ function devolverProductoSeleccionadoCompra(row) {
   const payload = mapProductoSeleccionCompra(row);
   if (!payload.id) return;
 
+  // Guardar en localStorage como respaldo (lo consume compra al recibir foco)
   localStorage.setItem(COMPRA_PRODUCTO_STORAGE_KEY, JSON.stringify(payload));
 
   if (window.opener && !window.opener.closed) {
+    // Llamar directo a la función del opener (más confiable que localStorage)
     try {
       if (typeof window.opener.recibirProducto === "function") {
         window.opener.recibirProducto(payload);
       }
       window.opener.focus();
-    } catch {
-      // noop
+    } catch (e) {
+      console.error("Error transfiriendo producto al compra:", e);
     }
+
     window.close();
+
+    // Fallback: si window.close() no cerró la ventana (bloqueado por Chrome),
+    // redirigir la pestaña/popup para que el usuario vuelva a compra.
+    setTimeout(() => {
+      try { window.location.href = "/modulos/compra/compra.html"; } catch { /* noop */ }
+    }, 400);
     return;
   }
 
+  // Sin opener: navegar directamente (el init de compra leerá el localStorage)
   window.location.href = "/modulos/compra/compra.html";
 }
 
