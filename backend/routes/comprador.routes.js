@@ -3,6 +3,19 @@ const router = express.Router();
 const db = require("../db");
 
 /* =========================
+   NEXT ID
+========================= */
+router.get("/next-id", async (req, res) => {
+  try {
+    const r = await db.query(`SELECT COALESCE(MAX(id),0) + 1 AS next_id FROM comprador`);
+    res.json({ id: Number(r.rows[0].next_id) });
+  } catch (err) {
+    console.error("ERROR NEXT-ID COMPRADOR:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* =========================
    CREAR COMPRADOR
 ========================= */
 router.post("/", async (req, res) => {

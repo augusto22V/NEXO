@@ -295,20 +295,30 @@ async function guardar() {
 
   try {
 
+    let compradorGuardado;
+
     if (!compradorId.value) {
       // NUEVO
-      await fetch(API, {
+      const res = await fetch(API, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
+      compradorGuardado = await res.json();
     } else {
       // EDITAR
-      await fetch(`${API}/${compradorId.value}`, {
+      const res = await fetch(`${API}/${compradorId.value}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
+      compradorGuardado = await res.json();
+    }
+
+    // En modo selección: seleccionar automáticamente y volver a la compra
+    if (isSelectionMode && compradorGuardado?.id) {
+      seleccionarCompradorDirecto(compradorGuardado);
+      return;
     }
 
     await cargar();
@@ -354,7 +364,7 @@ function eliminar() {
   });
 }
 
-// FILTRO 
+// FILTRO
 function filtrar() {
   const t = buscar.value.toLowerCase().trim();
 
@@ -366,6 +376,22 @@ function filtrar() {
     })
   );
 }
+
+// Enter en el buscador: selecciona el primer resultado
+buscar.addEventListener("keydown", e => {
+  if (e.key !== "Enter") return;
+  e.preventDefault();
+
+  // Si hay un comprador ya seleccionado, confirmar
+  if (compradorSeleccionadoTemp) {
+    seleccionarCompradorDirecto(compradorSeleccionadoTemp);
+    return;
+  }
+
+  // Seleccionar el primer row visible
+  const primera = tablaCompradores.querySelector(".tabla-row");
+  if (primera) primera.click();
+});
 
 // ===== VOLVER SEGURO =====
 function volverSeguro() {
@@ -393,11 +419,51 @@ function volverSeguro() {
 }
 
 // ===== MODAL ADVERTENCIA =====
+let _warnListener = null;
+
 function mostrarAdvertencia(texto) {
-  baseModalOpenInfo({
-    titulo: "Atención",
-    mensaje: texto
-  });
+  const modal = document.getElementById("modalAdvertencia");
+  const txt   = document.getElementById("modalAdvertenciaTexto");
+  const btn   = modal?.querySelector(".btn-aceptar");
+
+  if (!modal || !txt) { alert(texto); return; }
+
+  txt.textContent = texto;
+  modal.classList.remove("hidden");
+  setTimeout(() => btn?.focus(), 30);
+
+  if (_warnListener) document.removeEventListener("keydown", _warnListener);
+  _warnListener = function (e) {
+    if (e.key === "Enter" || e.key === "Escape") {
+      e.preventDefault();
+      e.stopPropagation();
+      modal.classList.add("hidden");
+      document.removeEventListener("keydown", _warnListener);
+      _warnListener = null;
+      codigoComprador.focus();
+    }
+  };
+  document.addEventListener("keydown", _warnListener);
+
+  if (btn) btn.onclick = () => {
+    modal.classList.add("hidden");
+    if (_warnListener) {
+      document.removeEventListener("keydown", _warnListener);
+      _warnListener = null;
+    }
+    codigoComprador.focus();
+  };
+}
+
+// ===== PRÓXIMO ID =====
+async function obtenerProximoId() {
+  try {
+    const res = await fetch(API + "/next-id");
+    const data = await res.json();
+    return data.id;
+  } catch {
+    return "";
+  }
 }
 
 // ===== ATAJOS =====
@@ -407,21 +473,33 @@ document.addEventListener("keydown", e => {
     e.preventDefault();
     nuevo();
   }
-if (e.key === "F3") {
-  e.preventDefault();
-  if (!btnGuardar.disabled) guardar();
-}
+
+  if (e.key === "F3") {
+    e.preventDefault();
+    if (!btnGuardar.disabled) guardar();
+  }
 
   if (e.key === "F4") {
-  e.preventDefault();
-  if (!btnCancelar.disabled) cancelar();
- }
+    e.preventDefault();
+    if (!btnCancelar.disabled) cancelar();
+  }
 
   if (e.key === "Delete") {
     e.preventDefault();
     if (!btnEliminar.disabled) eliminar();
   }
 
+  // Enter global (solo cuando el foco NO está en input/textarea/button)
+  if (e.key === "Enter" && isSelectionMode) {
+    const tag = document.activeElement?.tagName;
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "BUTTON") return;
+    e.preventDefault();
+    if (compradorSeleccionadoTemp) {
+      seleccionarCompradorDirecto(compradorSeleccionadoTemp);
+    } else {
+      nuevo();
+    }
+  }
 
 });
 
@@ -475,9 +553,15 @@ window.onload = () => {
 
   cargar();
 
-  baseModalEnableExitProtection({
-    hayCambios: hayCambiosSinGuardar
-  });
+  // En modo selección (popup) no necesita protección de salida
+  if (!isSelectionMode) {
+    baseModalEnableExitProtection({
+      hayCambios: hayCambiosSinGuardar
+    });
+  }
+
+  // Re-asignar volverSeguro DESPUÉS de baseModal para que no lo sobreescriba
+  window.volverSeguro = volverSeguro;
 
   setTimeout(() => {
     codigoComprador.focus();

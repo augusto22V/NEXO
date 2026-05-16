@@ -587,11 +587,13 @@ telefonoProveedor.addEventListener("input", () => {
   telefonoProveedor.value = telefonoProveedor.value.replace(/[^0-9]/g, "");
 });
 
-rucProveedor.addEventListener("input", () => {
+rucProveedor.addEventListener(“input”, () => {
+  rucProveedor.value = rucProveedor.value.replace(/[^0-9-]/g, “”);
+});
 
-  rucProveedor.addEventListener("keydown", async (e) => {
+rucProveedor.addEventListener(“keydown”, async (e) => {
 
-  if (e.key !== "Enter") return;
+  if (e.key !== “Enter”) return;
 
   const valor = rucProveedor.value.trim();
 
@@ -604,7 +606,7 @@ rucProveedor.addEventListener("input", () => {
 
     if (data) {
 
-      // ðŸ”¥ reemplaza con DV correcto
+      // reemplaza con DV correcto
       rucProveedor.value = data.ruc;
 
       razonProveedor.value = data.razon_social || '';
@@ -614,20 +616,17 @@ rucProveedor.addEventListener("input", () => {
 
     } else {
 
-      mostrarAdvertencia("RUC no encontrado", razonProveedor);
+      mostrarAdvertencia(“RUC no encontrado”, razonProveedor);
 
     }
 
   } catch (err) {
 
     console.error(err);
-    mostrarAdvertencia("Error consultando RUC");
+    mostrarAdvertencia(“Error consultando RUC”);
 
   }
 
-});
-
-  rucProveedor.value = rucProveedor.value.replace(/[^0-9-]/g, "");
 });
 
 
