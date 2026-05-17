@@ -1682,8 +1682,17 @@ router.post("/reanudar/:id", requirePermisoVentaRapida("venta_rapida_ver"), asyn
     if (estado === "EFECTIVADO") throw new Error("No se puede reanudar una venta cobrada");
     if (estado === "CANCELADO") throw new Error("No se puede reanudar una venta cancelada");
 
-    // Verificar stock disponible y re-descontar al reanudar.
-    // (El stock fue devuelto cuando se puso EN_ESPERA, ahora se vuelve a tomar.)
+    // Detectar si el stock fue devuelto cuando se puso en espera.
+    // Las ventas puestas en espera ANTES del fix no tienen movimiento VENTA_EN_ESPERA
+    // y su stock ya estaba descontado → no hay que re-descontarlo al reanudar.
+    const movEspera = await client.query(
+      `SELECT COUNT(*) AS cnt
+       FROM stock_movimiento
+       WHERE referencia_id = $1 AND referencia_tipo = 'VENTA_EN_ESPERA'`,
+      [id]
+    );
+    const stockFueDevuelto = Number(movEspera.rows[0].cnt) > 0;
+
     const detalleRes = await client.query(
       `SELECT vd.producto_id, vd.cantidad, p.stock, p.no_control_stock, p.nombre
        FROM venta_detalle vd
@@ -1692,31 +1701,35 @@ router.post("/reanudar/:id", requirePermisoVentaRapida("venta_rapida_ver"), asyn
        FOR UPDATE OF p`,
       [id]
     );
-    for (const item of detalleRes.rows) {
-      if (!item.no_control_stock && Number(item.stock) < Number(item.cantidad)) {
-        throw new Error(
-          `Stock insuficiente para "${item.nombre}": disponible ${Number(item.stock)}, requerido ${Number(item.cantidad)}`
-        );
-      }
-    }
 
-    // Re-descontar stock al reanudar
-    const empresaIdReanudar = getEmpresaIdFromReq(req);
-    for (const item of detalleRes.rows) {
-      if (!item.no_control_stock) {
-        await client.query(
-          `UPDATE producto SET stock = stock - $1 WHERE id = $2`,
-          [item.cantidad, item.producto_id]
-        );
-        await registrarStockMovimientoVenta(client, {
-          productoId: item.producto_id,
-          empresaId: empresaIdReanudar,
-          tipo: "SALIDA",
-          cantidad: item.cantidad,
-          costo: 0,
-          referenciaId: id,
-          referenciaTipo: "VENTA"
-        });
+    // Solo verificar y re-descontar si el stock fue devuelto al pausar
+    // (comportamiento nuevo). Ventas antiguas ya tienen el stock descontado.
+    if (stockFueDevuelto) {
+      for (const item of detalleRes.rows) {
+        if (!item.no_control_stock && Number(item.stock) < Number(item.cantidad)) {
+          throw new Error(
+            `Stock insuficiente para "${item.nombre}": disponible ${Number(item.stock)}, requerido ${Number(item.cantidad)}`
+          );
+        }
+      }
+
+      const empresaIdReanudar = getEmpresaIdFromReq(req);
+      for (const item of detalleRes.rows) {
+        if (!item.no_control_stock) {
+          await client.query(
+            `UPDATE producto SET stock = stock - $1 WHERE id = $2`,
+            [item.cantidad, item.producto_id]
+          );
+          await registrarStockMovimientoVenta(client, {
+            productoId: item.producto_id,
+            empresaId: empresaIdReanudar,
+            tipo: "SALIDA",
+            cantidad: item.cantidad,
+            costo: 0,
+            referenciaId: id,
+            referenciaTipo: "VENTA"
+          });
+        }
       }
     }
 
