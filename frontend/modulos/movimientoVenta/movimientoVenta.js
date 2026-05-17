@@ -672,7 +672,10 @@ async function anularSeleccionados() {
     if (!continuar) return;
   }
 
-  if (!confirm(`Anular ${validas.length} ventas?`)) return;
+  if (!confirm(`¿Anular ${validas.length} venta(s)? Se devolverá el stock correspondiente.`)) return;
+
+  let ok = 0;
+  const fallidas = [];
 
   for (const venta of validas) {
     try {
@@ -680,15 +683,26 @@ async function anularSeleccionados() {
         method: "POST"
       });
 
-      if (!res.ok) {
-        console.log("Error anulando:", venta.id);
+      if (res.ok) {
+        ok++;
+      } else {
+        const body = await res.json().catch(() => ({}));
+        fallidas.push(`N° ${venta.numero || venta.id}: ${body.error || res.status}`);
+        console.warn("[ANULAR] Falló venta", venta.id, body);
       }
     } catch (err) {
-      console.log("Error conexion:", err);
+      fallidas.push(`N° ${venta.numero || venta.id}: error de conexión`);
+      console.error("[ANULAR] Error conexión:", err);
     }
   }
 
-  alert("Proceso de anulacion finalizado");
+  if (fallidas.length === 0) {
+    alert(`✅ ${ok} venta(s) anulada(s) correctamente. El stock fue devuelto.`);
+  } else {
+    const detalle = fallidas.join("\n");
+    alert(`✅ ${ok} anulada(s) correctamente.\n❌ ${fallidas.length} no se pudo(eron) anular:\n${detalle}`);
+  }
+
   buscarMovimientos();
 }
 
