@@ -1627,6 +1627,34 @@ router.post("/en-espera/:id", requirePermisoVentaRapida("venta_rapida_ver"), asy
       [id, usuarioId, prioridad, notaEspera]
     );
 
+    // Devolver el stock mientras la venta está pausada.
+    // Al reanudar se vuelve a descontar, garantizando disponibilidad real.
+    const detalleEspera = await client.query(
+      `SELECT vd.producto_id, vd.cantidad, p.no_control_stock
+       FROM venta_detalle vd
+       JOIN producto p ON p.id = vd.producto_id
+       WHERE vd.venta_id = $1`,
+      [id]
+    );
+    const empresaIdEspera = getEmpresaIdFromReq(req);
+    for (const item of detalleEspera.rows) {
+      if (!item.no_control_stock) {
+        await client.query(
+          `UPDATE producto SET stock = stock + $1 WHERE id = $2`,
+          [item.cantidad, item.producto_id]
+        );
+        await registrarStockMovimientoVenta(client, {
+          productoId: item.producto_id,
+          empresaId: empresaIdEspera,
+          tipo: "ENTRADA",
+          cantidad: item.cantidad,
+          costo: 0,
+          referenciaId: id,
+          referenciaTipo: "VENTA_EN_ESPERA"
+        });
+      }
+    }
+
     await client.query("COMMIT");
     res.json({ ok: true, id, estado: "EN_ESPERA" });
   } catch (err) {
@@ -1654,7 +1682,8 @@ router.post("/reanudar/:id", requirePermisoVentaRapida("venta_rapida_ver"), asyn
     if (estado === "EFECTIVADO") throw new Error("No se puede reanudar una venta cobrada");
     if (estado === "CANCELADO") throw new Error("No se puede reanudar una venta cancelada");
 
-    // Verificar stock disponible antes de reanudar (FOR UPDATE OF p previene race conditions)
+    // Verificar stock disponible y re-descontar al reanudar.
+    // (El stock fue devuelto cuando se puso EN_ESPERA, ahora se vuelve a tomar.)
     const detalleRes = await client.query(
       `SELECT vd.producto_id, vd.cantidad, p.stock, p.no_control_stock, p.nombre
        FROM venta_detalle vd
@@ -1665,7 +1694,29 @@ router.post("/reanudar/:id", requirePermisoVentaRapida("venta_rapida_ver"), asyn
     );
     for (const item of detalleRes.rows) {
       if (!item.no_control_stock && Number(item.stock) < Number(item.cantidad)) {
-        throw new Error(`Stock insuficiente para "${item.nombre}": disponible ${item.stock}, requerido ${item.cantidad}`);
+        throw new Error(
+          `Stock insuficiente para "${item.nombre}": disponible ${Number(item.stock)}, requerido ${Number(item.cantidad)}`
+        );
+      }
+    }
+
+    // Re-descontar stock al reanudar
+    const empresaIdReanudar = getEmpresaIdFromReq(req);
+    for (const item of detalleRes.rows) {
+      if (!item.no_control_stock) {
+        await client.query(
+          `UPDATE producto SET stock = stock - $1 WHERE id = $2`,
+          [item.cantidad, item.producto_id]
+        );
+        await registrarStockMovimientoVenta(client, {
+          productoId: item.producto_id,
+          empresaId: empresaIdReanudar,
+          tipo: "SALIDA",
+          cantidad: item.cantidad,
+          costo: 0,
+          referenciaId: id,
+          referenciaTipo: "VENTA"
+        });
       }
     }
 
@@ -1772,9 +1823,11 @@ router.post("/cancelar/:id", requirePermisoVentaRapida("venta_rapida_cancelar"),
     }
 
 // =====================================
-// DEVOLVER STOCK SI YA ESTABA CONCLUIDO, EFECTIVADO, EN_ESPERA O PENDIENTE
+// DEVOLVER STOCK SI YA ESTABA CONCLUIDO, EFECTIVADO O PENDIENTE
+// NOTA: EN_ESPERA queda excluido — el stock ya fue devuelto al poner la venta
+//       en espera (endpoint /en-espera/:id). Incluirlo aquí causaría doble devolución.
 // =====================================
-if (estado === "CONCLUIDO" || estado === "EFECTIVADO" || estado === "EN_ESPERA" || estado === "PENDIENTE") {
+if (estado === "CONCLUIDO" || estado === "EFECTIVADO" || estado === "PENDIENTE") {
 
   const detalle = await client.query(`
     SELECT producto_id, cantidad, precio_gs, precio

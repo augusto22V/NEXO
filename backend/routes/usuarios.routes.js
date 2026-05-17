@@ -176,6 +176,7 @@ router.put("/:id", async (req, res) => {
       password,
       nombre,
       rol,
+      empresa_id,
       activo,
       modo_factura,
       modo_impresion,
@@ -185,14 +186,25 @@ router.put("/:id", async (req, res) => {
     // =========================
     // NORMALIZAR DATOS
     // =========================
-const usuarioUpper = usuario?.toUpperCase();
-const rolLower = String(rol || "").trim().toLowerCase();
-const mf = (modo_factura || "PREGUNTAR").toUpperCase();
-const mi = (modo_impresion || "AUTO").toUpperCase();
-const mc = modo_confirmacion ?? false;
+    const usuarioUpper = usuario?.toUpperCase();
+    const rolLower = String(rol || "").trim().toLowerCase();
+    const mf = (modo_factura || "PREGUNTAR").toUpperCase();
+    const mi = (modo_impresion || "AUTO").toUpperCase();
+    const mc = modo_confirmacion ?? false;
+    const empresaIdFinal = Number(empresa_id) > 0 ? Number(empresa_id) : null;
 
     if (!ROLES_VALIDOS.has(rolLower)) {
       return res.status(400).json({ error: "Rol invalido" });
+    }
+
+    // Validar que la empresa exista (si se proporcionó)
+    if (empresaIdFinal) {
+      const empresaExiste = await pool.query(
+        `SELECT id FROM empresa WHERE id = $1`, [empresaIdFinal]
+      );
+      if (!empresaExiste.rowCount) {
+        return res.status(400).json({ error: `La empresa ${empresaIdFinal} no existe` });
+      }
     }
 
     // =========================
@@ -211,10 +223,11 @@ const mc = modo_confirmacion ?? false;
             password=$3,
             rol=$4,
             activo=$5,
-            modo_factura=$6,
-            modo_impresion=$7,
-            modo_confirmacion=$8
-        WHERE id=$9
+            empresa_id=$6,
+            modo_factura=$7,
+            modo_impresion=$8,
+            modo_confirmacion=$9
+        WHERE id=$10
       RETURNING id`,
       [
         usuarioUpper,
@@ -222,6 +235,7 @@ const mc = modo_confirmacion ?? false;
         hash,
         rolLower,
         activo,
+        empresaIdFinal,
         mf,
         mi,
         mc,
@@ -239,16 +253,18 @@ const mc = modo_confirmacion ?? false;
             nombre=$2,
             rol=$3,
             activo=$4,
-            modo_factura=$5,
-            modo_impresion=$6,
-            modo_confirmacion=$7
-        WHERE id=$8
+            empresa_id=$5,
+            modo_factura=$6,
+            modo_impresion=$7,
+            modo_confirmacion=$8
+        WHERE id=$9
       RETURNING id`,
       [
         usuarioUpper,
         nombre,
         rolLower,
         activo,
+        empresaIdFinal,
         mf,
         mi,
         mc,

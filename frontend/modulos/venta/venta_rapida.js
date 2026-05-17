@@ -13,6 +13,8 @@ let categorias = [];
 let productos = [];
 let productosFiltrados = [];
 let categoriaActual = null;
+let enBusquedaGlobal = false;
+let _debounceTimer = null;
 let itemEditando = null;
 let ventaBloqueada = false;
 let imprimiendoCocina = false;
@@ -678,6 +680,11 @@ function volverCategorias() {
   document.getElementById("productos").style.display = "none";
   document.getElementById("categorias").style.display = "grid";
   productosFiltrados = [];
+  enBusquedaGlobal = false;
+
+  // Limpiar buscador si venía de búsqueda global
+  const buscador = document.getElementById("busquedaRapidaPOS");
+  if (buscador) buscador.value = "";
 
   localStorage.removeItem("categoriaPOS");
   const btn = document.getElementById("btnNav");
@@ -966,20 +973,59 @@ function normalizarBusqueda(s) {
 
 function filtrarProductosRapido(valor) {
   const txt = normalizarBusqueda(valor);
+  const enVistaProductos = document.getElementById("productos").style.display === "grid";
+
+  // ── Sin texto ──────────────────────────────────────────────────────
   if (!txt) {
-    productosFiltrados = [];
+    if (enBusquedaGlobal) {
+      // Volver a categorías si venía de búsqueda global
+      enBusquedaGlobal = false;
+      volverCategorias();
+    } else {
+      productosFiltrados = [];
+      renderProductos();
+    }
+    return;
+  }
+
+  // ── Dentro de una categoría → filtro local ──────────────────────────
+  if (enVistaProductos && !enBusquedaGlobal) {
+    productosFiltrados = productos.filter((p) => {
+      const nombre = normalizarBusqueda(p?.nombre);
+      const codigo = String(p?.codigo_barra || "");
+      const id = String(p?.id || "");
+      return nombre.includes(txt) || codigo.includes(txt) || id === txt;
+    });
     renderProductos();
     return;
   }
 
-  productosFiltrados = productos.filter((p) => {
-    const nombre = normalizarBusqueda(p?.nombre);
-    const codigo = String(p?.codigo_barra || "");
-    const id = String(p?.id || "");
-    return nombre.includes(txt) || codigo.includes(txt) || id === txt;
-  });
+  // ── Búsqueda global (desde pantalla de categorías o ya en global) ───
+  clearTimeout(_debounceTimer);
+  _debounceTimer = setTimeout(() => buscarProductosGlobal(valor.trim()), 280);
+}
 
-  renderProductos();
+async function buscarProductosGlobal(q) {
+  if (!q) return;
+  enBusquedaGlobal = true;
+
+  // Mostrar grid de productos
+  document.getElementById("categorias").style.display = "none";
+  document.getElementById("productos").style.display = "grid";
+  document.getElementById("btnNav").innerText = "← Categoría";
+  categoriaActual = null;
+
+  try {
+    const res = await fetch(`/api/productos/pos/buscar?q=${encodeURIComponent(q)}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json().catch(() => []);
+    productos = Array.isArray(data) ? data : [];
+    productosFiltrados = [];
+    renderProductos();
+  } catch (err) {
+    console.error("Error búsqueda global:", err);
+    mostrarMensaje("Error buscando productos", "error");
+  }
 }
 
 window.ajustarCantidadEdit = function (delta) {
