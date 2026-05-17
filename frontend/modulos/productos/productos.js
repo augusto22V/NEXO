@@ -854,6 +854,10 @@ form.addEventListener("submit", async (e) => {
 
   nombreInput.value = nombreInput.value.toUpperCase();
   descripcionInput.value = descripcionInput.value.toUpperCase();
+
+  // Resetear paginación para que la lista se recargue desde el principio
+  page = 1;
+  fin = false;
   await cargarProductos();
   estadoInicial();
 
@@ -866,6 +870,8 @@ form.addEventListener("submit", async (e) => {
 function cancelarProducto() {
   estadoInicial();
   estadoOriginal = null;
+  page = 1;
+  fin = false;
   cargarProductos();
 }
 
