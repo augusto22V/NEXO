@@ -1448,13 +1448,18 @@ async function agregarProducto(prod, cantidadSolicitada = 1) {
       }
 
       if (!data?.item_id) {
-        throw new Error("Respuesta inválida");
+        throw new Error(“Respuesta inválida”);
       }
 
       nuevoItem.id = Number(data.item_id);
       nuevoItem.loading = false;
 
-      // ðŸ”¥ ACTIVAR MODO FACTURA
+      // ⚠️ ADVERTENCIA DE STOCK NEGATIVO — el ítem SI se agregó, solo se avisa
+      if (data.advertencia) {
+        mostrarMensaje(data.advertencia, “aviso”);
+      }
+
+      // 🔥 ACTIVAR MODO FACTURA
       if (data.requiere_factura) {
         ventaModoFactura = true;
       }

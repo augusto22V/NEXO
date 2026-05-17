@@ -511,14 +511,12 @@ router.post("/agregar-item", requirePermisoVentaRapida("venta_rapida_ver"), asyn
     }
 
     // =====================================
-    // CONTROL STOCK
+    // CONTROL STOCK — se permite vender en negativo con advertencia
     // =====================================
     const controlaStock = !prod.rows[0].no_control_stock;
-    const stockActual = prod.rows[0].stock;
-
-    if (controlaStock && stockActual < cantidadValue) {
-      throw new Error("Stock insuficiente");
-    }
+    const stockActual   = Number(prod.rows[0].stock ?? 0);
+    const nombreProd    = prod.rows[0].nombre || "Producto";
+    const stockInsuficiente = controlaStock && stockActual < cantidadValue;
 
     // =====================================
     // ACUMULACION — mismo producto suma cantidad
@@ -571,7 +569,10 @@ router.post("/agregar-item", requirePermisoVentaRapida("venta_rapida_ver"), asyn
           total: totalVenta,
           comision,
           item_id: item.id,
-          acumulado: true
+          acumulado: true,
+          ...(stockInsuficiente && {
+            advertencia: `Stock insuficiente para "${nombreProd}" (disponible: ${stockActual}). Vendiendo en negativo.`
+          })
         });
       }
     }
@@ -643,13 +644,18 @@ router.post("/agregar-item", requirePermisoVentaRapida("venta_rapida_ver"), asyn
 
     await client.query("COMMIT");
 
+    const advertenciaStock = stockInsuficiente
+      ? `Stock insuficiente para "${nombreProd}" (disponible: ${stockActual}). Vendiendo en negativo.`
+      : undefined;
+
     if (esFacturacionDirecta) {
       return res.json({
         ok: true,
         total: totalVenta,
         comision,
         item_id: itemId,
-        requiere_factura: true
+        requiere_factura: true,
+        ...(advertenciaStock && { advertencia: advertenciaStock })
       });
     }
 
@@ -662,7 +668,8 @@ router.post("/agregar-item", requirePermisoVentaRapida("venta_rapida_ver"), asyn
       precio_moneda_origen: conversion.monto_origen,
       precio_gs: conversion.monto_gs,
       precio_brl: conversion.monto_brl,
-      precio_usd: conversion.monto_usd
+      precio_usd: conversion.monto_usd,
+      ...(advertenciaStock && { advertencia: advertenciaStock })
     });
 
   } catch (err) {
@@ -754,12 +761,10 @@ router.post("/agregar-por-codigo", requirePermisoVentaRapida("venta_rapida_ver")
       return res.status(400).json({ error: "La venta no es editable" });
     }
 
-    // Control de stock
-    const controlaStock = !prod.no_control_stock;
-    if (controlaStock && Number(prod.stock) < cantidadValue) {
-      await client.query("ROLLBACK");
-      return res.status(400).json({ error: "Stock insuficiente" });
-    }
+    // Control de stock — se permite negativo con advertencia
+    const controlaStock     = !prod.no_control_stock;
+    const stockActualCod    = Number(prod.stock ?? 0);
+    const stockInsufCod     = controlaStock && stockActualCod < cantidadValue;
 
     const cotizacion = await getCotizacionActiva(client);
     const monedaIdResuelto = resolveMonedaId(moneda_id, MONEDA_IDS.PYG);
@@ -818,7 +823,10 @@ router.post("/agregar-por-codigo", requirePermisoVentaRapida("venta_rapida_ver")
           item_id: item.id,
           producto_id: productoId,
           producto_nombre: prod.nombre,
-          acumulado: true
+          acumulado: true,
+          ...(stockInsufCod && {
+            advertencia: `Stock insuficiente para "${prod.nombre}" (disponible: ${stockActualCod}). Vendiendo en negativo.`
+          })
         });
       }
     }
@@ -868,7 +876,10 @@ router.post("/agregar-por-codigo", requirePermisoVentaRapida("venta_rapida_ver")
       item_id: itemId,
       producto_id: productoId,
       producto_nombre: prod.nombre,
-      acumulado: false
+      acumulado: false,
+      ...(stockInsufCod && {
+        advertencia: `Stock insuficiente para "${prod.nombre}" (disponible: ${stockActualCod}). Vendiendo en negativo.`
+      })
     });
 
   } catch (err) {
@@ -1891,6 +1902,10 @@ if (estado === "CONCLUIDO" || estado === "EFECTIVADO" || estado === "PENDIENTE")
        WHERE id = $1`,
       [id]
     );
+
+    // Eliminar el movimiento de caja vinculado (si la venta era EFECTIVADA)
+    // Esto garantiza que el arqueo refleje el monto real en caja tras la anulación.
+    await client.query(`DELETE FROM caja_movimiento WHERE venta_id = $1`, [id]);
 
     await clearMesaByVentaId(client, id, getMesaScopeFromReq(req));
 
