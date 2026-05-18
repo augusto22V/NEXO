@@ -115,7 +115,7 @@ function createWindow() {
     minWidth: 1024,
     minHeight: 600,
     icon: buildIcon(),
-    title: 'LibreriaSys',
+    title: 'ALPX Systems',
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
@@ -143,11 +143,11 @@ function createTray() {
     : nativeImage.createEmpty();
 
   tray = new Tray(iconImg);
-  tray.setToolTip('LibreriaSys — Sistema de gestión');
+  tray.setToolTip('ALPX Systems');
 
   const menu = Menu.buildFromTemplate([
     {
-      label: 'Abrir LibreriaSys',
+      label: 'Abrir ALPX Systems',
       click() {
         if (mainWindow) { mainWindow.show(); mainWindow.focus(); }
       },
@@ -204,7 +204,7 @@ app.whenReady().then(async () => {
       await waitForBackend(20000);
     } catch (err) {
       dialog.showErrorBox(
-        'Error al iniciar LibreriaSys',
+        'Error al iniciar ALPX Systems',
         `El servidor backend no pudo iniciarse.\n\n${err.message}\n\n` +
         `Verifique que:\n` +
         `  • Node.js está instalado (ejecute: node -v)\n` +
