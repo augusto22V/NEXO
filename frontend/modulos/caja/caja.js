@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   await cargarPermisos();
   await cargarCotizacion();
   await cargarVentaDesdeURL();
+  setClienteOcasional();   // siempre arranca con Ocasional por defecto
   actualizarHora();
   setInterval(actualizarHora, 1000);
 
@@ -353,12 +354,18 @@ async function buscarClientePorRuc(event) {
   }
 }
 
-function limpiarCliente() {
-  clienteActual = null;
+/* Establece el cliente ocasional (ID 1) como seleccionado por defecto */
+function setClienteOcasional() {
+  clienteActual = { id: 1, nombre: "Ocasional" };
   const rucEl    = document.getElementById("rucInput");
   const nombreEl = document.getElementById("clienteNombre");
   if (rucEl)    rucEl.value    = "";
-  if (nombreEl) nombreEl.value = "";
+  if (nombreEl) nombreEl.value = "Ocasional";
+}
+
+/* × → vuelve a Ocasional en vez de dejar vacío */
+function limpiarCliente() {
+  setClienteOcasional();
 }
 
 /* === EFECTIVIZAR === */

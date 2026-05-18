@@ -27,15 +27,15 @@
       <!-- RUC / CLIENTE -->
       <div class="cliente-row">
         <div class="cliente-field cliente-ruc">
-          <label>RUC</label>
-          <input type="text" id="rucInput" placeholder="RUC o Cédula"
+          <label>RUC <span style="font-size:0.75em;opacity:0.6">(solo factura)</span></label>
+          <input type="text" id="rucInput" placeholder="RUC o Cédula + Enter"
                  onkeydown="buscarClientePorRuc(event)">
         </div>
         <div class="cliente-field cliente-nombre">
           <label>Cliente</label>
-          <input type="text" id="clienteNombre" placeholder="Nombre del cliente" readonly>
+          <input type="text" id="clienteNombre" placeholder="Ocasional" readonly>
         </div>
-        <button class="btn-cliente-clear" onclick="limpiarCliente()" title="Limpiar">×</button>
+        <button class="btn-cliente-clear" onclick="limpiarCliente()" title="Volver a Ocasional">×</button>
       </div>
 
       <!-- ITEMS -->
