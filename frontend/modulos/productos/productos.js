@@ -1391,44 +1391,41 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 
-// ===== ORDENAMIENTO MULTI-COLUMNA =====
-const SORT_COLS = [
-  { el: document.getElementById("thId"),     campo: "id",     label: "ID"        },
-  { el: document.getElementById("thNombre"), campo: "nombre", label: "Nombre"    },
-  { el: document.getElementById("thPrecio"), campo: "precio", label: "Minorista" },
-  { el: document.getElementById("thStock"),  campo: "stock",  label: "Stock"     },
-];
+// ===== ORDENAMIENTO MULTI-COLUMNA (event delegation) =====
+const SORT_LABELS = { id: "ID", nombre: "Nombre", precio: "Minorista", stock: "Stock" };
 
 function actualizarHeadersSort() {
-  for (const col of SORT_COLS) {
-    if (!col.el) continue;
-    if (col.campo === sortField) {
-      col.el.textContent = `${col.label} ${sortDir === "asc" ? "▲" : "▼"}`;
-      col.el.classList.add("th-activo");
+  const header = document.getElementById("tablaHeader");
+  if (!header) return;
+  header.querySelectorAll("[data-sort]").forEach(span => {
+    const campo = span.dataset.sort;
+    const label = SORT_LABELS[campo] || campo;
+    if (campo === sortField) {
+      span.textContent = `${label} ${sortDir === "asc" ? "▲" : "▼"}`;
+      span.classList.add("th-activo");
     } else {
-      col.el.textContent = col.label;
-      col.el.classList.remove("th-activo");
+      span.textContent = label;
+      span.classList.remove("th-activo");
     }
-  }
-}
-
-for (const col of SORT_COLS) {
-  if (!col.el) continue;
-  col.el.addEventListener("click", () => {
-    if (sortField === col.campo) {
-      sortDir = sortDir === "asc" ? "desc" : "asc";
-    } else {
-      sortField = col.campo;
-      sortDir   = col.campo === "nombre" ? "asc" : "desc"; // nombre: A→Z por defecto
-    }
-    actualizarHeadersSort();
-    page = 1;
-    fin  = false;
-    cargarProductos();
   });
 }
 
-// Estado inicial
+document.getElementById("tablaHeader").addEventListener("click", (e) => {
+  const span = e.target.closest("[data-sort]");
+  if (!span) return;
+  const campo = span.dataset.sort;
+  if (sortField === campo) {
+    sortDir = sortDir === "asc" ? "desc" : "asc";
+  } else {
+    sortField = campo;
+    sortDir   = campo === "nombre" ? "asc" : "desc";
+  }
+  actualizarHeadersSort();
+  page = 1;
+  fin  = false;
+  cargarProductos();
+});
+
 actualizarHeadersSort();
 
 window.addEventListener("impresorasActualizadas", () => {
