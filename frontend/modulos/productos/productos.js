@@ -300,6 +300,10 @@ async function cargarProductos() {
       row.className = "tabla-row";
       row.dataset.id = p.id;
 
+      const imgCell = p.imagen
+        ? `<span><img class="img-thumb" src="${p.imagen}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><span class="img-thumb-vacia" style="display:none">📦</span></span>`
+        : `<span><span class="img-thumb-vacia">📦</span></span>`;
+
       row.innerHTML = `
         <span>${p.id ?? ""}</span>
         <span>${p.nombre ?? ""}</span>
@@ -309,6 +313,7 @@ async function cargarProductos() {
         <span>${p.destino_impresion ?? "-"}</span>
         <span>${categoriasMap[String(p.categoria_id)] ?? "-"}</span>
         <span>${p.es_insumo ? "SI" : "NO"}</span>
+        ${imgCell}
       `;
 
       row.onclick = () => seleccionarProducto(p.id);
