@@ -122,12 +122,32 @@ function createWindow() {
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
+      zoomFactor: 1.25,   // 125% — igual al zoom típico del navegador
     },
     show: false,
   });
 
   mainWindow.loadURL(LOGIN_URL);
-  mainWindow.once('ready-to-show', () => mainWindow.show());
+  mainWindow.once('ready-to-show', () => {
+    mainWindow.show();
+    // Aplicar zoom inicial (zoomFactor en webPreferences no siempre alcanza solo)
+    mainWindow.webContents.setZoomFactor(1.25);
+    // Habilitar zoom con pellizco / trackpad
+    mainWindow.webContents.setVisualZoomLevelLimits(1, 5);
+  });
+
+  // Atajos de zoom: Ctrl + / Ctrl - / Ctrl 0
+  mainWindow.webContents.on('before-input-event', (_e, input) => {
+    if (!input.control) return;
+    const current = mainWindow.webContents.getZoomFactor();
+    if (input.key === '+' || input.key === '=') {
+      mainWindow.webContents.setZoomFactor(Math.min(current + 0.1, 3.0));
+    } else if (input.key === '-') {
+      mainWindow.webContents.setZoomFactor(Math.max(current - 0.1, 0.5));
+    } else if (input.key === '0') {
+      mainWindow.webContents.setZoomFactor(1.25); // Ctrl+0 vuelve al 125%
+    }
+  });
 
   // Ocultar en lugar de cerrar (queda en tray)
   mainWindow.on('close', (e) => {
