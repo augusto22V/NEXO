@@ -264,12 +264,18 @@
 /* HEADER */
 .tabla-header {
   display: grid;
-  grid-template-columns: 70px 170px 130px 130px 80px 110px 180px 90px 70px;
-  background: #f0f0f0;
-  padding: 10px;
-  font-weight: bold;
+  grid-template-columns: 60px 1fr 110px 110px 75px 100px 160px 80px 74px;
+  background: #2d3748;
+  color: #fff;
+  padding: 10px 14px;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
   position: sticky;
   top: 0;
+  border-radius: 8px 8px 0 0;
+  gap: 0;
 }
 
 /* BODY */
@@ -280,25 +286,33 @@
   overflow-y: auto;
 }
 
-/* ROW */
+/* ROW — filas con separación clara */
 .tabla-row {
   display: grid;
-  grid-template-columns: 70px 170px 130px 130px 80px 110px 180px 90px 70px;
-  padding: 8px 10px;
-  border-top: 1px solid #eee;
+  grid-template-columns: 60px 1fr 110px 110px 75px 100px 160px 80px 74px;
+  padding: 10px 14px;
+  border-bottom: 1px solid #e2e8f0;
   font-size: 13px;
   cursor: pointer;
   align-items: center;
-  min-height: 72px;
+  min-height: 76px;
+  background: #fff;
+  transition: background 0.12s;
+}
+
+/* Filas alternadas para facilitar la lectura */
+.tabla-row:nth-child(even) {
+  background: #f8fafc;
 }
 
 .tabla-row:hover {
-  background: #f9f9f9;
+  background: #eef2ff;
 }
 
 .tabla-row.activo {
   background: #e3e7ff;
   border-left: 4px solid #7ED957;
+  padding-left: 10px;
 }
 
 /* Miniatura de imagen en la lista */
@@ -326,16 +340,16 @@
   margin: 2px 0;
 }
 
-/* Columna de sort activa */
+/* Columna de sort activa — sobre fondo oscuro del header */
 .th-orden {
   cursor: pointer;
   user-select: none;
 }
 .th-orden:hover {
-  color: #4a5568;
+  color: #cbd5e0;
 }
 .th-activo {
-  color: #2563eb !important;
+  color: #90cdf4 !important;
   font-weight: 700;
 }
 
