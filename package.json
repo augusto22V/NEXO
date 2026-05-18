@@ -1,6 +1,51 @@
 {
+  "name": "libreriasuys",
+  "productName": "LibreriaSys",
+  "version": "1.0.0",
+  "description": "Sistema de gestión para librería - ALPX",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win",
+    "pack": "electron-builder --win --dir"
+  },
   "dependencies": {
     "cookie-parser": "^1.4.7",
     "multer": "^2.0.2"
+  },
+  "devDependencies": {
+    "electron": "^36.9.5",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.alpx.libreriasuys",
+    "productName": "LibreriaSys",
+    "copyright": "ALPX",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "frontend/**/*",
+      "backend/**/*",
+      "!backend/node_modules/.cache/**",
+      "!**/node_modules/.bin/**",
+      "!**/*.md",
+      "!**/.git/**",
+      "!backend/uploads/**"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "frontend/recursos/img/icono.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "LibreriaSys",
+      "installerIcon": "frontend/recursos/img/icono.png",
+      "uninstallerIcon": "frontend/recursos/img/icono.png"
+    }
   }
 }
