@@ -369,6 +369,7 @@ router.get('/', async (req, res) => {
     const CAMPOS_ORDEN_VALIDOS = {
       id:     'p.id',
       nombre: 'p.nombre',
+      costo:  'COALESCE(pp.precio_compra, 0)',
       precio: 'COALESCE(pp.precio_venta, 0)',
       stock:  'p.stock'
     };

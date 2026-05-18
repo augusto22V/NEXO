@@ -1392,7 +1392,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
 // ===== ORDENAMIENTO MULTI-COLUMNA (event delegation) =====
-const SORT_LABELS = { id: "ID", nombre: "Nombre", precio: "Minorista", stock: "Stock" };
+const SORT_LABELS = { id: "ID", nombre: "Nombre", costo: "Costo Total", precio: "Minorista", stock: "Stock" };
 
 function actualizarHeadersSort() {
   const header = document.getElementById("tablaHeader");
