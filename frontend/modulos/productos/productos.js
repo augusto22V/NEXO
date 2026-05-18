@@ -268,6 +268,7 @@ async function cargarProductos() {
       limit: String(limit),
       buscar: texto,
       orden: sortDir,
+      campo: sortField,
       categoria_id: categoriaFiltro,
       destino: destinoFiltro,
       es_insumo: esInsumoFiltro,
@@ -1390,17 +1391,45 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 
-thId.addEventListener("click", () => {
+// ===== ORDENAMIENTO MULTI-COLUMNA =====
+const SORT_COLS = [
+  { el: document.getElementById("thId"),     campo: "id",     label: "ID"        },
+  { el: document.getElementById("thNombre"), campo: "nombre", label: "Nombre"    },
+  { el: document.getElementById("thPrecio"), campo: "precio", label: "Minorista" },
+  { el: document.getElementById("thStock"),  campo: "stock",  label: "Stock"     },
+];
 
-  sortDir = sortDir === "asc" ? "desc" : "asc";
+function actualizarHeadersSort() {
+  for (const col of SORT_COLS) {
+    if (!col.el) continue;
+    if (col.campo === sortField) {
+      col.el.textContent = `${col.label} ${sortDir === "asc" ? "▲" : "▼"}`;
+      col.el.classList.add("th-activo");
+    } else {
+      col.el.textContent = col.label;
+      col.el.classList.remove("th-activo");
+    }
+  }
+}
 
-  thId.textContent = sortDir === "asc" ? "ID â–²" : "ID â–¼";
+for (const col of SORT_COLS) {
+  if (!col.el) continue;
+  col.el.addEventListener("click", () => {
+    if (sortField === col.campo) {
+      sortDir = sortDir === "asc" ? "desc" : "asc";
+    } else {
+      sortField = col.campo;
+      sortDir   = col.campo === "nombre" ? "asc" : "desc"; // nombre: A→Z por defecto
+    }
+    actualizarHeadersSort();
+    page = 1;
+    fin  = false;
+    cargarProductos();
+  });
+}
 
-  page = 1;     
-  fin = false;  
-
-  cargarProductos();
-});
+// Estado inicial
+actualizarHeadersSort();
 
 window.addEventListener("impresorasActualizadas", () => {
   cargarDestinos();

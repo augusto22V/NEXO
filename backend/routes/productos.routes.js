@@ -364,8 +364,16 @@ router.get('/', async (req, res) => {
       ? monedaRaw
       : null;
 
-    // ORDEN DINAMICO
+    // ORDEN DINAMICO — campo y dirección
     const orden = req.query.orden === 'asc' ? 'ASC' : 'DESC';
+    const CAMPOS_ORDEN_VALIDOS = {
+      id:     'p.id',
+      nombre: 'p.nombre',
+      precio: 'COALESCE(pp.precio_venta, 0)',
+      stock:  'p.stock'
+    };
+    const campoRaw  = String(req.query.campo || 'id').toLowerCase();
+    const orderExpr = CAMPOS_ORDEN_VALIDOS[campoRaw] || 'p.id';
 
     const result = await pool.query(`
       SELECT
@@ -419,6 +427,7 @@ router.get('/', async (req, res) => {
           WHEN $3 <> '' AND LOWER(p.nombre) = LOWER($3) THEN 2
           ELSE 3
         END,
+        ${orderExpr} ${orden},
         p.id ${orden}
       LIMIT $1 OFFSET $2
     `, [limit, offset, busqueda, busquedaLike, categoriaId, destino, esInsumo, monedaId]);
