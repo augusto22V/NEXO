@@ -109,6 +109,9 @@ function buildIcon() {
 }
 
 function createWindow() {
+  // Quitar el menú nativo (File / Edit / View / Window / Help)
+  Menu.setApplicationMenu(null);
+
   mainWindow = new BrowserWindow({
     width: 1440,
     height: 900,
