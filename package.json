@@ -36,7 +36,7 @@
     ],
     "win": {
       "target": "nsis",
-      "icon": "frontend/recursos/img/icono.png"
+      "icon": "frontend/recursos/img/alpx-logo.png"
     },
     "nsis": {
       "oneClick": false,
@@ -44,8 +44,8 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "LibreriaSys",
-      "installerIcon": "frontend/recursos/img/icono.png",
-      "uninstallerIcon": "frontend/recursos/img/icono.png"
+      "installerIcon": "frontend/recursos/img/alpx-logo.png",
+      "uninstallerIcon": "frontend/recursos/img/alpx-logo.png"
     }
   }
 }

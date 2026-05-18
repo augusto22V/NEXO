@@ -22,7 +22,7 @@ const fs    = require('fs');
 const PORT        = 3001;
 const LOGIN_URL   = `http://localhost:${PORT}/login/login.html`;
 const BACKEND_DIR = path.join(__dirname, 'backend');
-const ICON_PATH   = path.join(__dirname, 'frontend', 'recursos', 'img', 'icono.png');
+const ICON_PATH   = path.join(__dirname, 'frontend', 'recursos', 'img', 'alpx-logo.png');
 
 // ─── Estado global ───────────────────────────────────────────────────────────
 
