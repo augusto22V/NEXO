@@ -631,7 +631,7 @@ function renderCategorias() {
           <div class="img-wrapper">
             ${cat.imagen
         ? `<img src="${cat.imagen}" onerror="this.onerror=null;this.src='/recursos/img/default.png'">`
-        : `<span style="font-size:40px;">ðŸ”</span>`}
+        : `<span style="font-size:40px;">ðŸ"</span>`}
           </div>
           <div class="nombre-categoria">${cat.nombre}</div>
         `;
@@ -1448,7 +1448,7 @@ async function agregarProducto(prod, cantidadSolicitada = 1) {
       }
 
       if (!data?.item_id) {
-        throw new Error(“Respuesta inválida”);
+        throw new Error("Respuesta inválida");
       }
 
       nuevoItem.id = Number(data.item_id);
@@ -1456,7 +1456,7 @@ async function agregarProducto(prod, cantidadSolicitada = 1) {
 
       // ⚠️ ADVERTENCIA DE STOCK NEGATIVO — el ítem SI se agregó, solo se avisa
       if (data.advertencia) {
-        mostrarMensaje(data.advertencia, “aviso”);
+        mostrarMensaje(data.advertencia, "aviso");
       }
 
       // 🔥 ACTIVAR MODO FACTURA
@@ -1530,7 +1530,7 @@ function renderPedido() {
           <div class="col-descripcion" onclick="editarItem(${index})">
             ${item.descripcion}
             ${(item.observacion || item.nota)
-        ? `<div class="observacion">ðŸ“ ${item.observacion || item.nota}</div>`
+        ? `<div class="observacion">ðŸ" ${item.observacion || item.nota}</div>`
         : ""}
           </div>
 
@@ -2086,7 +2086,7 @@ function vaciarPOS() {
   desbloquearVenta();
   actualizarVisibilidadTipoPedidoPOS();
 
-  // REACTIVAR BOTÃ“N EFECTIVIZAR
+  // REACTIVAR BOTÃ"N EFECTIVIZAR
   const btn = document.querySelector(".btn-efectivizar");
   if (btn) {
     const permitido = tienePermisoVentaRapida("venta_rapida_efectivizar");
@@ -2733,7 +2733,7 @@ async function confirmarFactura() {
     // =========================
   window.location.href = `/modulos/factura/factura_ticket.html?id=${data.id}`;
 
-    mostrarMensaje("âœ” Factura generada e impresa", "ok");
+    mostrarMensaje("✓ Factura generada e impresa", "ok");
 
     ventaBloqueada = true;
     bloquearVenta();
@@ -3419,7 +3419,7 @@ async function buscarPedidoPorNumero() {
     pedidoActual = {
       id: data.id,
       numero: data.numero,
-      fecha: data.fecha, // ðŸ”¥ CLAVE
+      fecha: data.fecha, // ðŸ"¥ CLAVE
       estado: data.estado,
       items: (data.items || []).map(d => ({
       id: Number(d.id) > 0 ? Number(d.id) : 0,
@@ -4329,7 +4329,7 @@ renderPedido(); //  FALTABA ESTO
   document.querySelectorAll(".modal").forEach(modal => {
     modal.addEventListener("click", function (e) {
 
-      // ðŸ”’ NO cerrar si es modal bloqueado
+      // ðŸ"’ NO cerrar si es modal bloqueado
       if (modal.classList.contains("no-close")) return;
 
       // cerrar solo si toca fondo
