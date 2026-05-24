@@ -331,6 +331,30 @@ function seleccionar(p) {
   formDirty = false;
 }
 
+function _enviarProveedorYCerrar(proveedorSeleccionado) {
+  const json = JSON.stringify(proveedorSeleccionado);
+  function cerrar() { try { window.close(); } catch (_) {} }
+
+  if (window.__electronAPI) {
+    // Electron: IPC garantizado — cierra solo después de que mainWindow recibe el valor
+    window.__electronAPI.setStorage("softsysProveedorSeleccionado", json)
+      .then(cerrar).catch(cerrar);
+    return;
+  }
+
+  // Browser normal: localStorage + opener directo
+  localStorage.setItem("softsysProveedorSeleccionado", json);
+  if (window.opener && !window.opener.closed) {
+    try {
+      if (typeof window.opener.recibirProveedor === "function") {
+        window.opener.recibirProveedor(proveedorSeleccionado);
+      }
+      window.opener.focus();
+    } catch { /* localStorage ya escrito */ }
+  }
+  cerrar();
+}
+
 function seleccionarProveedorDirecto(p) {
   const proveedorSeleccionado = {
     id: p.id,
@@ -352,23 +376,7 @@ function seleccionarProveedorDirecto(p) {
     return;
   }
 
-  // 1. Siempre escribir en localStorage (el timer del padre lo consume)
-  localStorage.setItem("softsysProveedorSeleccionado", JSON.stringify(proveedorSeleccionado));
-
-  // 2. Intentar llamada directa al opener si está disponible
-  if (window.opener && !window.opener.closed) {
-    try {
-      if (typeof window.opener.recibirProveedor === "function") {
-        window.opener.recibirProveedor(proveedorSeleccionado);
-      }
-      window.opener.focus();
-    } catch {
-      // localStorage ya está escrito, el timer lo leerá igual
-    }
-  }
-
-  // 3. Cerrar — NO navegar
-  try { window.close(); } catch (_) {}
+  _enviarProveedorYCerrar(proveedorSeleccionado);
 }
 
 function seleccionarProveedor() {
@@ -397,23 +405,7 @@ function seleccionarProveedor() {
     return;
   }
 
-  // 1. Siempre escribir en localStorage
-  localStorage.setItem("softsysProveedorSeleccionado", JSON.stringify(proveedorSeleccionado));
-
-  // 2. Intentar llamada directa al opener
-  if (window.opener && !window.opener.closed) {
-    try {
-      if (typeof window.opener.recibirProveedor === "function") {
-        window.opener.recibirProveedor(proveedorSeleccionado);
-      }
-      window.opener.focus();
-    } catch {
-      // localStorage ya está escrito
-    }
-  }
-
-  // 3. Cerrar — NO navegar
-  try { window.close(); } catch (_) {}
+  _enviarProveedorYCerrar(proveedorSeleccionado);
 }
 function nuevo() {
   modoNuevo(true);

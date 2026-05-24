@@ -204,24 +204,28 @@ function seleccionarCompradorDirecto(c) {
     id: c.id,
     nombre: c.nombre
   };
+  const json = JSON.stringify(compradorSeleccionado);
 
-  // 1. Siempre escribir en localStorage (el timer del padre lo consume)
-  localStorage.setItem("softsysCompradorSeleccionado", JSON.stringify(compradorSeleccionado));
+  function cerrar() { try { window.close(); } catch (_) {} }
 
-  // 2. Intentar llamada directa al opener si está disponible
+  if (window.__electronAPI) {
+    // Electron: IPC garantizado — cierra solo después de que mainWindow recibe el valor
+    window.__electronAPI.setStorage("softsysCompradorSeleccionado", json)
+      .then(cerrar).catch(cerrar);
+    return;
+  }
+
+  // Browser normal: localStorage + opener directo
+  localStorage.setItem("softsysCompradorSeleccionado", json);
   if (window.opener && !window.opener.closed) {
     try {
       if (typeof window.opener.recibirComprador === "function") {
         window.opener.recibirComprador(compradorSeleccionado);
       }
       window.opener.focus();
-    } catch {
-      // localStorage ya está escrito, el timer lo leerá igual
-    }
+    } catch { /* localStorage ya escrito */ }
   }
-
-  // 3. Cerrar — NO navegar (evita consumir localStorage en ventana equivocada)
-  try { window.close(); } catch (_) {}
+  cerrar();
 }
 
 function seleccionarComprador() {

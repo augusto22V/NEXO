@@ -222,10 +222,18 @@ function devolverProductoSeleccionadoCompra(row) {
   const payload = mapProductoSeleccionCompra(row);
   if (!payload.id) return;
 
-  // 1. Escribir en localStorage SIEMPRE — el timer del padre lo consume
-  localStorage.setItem(COMPRA_PRODUCTO_STORAGE_KEY, JSON.stringify(payload));
+  const json = JSON.stringify(payload);
+  function cerrar() { try { window.close(); } catch (_) {} }
 
-  // 2. Intentar llamada directa al opener (más rápido si está disponible)
+  if (window.__electronAPI) {
+    // Electron: IPC garantizado — cierra solo después de que mainWindow recibe el valor
+    window.__electronAPI.setStorage(COMPRA_PRODUCTO_STORAGE_KEY, json)
+      .then(cerrar).catch(cerrar);
+    return;
+  }
+
+  // Browser normal: localStorage + opener directo
+  localStorage.setItem(COMPRA_PRODUCTO_STORAGE_KEY, json);
   if (window.opener && !window.opener.closed) {
     try {
       if (typeof window.opener.recibirProducto === "function") {
@@ -234,13 +242,9 @@ function devolverProductoSeleccionadoCompra(row) {
       window.opener.focus();
     } catch (e) {
       console.error("Error transfiriendo producto al compra:", e);
-      // localStorage ya está escrito, el timer del padre lo leerá igual
     }
   }
-
-  // 3. Cerrar este popup — NO navegar a compra.html porque eso consumiría
-  //    el localStorage en este popup en vez de en la ventana principal.
-  try { window.close(); } catch (_) {}
+  cerrar();
 }
 
 function openCategoriaSelector() {

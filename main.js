@@ -10,7 +10,7 @@
  */
 
 const {
-  app, BrowserWindow, Tray, Menu, shell, nativeImage, dialog,
+  app, BrowserWindow, Tray, Menu, shell, nativeImage, dialog, ipcMain,
 } = require('electron');
 const { spawn } = require('child_process');
 const http  = require('http');
@@ -108,6 +108,24 @@ function buildIcon() {
   return undefined;
 }
 
+// ─── IPC: relay localStorage popup → mainWindow ───────────────────────────────
+// El preload expone window.__electronAPI.setStorage(key, value) en los popups.
+// Cuando el popup llama setStorage, este handler escribe en el localStorage de
+// mainWindow y dispara '__relayStorageReady' para consumo inmediato.
+// La Promise se resuelve DESPUÉS de escribir, garantizando que el popup
+// puede llamar window.close() sin race conditions.
+ipcMain.handle('set-main-storage', async (_event, { key, value }) => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    await mainWindow.webContents.executeJavaScript(
+      `localStorage.setItem(${JSON.stringify(key)}, ${JSON.stringify(value)})`
+    );
+    await mainWindow.webContents.executeJavaScript(
+      `window.dispatchEvent(new CustomEvent('__relayStorageReady'))`
+    );
+  }
+  return 'ok';
+});
+
 function createWindow() {
   // Quitar el menú nativo (File / Edit / View / Window / Help)
   Menu.setApplicationMenu(null);
@@ -123,6 +141,7 @@ function createWindow() {
       contextIsolation: true,
       nodeIntegration: false,
       zoomFactor: 1.0,
+      preload: path.join(__dirname, 'preload.js'),
     },
     show: false,
   });
