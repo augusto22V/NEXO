@@ -837,6 +837,10 @@ function bindEvents() {
 
   document.addEventListener("keydown", manejarAtajosGlobales);
   window.addEventListener("focus", consumirSeleccionesPendientes);
+  // Electron: el proceso principal dispara este evento justo después de hacer
+  // el relay localStorage popup → mainWindow, para consumo inmediato sin
+  // depender del timer de 250ms ni del evento focus.
+  window.addEventListener("__relayStorageReady", consumirSeleccionesPendientes);
   window.addEventListener("beforeunload", prevenirSalidaConItems);
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) consumirSeleccionesPendientes();

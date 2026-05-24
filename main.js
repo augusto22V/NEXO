@@ -181,8 +181,13 @@ function createWindow() {
           if (val !== null && val !== undefined) {
             relayDone = true;
             if (!mainWindow.isDestroyed()) {
+              // 1. Escribir en localStorage de la ventana principal
               await mainWindow.webContents.executeJavaScript(
                 `localStorage.setItem(${JSON.stringify(key)}, ${JSON.stringify(val)})`
+              );
+              // 2. Disparar evento custom para consumo INMEDIATO (sin esperar el timer de 250ms)
+              await mainWindow.webContents.executeJavaScript(
+                `window.dispatchEvent(new CustomEvent('__relayStorageReady'))`
               );
             }
             return; // Un valor por ciclo es suficiente
@@ -199,7 +204,10 @@ function createWindow() {
     }, 150);
 
     // Interceptar cierre: relay final → destruir popup
-    // Esto garantiza que el relay se ejecuta ANTES de que el popup desaparezca.
+    // Secuencia garantizada:
+    //   1. e.preventDefault() → popup sigue vivo
+    //   2. doRelay() lee del popup y escribe en mainWindow + dispara evento
+    //   3. popup.destroy() — el evento ya fue disparado, no hay race condition
     popup.on('close', (e) => {
       if (isQuitting) return; // Al salir de la app, cerrar normalmente
       e.preventDefault();    // Prevenir cierre inmediato
