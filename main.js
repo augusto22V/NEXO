@@ -136,6 +136,29 @@ function createWindow() {
     mainWindow.webContents.setVisualZoomLevelLimits(1, 5);
   });
 
+  // Popups (window.open desde el renderer): heredan el mismo zoom que la ventana principal
+  mainWindow.webContents.on('did-create-window', (popup) => {
+    // Sin menú nativo en popups
+    popup.setMenuBarVisibility(false);
+    // Aplicar mismo zoom que la ventana principal
+    popup.webContents.once('did-finish-load', () => {
+      const zoom = mainWindow.webContents.getZoomFactor();
+      popup.webContents.setZoomFactor(zoom);
+    });
+    // Atajos de zoom también en popups
+    popup.webContents.on('before-input-event', (_e, input) => {
+      if (!input.control) return;
+      const cur = popup.webContents.getZoomFactor();
+      if (input.key === '+' || input.key === '=') {
+        popup.webContents.setZoomFactor(Math.min(cur + 0.1, 3.0));
+      } else if (input.key === '-') {
+        popup.webContents.setZoomFactor(Math.max(cur - 0.1, 0.5));
+      } else if (input.key === '0') {
+        popup.webContents.setZoomFactor(mainWindow.webContents.getZoomFactor());
+      }
+    });
+  });
+
   // Atajos de zoom: Ctrl + / Ctrl - / Ctrl 0
   mainWindow.webContents.on('before-input-event', (_e, input) => {
     if (!input.control) return;
