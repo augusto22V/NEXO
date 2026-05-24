@@ -1864,6 +1864,10 @@ function aplicarProveedorSeleccionado(data) {
   $("proveedorId").value = data.id || "";
   $("proveedorCodigo").value = data.id || "";
   $("proveedorNombre").value = data.nombre || "";
+  // Auto-rellenar timbrado si el proveedor lo tiene registrado
+  if (data.timbrado) {
+    $("timbradoCompra").value = data.timbrado;
+  }
   persistCompraDraft();
 }
 

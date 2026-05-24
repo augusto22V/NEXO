@@ -19,6 +19,7 @@ const codigoProveedor = document.getElementById("codigoProveedor");
 const nombreProveedor = document.getElementById("nombreProveedor");
 const razonProveedor = document.getElementById("razonProveedor");
 const rucProveedor = document.getElementById("rucProveedor");
+const timbradoProveedor = document.getElementById("timbradoProveedor");
 const telefonoProveedor = document.getElementById("telefonoProveedor");
 const direccionProveedor = document.getElementById("direccionProveedor");
 const emailProveedor = document.getElementById("emailProveedor");
@@ -313,6 +314,7 @@ function seleccionar(p) {
   nombreProveedor.value = p.nombre || "";
   razonProveedor.value = p.razon_social || "";
   rucProveedor.value = p.ruc || "";
+  if (timbradoProveedor) timbradoProveedor.value = p.timbrado || "";
   telefonoProveedor.value = p.telefono || "";
   direccionProveedor.value = p.direccion || "";
   emailProveedor.value = p.email || "sincorreo@gmail.com";
@@ -361,6 +363,7 @@ function seleccionarProveedorDirecto(p) {
     nombre: p.nombre,
     razon_social: p.razon_social,
     ruc: p.ruc,
+    timbrado: p.timbrado || "",
     telefono: p.telefono,
     direccion: p.direccion,
     email: p.email
@@ -390,6 +393,7 @@ function seleccionarProveedor() {
     nombre: proveedorSeleccionadoTemp.nombre,
     razon_social: proveedorSeleccionadoTemp.razon_social,
     ruc: proveedorSeleccionadoTemp.ruc,
+    timbrado: proveedorSeleccionadoTemp.timbrado || "",
     telefono: proveedorSeleccionadoTemp.telefono,
     direccion: proveedorSeleccionadoTemp.direccion,
     email: proveedorSeleccionadoTemp.email
@@ -492,6 +496,7 @@ async function guardar() {
     nombre: nombreProveedor.value.trim(),
     razon_social: razonProveedor.value.trim(),
     ruc: rucProveedor.value.trim(),
+    timbrado: timbradoProveedor ? timbradoProveedor.value.trim() : "",
     telefono: telefonoProveedor.value.trim(),
     direccion: direccionProveedor.value.trim(),
     email: (emailProveedor.value.trim() || "sincorreo@gmail.com"),

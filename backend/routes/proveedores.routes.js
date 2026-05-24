@@ -23,7 +23,7 @@ router.get("/next-id", async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const r = await pool.query(`
-      SELECT id, nombre, razon_social, ruc, telefono, direccion, email, activo
+      SELECT id, nombre, razon_social, ruc, timbrado, telefono, direccion, email, activo
       FROM proveedor
       ORDER BY id DESC
     `);
@@ -39,7 +39,7 @@ router.get("/", async (req, res) => {
 router.get("/all/list", async (req, res) => {
   try {
     const r = await pool.query(`
-      SELECT id, nombre, razon_social, ruc, telefono, direccion, email, activo
+      SELECT id, nombre, razon_social, ruc, timbrado, telefono, direccion, email, activo
       FROM proveedor
       ORDER BY id DESC
     `);
@@ -58,7 +58,7 @@ router.get("/:id", async (req, res) => {
     const id = Number(req.params.id);
 
     const r = await pool.query(`
-      SELECT id, nombre, razon_social, ruc, telefono, direccion, email, activo
+      SELECT id, nombre, razon_social, ruc, timbrado, telefono, direccion, email, activo
       FROM proveedor
       WHERE id = $1
     `, [id]);
@@ -80,7 +80,7 @@ router.get("/:id", async (req, res) => {
 ========================= */
 router.post("/", async (req, res) => {
 
-  const { nombre, razon_social, ruc, telefono, direccion, email, activo } = req.body;
+  const { nombre, razon_social, ruc, timbrado, telefono, direccion, email, activo } = req.body;
 
   if (!nombre || !nombre.trim()) {
     return res.status(400).json({ error: "Nombre obligatorio" });
@@ -90,13 +90,14 @@ router.post("/", async (req, res) => {
 
     const result = await pool.query(`
       INSERT INTO proveedor
-      (nombre, razon_social, ruc, telefono, direccion, email, activo, creado_en)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,NOW())
+      (nombre, razon_social, ruc, timbrado, telefono, direccion, email, activo, creado_en)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,NOW())
       RETURNING *
     `, [
       nombre.trim(),
       razon_social || null,
       ruc || null,
+      timbrado || null,
       telefono || null,
       direccion || null,
       email || null,
@@ -117,7 +118,7 @@ router.post("/", async (req, res) => {
 router.put("/:id", async (req, res) => {
 
   const id = Number(req.params.id);
-  const { nombre, razon_social, ruc, telefono, direccion, email, activo } = req.body;
+  const { nombre, razon_social, ruc, timbrado, telefono, direccion, email, activo } = req.body;
 
   if (!nombre || !nombre.trim()) {
     return res.status(400).json({ error: "Nombre obligatorio" });
@@ -130,16 +131,18 @@ router.put("/:id", async (req, res) => {
         nombre = $1,
         razon_social = $2,
         ruc = $3,
-        telefono = $4,
-        direccion = $5,
-        email = $6,
-        activo = $7
-      WHERE id = $8
+        timbrado = $4,
+        telefono = $5,
+        direccion = $6,
+        email = $7,
+        activo = $8
+      WHERE id = $9
       RETURNING *
     `, [
       nombre.trim(),
       razon_social || null,
       ruc || null,
+      timbrado || null,
       telefono || null,
       direccion || null,
       email || null,
