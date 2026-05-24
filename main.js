@@ -122,7 +122,7 @@ function createWindow() {
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
-      zoomFactor: 1.25,   // 125% — igual al zoom típico del navegador
+      zoomFactor: 1.0,
     },
     show: false,
   });
@@ -130,33 +130,28 @@ function createWindow() {
   mainWindow.loadURL(LOGIN_URL);
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
-    // Aplicar zoom inicial (zoomFactor en webPreferences no siempre alcanza solo)
-    mainWindow.webContents.setZoomFactor(1.25);
-    // Habilitar zoom con pellizco / trackpad
     mainWindow.webContents.setVisualZoomLevelLimits(1, 5);
   });
 
-  // Popups (window.open desde el renderer): heredan el mismo zoom que la ventana principal
+  // Popups (window.open desde el renderer): abrir grandes y sin menú
+  const { screen } = require('electron');
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    const { width: sw, height: sh } = screen.getPrimaryDisplay().workAreaSize;
+    return {
+      action: 'allow',
+      overrideBrowserWindowOptions: {
+        width:  Math.round(sw * 0.88),
+        height: Math.round(sh * 0.88),
+        autoHideMenuBar: true,
+        icon: buildIcon(),
+        webPreferences: { contextIsolation: true, nodeIntegration: false },
+      },
+    };
+  });
+
   mainWindow.webContents.on('did-create-window', (popup) => {
-    // Sin menú nativo en popups
     popup.setMenuBarVisibility(false);
-    // Aplicar mismo zoom que la ventana principal
-    popup.webContents.once('did-finish-load', () => {
-      const zoom = mainWindow.webContents.getZoomFactor();
-      popup.webContents.setZoomFactor(zoom);
-    });
-    // Atajos de zoom también en popups
-    popup.webContents.on('before-input-event', (_e, input) => {
-      if (!input.control) return;
-      const cur = popup.webContents.getZoomFactor();
-      if (input.key === '+' || input.key === '=') {
-        popup.webContents.setZoomFactor(Math.min(cur + 0.1, 3.0));
-      } else if (input.key === '-') {
-        popup.webContents.setZoomFactor(Math.max(cur - 0.1, 0.5));
-      } else if (input.key === '0') {
-        popup.webContents.setZoomFactor(mainWindow.webContents.getZoomFactor());
-      }
-    });
+    popup.center();
   });
 
   // Atajos de zoom: Ctrl + / Ctrl - / Ctrl 0
@@ -168,7 +163,7 @@ function createWindow() {
     } else if (input.key === '-') {
       mainWindow.webContents.setZoomFactor(Math.max(current - 0.1, 0.5));
     } else if (input.key === '0') {
-      mainWindow.webContents.setZoomFactor(1.25); // Ctrl+0 vuelve al 125%
+      mainWindow.webContents.setZoomFactor(1.0); // Ctrl+0 vuelve al 100%
     }
   });
 
