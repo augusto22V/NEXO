@@ -133,16 +133,59 @@ function createWindow() {
     mainWindow.webContents.setVisualZoomLevelLimits(1, 5);
   });
 
-  // Popups (window.open desde el renderer): redimensionar al 88% de pantalla
-  // Usamos did-create-window (no setWindowOpenHandler) para que window.open()
-  // siga devolviendo un proxy válido al renderer — si retorna null el timer
-  // de selección se detiene inmediatamente y el producto nunca llega.
+  // ─── Popups (window.open desde el renderer) ─────────────────────────────────
+  // PROBLEMA: en Electron cada BrowserWindow tiene su propio renderer process
+  // con su propio localStorage — no se comparte entre ventanas como en el browser.
+  // SOLUCIÓN: el proceso principal actúa de puente: lee el localStorage del popup
+  // cada 150 ms y lo copia al localStorage de la ventana principal.
   const { screen } = require('electron');
+
+  // Claves que los selectores escriben en localStorage
+  const SELECTOR_RELAY_KEYS = [
+    'softsysProductoSeleccionado',
+    'softsysProveedorSeleccionado',
+    'softsysCompradorSeleccionado',
+    'softsysCompraSeleccionada',
+    'softsysOperacionSeleccionada',
+    'ventaProductoSeleccionado',
+  ];
+
   mainWindow.webContents.on('did-create-window', (popup) => {
+    // Tamaño y menú
     popup.setMenuBarVisibility(false);
     const { width: sw, height: sh } = screen.getPrimaryDisplay().workAreaSize;
     popup.setSize(Math.round(sw * 0.88), Math.round(sh * 0.88));
     popup.center();
+
+    // Puente de localStorage: popup → proceso principal → ventana principal
+    const relayTimer = setInterval(async () => {
+      if (popup.isDestroyed()) { clearInterval(relayTimer); return; }
+      try {
+        for (const key of SELECTOR_RELAY_KEYS) {
+          // Leer y borrar del popup en un solo evalJS (atómico dentro del renderer)
+          const val = await popup.webContents.executeJavaScript(`(function(){
+            var v = localStorage.getItem(${JSON.stringify(key)});
+            if (v !== null) localStorage.removeItem(${JSON.stringify(key)});
+            return v;
+          })()`);
+
+          if (val !== null && val !== undefined) {
+            // Escribir en el localStorage de la ventana principal
+            if (!mainWindow.isDestroyed()) {
+              await mainWindow.webContents.executeJavaScript(
+                `localStorage.setItem(${JSON.stringify(key)}, ${JSON.stringify(val)})`
+              );
+            }
+            clearInterval(relayTimer);
+            return; // Un valor relayado es suficiente por ciclo
+          }
+        }
+      } catch (_) {
+        clearInterval(relayTimer); // Popup destruido — detener
+      }
+    }, 150);
+
+    popup.once('closed', () => clearInterval(relayTimer));
   });
 
   // Atajos de zoom: Ctrl + / Ctrl - / Ctrl 0
