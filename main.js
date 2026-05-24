@@ -157,33 +157,57 @@ function createWindow() {
     popup.setSize(Math.round(sw * 0.88), Math.round(sh * 0.88));
     popup.center();
 
-    // Puente de localStorage: popup → proceso principal → ventana principal
-    const relayTimer = setInterval(async () => {
-      if (popup.isDestroyed()) { clearInterval(relayTimer); return; }
+    // ── Puente de localStorage: popup → proceso principal → ventana principal ──
+    // El popup escribe en su propio localStorage (proceso renderer aislado).
+    // El relay lee esos valores y los escribe en el localStorage de mainWindow.
+    //
+    // Estrategia dual:
+    //   1. Timer cada 150 ms: detecta escrituras mientras el popup sigue abierto.
+    //   2. Evento 'close': intercepta el cierre, hace relay final y destruye el popup.
+    //      Esto resuelve la race condition donde window.close() es tan rápido que
+    //      el popup ya está destruido antes de que el timer pueda leer.
+
+    let relayDone = false;
+
+    async function doRelay() {
+      if (relayDone || popup.isDestroyed()) return;
       try {
         for (const key of SELECTOR_RELAY_KEYS) {
-          // Leer y borrar del popup en un solo evalJS (atómico dentro del renderer)
           const val = await popup.webContents.executeJavaScript(`(function(){
             var v = localStorage.getItem(${JSON.stringify(key)});
             if (v !== null) localStorage.removeItem(${JSON.stringify(key)});
             return v;
           })()`);
-
           if (val !== null && val !== undefined) {
-            // Escribir en el localStorage de la ventana principal
+            relayDone = true;
             if (!mainWindow.isDestroyed()) {
               await mainWindow.webContents.executeJavaScript(
                 `localStorage.setItem(${JSON.stringify(key)}, ${JSON.stringify(val)})`
               );
             }
-            clearInterval(relayTimer);
-            return; // Un valor relayado es suficiente por ciclo
+            return; // Un valor por ciclo es suficiente
           }
         }
-      } catch (_) {
-        clearInterval(relayTimer); // Popup destruido — detener
-      }
+      } catch (_) { /* popup destruido o cerrado */ }
+    }
+
+    // Timer de respaldo (popup abierto por más de 150 ms)
+    const relayTimer = setInterval(async () => {
+      if (popup.isDestroyed()) { clearInterval(relayTimer); return; }
+      await doRelay();
+      if (relayDone) clearInterval(relayTimer);
     }, 150);
+
+    // Interceptar cierre: relay final → destruir popup
+    // Esto garantiza que el relay se ejecuta ANTES de que el popup desaparezca.
+    popup.on('close', (e) => {
+      if (isQuitting) return; // Al salir de la app, cerrar normalmente
+      e.preventDefault();    // Prevenir cierre inmediato
+      clearInterval(relayTimer);
+      doRelay().finally(() => {
+        try { if (!popup.isDestroyed()) popup.destroy(); } catch (_) {}
+      });
+    });
 
     popup.once('closed', () => clearInterval(relayTimer));
   });
