@@ -133,24 +133,15 @@ function createWindow() {
     mainWindow.webContents.setVisualZoomLevelLimits(1, 5);
   });
 
-  // Popups (window.open desde el renderer): abrir grandes y sin menú
+  // Popups (window.open desde el renderer): redimensionar al 88% de pantalla
+  // Usamos did-create-window (no setWindowOpenHandler) para que window.open()
+  // siga devolviendo un proxy válido al renderer — si retorna null el timer
+  // de selección se detiene inmediatamente y el producto nunca llega.
   const { screen } = require('electron');
-  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    const { width: sw, height: sh } = screen.getPrimaryDisplay().workAreaSize;
-    return {
-      action: 'allow',
-      overrideBrowserWindowOptions: {
-        width:  Math.round(sw * 0.88),
-        height: Math.round(sh * 0.88),
-        autoHideMenuBar: true,
-        icon: buildIcon(),
-        webPreferences: { contextIsolation: true, nodeIntegration: false },
-      },
-    };
-  });
-
   mainWindow.webContents.on('did-create-window', (popup) => {
     popup.setMenuBarVisibility(false);
+    const { width: sw, height: sh } = screen.getPrimaryDisplay().workAreaSize;
+    popup.setSize(Math.round(sw * 0.88), Math.round(sh * 0.88));
     popup.center();
   });
 
