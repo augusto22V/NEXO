@@ -153,9 +153,14 @@ if (c.activo === false) {
     row.onclick = () => {
       document.querySelectorAll(".tabla-row")
         .forEach(r => r.classList.remove("activo"));
-
       row.classList.add("activo");
-      seleccionar(c);
+
+      // En modo selección: un solo clic cierra y devuelve el comprador
+      if (isSelectionMode) {
+        seleccionarCompradorDirecto(c);
+      } else {
+        seleccionar(c);
+      }
     };
 
     row.ondblclick = () => {
@@ -200,19 +205,23 @@ function seleccionarCompradorDirecto(c) {
     nombre: c.nombre
   };
 
-  if (window.opener && !window.opener.closed && typeof window.opener.recibirComprador === "function") {
+  // 1. Siempre escribir en localStorage (el timer del padre lo consume)
+  localStorage.setItem("softsysCompradorSeleccionado", JSON.stringify(compradorSeleccionado));
+
+  // 2. Intentar llamada directa al opener si está disponible
+  if (window.opener && !window.opener.closed) {
     try {
-      window.opener.recibirComprador(compradorSeleccionado);
+      if (typeof window.opener.recibirComprador === "function") {
+        window.opener.recibirComprador(compradorSeleccionado);
+      }
       window.opener.focus();
-      window.close();
-      return;
     } catch {
-      // fallback localStorage
+      // localStorage ya está escrito, el timer lo leerá igual
     }
   }
 
-  localStorage.setItem("softsysCompradorSeleccionado", JSON.stringify(compradorSeleccionado));
-  window.close();
+  // 3. Cerrar — NO navegar (evita consumir localStorage en ventana equivocada)
+  try { window.close(); } catch (_) {}
 }
 
 function seleccionarComprador() {

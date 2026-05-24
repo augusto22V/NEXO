@@ -228,9 +228,9 @@ function render(data) {
     document.querySelectorAll(".tabla-row").forEach((r) => r.classList.remove("activo"));
     row.classList.add("activo");
 
+    // En modo selección: un solo clic cierra y devuelve el proveedor
     if (isSelectionMode) {
-      proveedorSeleccionadoTemp = p;
-      btnSeleccionar.disabled = false;
+      seleccionarProveedorDirecto(p);
     } else {
       seleccionar(p);
     }
@@ -352,19 +352,23 @@ function seleccionarProveedorDirecto(p) {
     return;
   }
 
-  if (window.opener && !window.opener.closed && typeof window.opener.recibirProveedor === "function") {
+  // 1. Siempre escribir en localStorage (el timer del padre lo consume)
+  localStorage.setItem("softsysProveedorSeleccionado", JSON.stringify(proveedorSeleccionado));
+
+  // 2. Intentar llamada directa al opener si está disponible
+  if (window.opener && !window.opener.closed) {
     try {
-      window.opener.recibirProveedor(proveedorSeleccionado);
+      if (typeof window.opener.recibirProveedor === "function") {
+        window.opener.recibirProveedor(proveedorSeleccionado);
+      }
       window.opener.focus();
-      window.close();
-      return;
     } catch {
-      // fallback localStorage
+      // localStorage ya está escrito, el timer lo leerá igual
     }
   }
 
-  localStorage.setItem("softsysProveedorSeleccionado", JSON.stringify(proveedorSeleccionado));
-  window.close();
+  // 3. Cerrar — NO navegar
+  try { window.close(); } catch (_) {}
 }
 
 function seleccionarProveedor() {
@@ -393,19 +397,23 @@ function seleccionarProveedor() {
     return;
   }
 
-  if (window.opener && !window.opener.closed && typeof window.opener.recibirProveedor === "function") {
+  // 1. Siempre escribir en localStorage
+  localStorage.setItem("softsysProveedorSeleccionado", JSON.stringify(proveedorSeleccionado));
+
+  // 2. Intentar llamada directa al opener
+  if (window.opener && !window.opener.closed) {
     try {
-      window.opener.recibirProveedor(proveedorSeleccionado);
+      if (typeof window.opener.recibirProveedor === "function") {
+        window.opener.recibirProveedor(proveedorSeleccionado);
+      }
       window.opener.focus();
-      window.close();
-      return;
     } catch {
-      // fallback localStorage
+      // localStorage ya está escrito
     }
   }
 
-  localStorage.setItem("softsysProveedorSeleccionado", JSON.stringify(proveedorSeleccionado));
-  window.close();
+  // 3. Cerrar — NO navegar
+  try { window.close(); } catch (_) {}
 }
 function nuevo() {
   modoNuevo(true);
