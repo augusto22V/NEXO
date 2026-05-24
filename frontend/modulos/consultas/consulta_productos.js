@@ -222,11 +222,11 @@ function devolverProductoSeleccionadoCompra(row) {
   const payload = mapProductoSeleccionCompra(row);
   if (!payload.id) return;
 
-  // Guardar en localStorage como respaldo (lo consume compra al recibir foco)
+  // 1. Escribir en localStorage SIEMPRE — el timer del padre lo consume
   localStorage.setItem(COMPRA_PRODUCTO_STORAGE_KEY, JSON.stringify(payload));
 
+  // 2. Intentar llamada directa al opener (más rápido si está disponible)
   if (window.opener && !window.opener.closed) {
-    // Llamar directo a la función del opener (más confiable que localStorage)
     try {
       if (typeof window.opener.recibirProducto === "function") {
         window.opener.recibirProducto(payload);
@@ -234,20 +234,13 @@ function devolverProductoSeleccionadoCompra(row) {
       window.opener.focus();
     } catch (e) {
       console.error("Error transfiriendo producto al compra:", e);
+      // localStorage ya está escrito, el timer del padre lo leerá igual
     }
-
-    window.close();
-
-    // Fallback: si window.close() no cerró la ventana (bloqueado por Chrome),
-    // redirigir la pestaña/popup para que el usuario vuelva a compra.
-    setTimeout(() => {
-      try { window.location.href = "/modulos/compra/compra.html"; } catch { /* noop */ }
-    }, 400);
-    return;
   }
 
-  // Sin opener: navegar directamente (el init de compra leerá el localStorage)
-  window.location.href = "/modulos/compra/compra.html";
+  // 3. Cerrar este popup — NO navegar a compra.html porque eso consumiría
+  //    el localStorage en este popup en vez de en la ventana principal.
+  try { window.close(); } catch (_) {}
 }
 
 function openCategoriaSelector() {
