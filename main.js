@@ -116,12 +116,16 @@ function buildIcon() {
 // puede llamar window.close() sin race conditions.
 ipcMain.handle('set-main-storage', async (_event, { key, value }) => {
   if (mainWindow && !mainWindow.isDestroyed()) {
-    await mainWindow.webContents.executeJavaScript(
-      `localStorage.setItem(${JSON.stringify(key)}, ${JSON.stringify(value)})`
-    );
-    await mainWindow.webContents.executeJavaScript(
-      `window.dispatchEvent(new CustomEvent('__relayStorageReady'))`
-    );
+    // Escribir en localStorage Y llamar consumirSeleccionesPendientes en un solo
+    // executeJavaScript para garantizar que el valor esté disponible cuando se llama.
+    await mainWindow.webContents.executeJavaScript(`(function(){
+      localStorage.setItem(${JSON.stringify(key)}, ${JSON.stringify(value)});
+      if (typeof window.__consumirSelecciones === 'function') {
+        window.__consumirSelecciones();
+      } else {
+        window.dispatchEvent(new CustomEvent('__relayStorageReady'));
+      }
+    })()`);
   }
   return 'ok';
 });

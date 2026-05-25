@@ -2145,6 +2145,9 @@ function salir() {
 
 window.salir = salir;
 window.nuevaCompra = nuevaCompra;
+// Expuesto para que el proceso principal de Electron lo llame directamente
+// desde executeJavaScript al recibir datos de un popup selector via IPC.
+window.__consumirSelecciones = consumirSeleccionesPendientes;
 
 document.addEventListener("DOMContentLoaded", init);
 
