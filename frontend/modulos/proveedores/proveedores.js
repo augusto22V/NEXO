@@ -338,13 +338,13 @@ function _enviarProveedorYCerrar(proveedorSeleccionado) {
   function cerrar() { try { window.close(); } catch (_) {} }
 
   if (window.__electronAPI) {
-    // Electron: IPC garantizado — cierra solo después de que mainWindow recibe el valor
+    // Electron con preload: IPC garantizado
     window.__electronAPI.setStorage("softsysProveedorSeleccionado", json)
       .then(cerrar).catch(cerrar);
     return;
   }
 
-  // Browser normal: localStorage + opener directo
+  // Fallback: localStorage + espera 500ms para que el relay de Electron lo lea
   localStorage.setItem("softsysProveedorSeleccionado", json);
   if (window.opener && !window.opener.closed) {
     try {
@@ -354,7 +354,7 @@ function _enviarProveedorYCerrar(proveedorSeleccionado) {
       window.opener.focus();
     } catch { /* localStorage ya escrito */ }
   }
-  cerrar();
+  setTimeout(cerrar, 500);
 }
 
 function seleccionarProveedorDirecto(p) {

@@ -226,13 +226,13 @@ function devolverProductoSeleccionadoCompra(row) {
   function cerrar() { try { window.close(); } catch (_) {} }
 
   if (window.__electronAPI) {
-    // Electron: IPC garantizado — cierra solo después de que mainWindow recibe el valor
+    // Electron con preload: IPC garantizado
     window.__electronAPI.setStorage(COMPRA_PRODUCTO_STORAGE_KEY, json)
       .then(cerrar).catch(cerrar);
     return;
   }
 
-  // Browser normal: localStorage + opener directo
+  // Fallback: localStorage + espera 500ms para que el relay de Electron lo lea
   localStorage.setItem(COMPRA_PRODUCTO_STORAGE_KEY, json);
   if (window.opener && !window.opener.closed) {
     try {
@@ -244,7 +244,7 @@ function devolverProductoSeleccionadoCompra(row) {
       console.error("Error transfiriendo producto al compra:", e);
     }
   }
-  cerrar();
+  setTimeout(cerrar, 500);
 }
 
 function openCategoriaSelector() {
