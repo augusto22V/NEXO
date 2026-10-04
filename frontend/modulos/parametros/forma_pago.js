@@ -136,7 +136,7 @@ function cerrarAdvertencia(refocus = false) {
 
 function volverSeguro() {
   if (formDirty) {
-    baseModalOpenConfirmGeneric({
+    baseModalOpenConfirm({
       titulo: "Salir",
       mensaje: "Hay cambios sin guardar. Desea salir?",
       onConfirm: () => {
@@ -289,7 +289,7 @@ async function guardar() {
 
 async function eliminar() {
   if (!formaPagoId.value) return;
-  baseModalOpenConfirmGeneric({
+  baseModalOpenConfirm({
     titulo: "Eliminar",
     mensaje: "Desea eliminar la forma de pago seleccionada?",
     onConfirm: async () => {

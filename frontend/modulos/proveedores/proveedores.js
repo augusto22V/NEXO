@@ -169,7 +169,7 @@ function volverSeguro() {
 
   if (hayCambiosSinGuardar()) {
 
-    baseModalOpenConfirmGeneric({
+    baseModalOpenConfirm({
       titulo: "Salir",
       mensaje: "Hay cambios sin guardar. ¿Desea salir?",
       onConfirm: () => {
@@ -259,17 +259,17 @@ async function obtenerProximoId() {
   return Number(data.next_id);
 }
 
-// ===== ENTER EN CÃ“DIGO (igual Producto) =====
+// ===== ENTER EN CÃ"DIGO (igual Producto) =====
 codigoProveedor.addEventListener("keydown", async (e) => {
 
   if (e.key !== "Enter") return;
 
   e.preventDefault();
-  e.stopImmediatePropagation(); // ðŸ”¥ importante
+  e.stopImmediatePropagation(); // ðŸ"¥ importante
 
   const valor = codigoProveedor.value.trim();
 
-  // ENTER vacío â†’ next-id
+  // ENTER vacío â†' next-id
   if (!valor) {
     try {
       const nextId = await obtenerProximoId();
@@ -295,7 +295,7 @@ codigoProveedor.addEventListener("keydown", async (e) => {
       return;
     }
 
-    // NO EXISTE â†’ advertir y NO avanzar
+    // NO EXISTE â†' advertir y NO avanzar
     mostrarAdvertencia(`No existe proveedor con código ${id}`, codigoProveedor);
     return;
 
@@ -337,14 +337,21 @@ function _enviarProveedorYCerrar(proveedorSeleccionado) {
   const json = JSON.stringify(proveedorSeleccionado);
   function cerrar() { try { window.close(); } catch (_) {} }
 
+  // 1. BroadcastChannel — mecanismo principal (mismo origen/sesion en Electron)
+  try {
+    const bc = new BroadcastChannel('alpx_selector_channel');
+    bc.postMessage({ type: 'proveedor', payload: proveedorSeleccionado });
+    bc.close();
+  } catch (_) {}
+
+  // 2. IPC Electron (si el preload esta disponible): cierra el popup cuando resuelve
   if (window.__electronAPI) {
-    // Electron con preload: IPC garantizado
     window.__electronAPI.setStorage("softsysProveedorSeleccionado", json)
       .then(cerrar).catch(cerrar);
     return;
   }
 
-  // Fallback: localStorage + espera 500ms para que el relay de Electron lo lea
+  // 3. Fallback: localStorage + opener + 500ms
   localStorage.setItem("softsysProveedorSeleccionado", json);
   if (window.opener && !window.opener.closed) {
     try {
@@ -592,13 +599,13 @@ telefonoProveedor.addEventListener("input", () => {
   telefonoProveedor.value = telefonoProveedor.value.replace(/[^0-9]/g, "");
 });
 
-rucProveedor.addEventListener(“input”, () => {
-  rucProveedor.value = rucProveedor.value.replace(/[^0-9-]/g, “”);
+rucProveedor.addEventListener("input", () => {
+  rucProveedor.value = rucProveedor.value.replace(/[^0-9-]/g, "");
 });
 
-rucProveedor.addEventListener(“keydown”, async (e) => {
+rucProveedor.addEventListener("keydown", async (e) => {
 
-  if (e.key !== “Enter”) return;
+  if (e.key !== "Enter") return;
 
   const valor = rucProveedor.value.trim();
 
@@ -621,14 +628,14 @@ rucProveedor.addEventListener(“keydown”, async (e) => {
 
     } else {
 
-      mostrarAdvertencia(“RUC no encontrado”, razonProveedor);
+      mostrarAdvertencia("RUC no encontrado", razonProveedor);
 
     }
 
   } catch (err) {
 
     console.error(err);
-    mostrarAdvertencia(“Error consultando RUC”);
+    mostrarAdvertencia("Error consultando RUC");
 
   }
 
@@ -651,7 +658,7 @@ rucProveedor.addEventListener(“keydown”, async (e) => {
   });
 });
 
-// ===== ENTER NAVEGACIÃ“N ENTRE CAMPOS =====
+// ===== ENTER NAVEGACIÃ"N ENTRE CAMPOS =====
 document.querySelector(".panel-form")?.addEventListener("keydown", (e) => {
   if (e.key !== "Enter") return;
 
@@ -686,11 +693,11 @@ document.addEventListener("keydown", (e) => {
 
 if (e.key === "Escape") {
 
-  // si modal advertencia está abierto â†’ no salir
+  // si modal advertencia está abierto â†' no salir
   const modal = document.getElementById("modalAdvertencia");
   if (modal && !modal.classList.contains("hidden")) return;
 
-  // si modal eliminar está abierto â†’ no salir
+  // si modal eliminar está abierto â†' no salir
   const modalEliminar = document.getElementById("modalEliminar");
   if (modalEliminar && !modalEliminar.classList.contains("hidden")) return;
 

@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 
-const JWT_SECRET = "stoptop_secret_2024";
+const JWT_SECRET = process.env.JWT_SECRET || "stoptop_secret_2024";
 
 function authMiddleware(req, res, next) {
 

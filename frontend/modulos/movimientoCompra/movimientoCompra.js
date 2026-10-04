@@ -144,7 +144,7 @@ function seleccionarCompra(row) {
     return true;
   }
 
-  window.location.href = `/modulos/compra/compra.html?id=${id}`;
+  window.location.href = `/modulos/compra/compra.html?id=${id}&from=movimiento_compra`;
   return true;
 }
 
@@ -155,7 +155,7 @@ function abrirCompraSeleccionada() {
     seleccionarCompra(row);
     return;
   }
-  window.location.href = `/modulos/compra/compra.html?id=${encodeURIComponent(row.id)}`;
+  window.location.href = `/modulos/compra/compra.html?id=${encodeURIComponent(row.id)}&from=movimiento_compra`;
 }
 
 function volver() {

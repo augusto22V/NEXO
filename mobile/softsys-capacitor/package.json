@@ -1,8 +1,8 @@
 ﻿{
-  "name": "softsys-capacitor",
+  "name": "alpx-capacitor",
   "version": "1.0.0",
   "private": true,
-  "description": "SoftSys Android wrapper (Capacitor)",
+  "description": "ALPX Android wrapper (Capacitor)",
   "scripts": {
     "android:add": "npx cap add android",
     "android:sync": "npx cap sync android",

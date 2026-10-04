@@ -24,6 +24,7 @@ const refs = {
   btnBuscarProducto: document.getElementById("btnBuscarProductoPrecio"),
   btnGuardar: document.getElementById("btnGuardarPrecio"),
   btnValorPorCantidad: document.getElementById("btnValorPorCantidad"),
+  btnCorregirVentas: document.getElementById("btnCorregirVentas"),
 
   inputBuscarProducto: document.getElementById("inputBuscarProductoPrecio"),
   nombreProducto: document.getElementById("nombreProducto"),
@@ -1058,15 +1059,71 @@ async function guardarPrecio(event) {
 
     state.precioActual = data;
     await cargarPrecioProducto(productoId);
-    volver();
+
+    // Mostrar confirmación sin navegar — el usuario decide si quiere cambiar otro producto
+    if (btn) {
+      btn.textContent = "✔ Precio guardado";
+      btn.style.background = "#2e7d32";
+      setTimeout(() => {
+        btn.textContent = labelOriginal;
+        btn.style.background = "";
+      }, 2000);
+    }
   } catch (error) {
     console.error(error);
     alert(error.message || "Error al guardar precio");
   } finally {
     if (btn) {
       btn.disabled = false;
-      btn.textContent = labelOriginal;
     }
+  }
+}
+
+/* =========================================================
+   CORREGIR COSTO EN VENTAS ANTERIORES
+   Aplica el costo GUARDADO actual a las ventas pasadas de este
+   producto. Solo para cuando el costo estaba mal cargado.
+   ========================================================= */
+async function onClickCorregirVentasAnteriores() {
+  if (modoConsulta) return;
+
+  const productoId = Number(refs.productoId?.value || 0);
+  if (!productoId) {
+    alert("Primero seleccioná un producto.");
+    refs.inputBuscarProducto?.focus();
+    return;
+  }
+
+  const nombre = (refs.nombreProducto?.textContent || refs.descripcionProducto?.value || "este producto").trim();
+  const costoTxt = refs.costoMedioActual?.value || refs.precioCompra?.value || "(actual)";
+
+  const msg =
+    `¿Aplicar el costo GUARDADO (${costoTxt}) a TODAS las ventas anteriores de "${nombre}"?\n\n` +
+    `⚠️ Usa el costo ya guardado. Si recién lo corregiste, primero apretá "Guardar Precio".\n\n` +
+    `Hacé esto SOLO si el costo estaba mal cargado. Si el costo subió de verdad, NO lo uses ` +
+    `(las ventas viejas deben mantener su costo original).`;
+
+  if (!confirm(msg)) return;
+
+  const btn = refs.btnCorregirVentas;
+  const labelOriginal = btn?.textContent || "Corregir ventas anteriores";
+  if (btn) { btn.disabled = true; btn.textContent = "Corrigiendo..."; }
+
+  try {
+    const res = await fetch("/api/venta/recosto-producto", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ producto_id: productoId })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.error || "No se pudo corregir");
+
+    alert(`✔ Listo. Se corrigieron ${data.actualizadas} línea(s) de venta con el costo actual.`);
+  } catch (e) {
+    alert("Error: " + (e.message || e));
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = labelOriginal; }
   }
 }
 
@@ -1185,6 +1242,7 @@ function registrarEventosBusqueda() {
   refs.btnBuscarProducto?.addEventListener("click", accionBuscarProductoManual);
 
   refs.btnValorPorCantidad?.addEventListener("click", onClickValorPorCantidad);
+  refs.btnCorregirVentas?.addEventListener("click", onClickCorregirVentasAnteriores);
   refs.btnCerrarValorCantidad?.addEventListener("click", cerrarModalValorCantidad);
   refs.btnCancelarValorCantidad?.addEventListener("click", cerrarModalValorCantidad);
   refs.btnGuardarValorCantidad?.addEventListener("click", onGuardarValorCantidad);

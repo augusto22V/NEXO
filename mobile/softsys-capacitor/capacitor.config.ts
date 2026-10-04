@@ -1,8 +1,8 @@
 ﻿import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.softsys.lanapp',
-  appName: 'SoftSys',
+  appId: 'com.alpx.lanapp',
+  appName: 'ALPX SYSTEM',
   webDir: 'www',
   server: {
     cleartext: true,

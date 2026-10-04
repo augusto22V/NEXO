@@ -1,13 +1,19 @@
+require('dotenv').config();
 const { Pool } = require('pg');
 const { getAuditContext } = require('./middlewares/auditContext.middleware');
 
-const pool = new Pool({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'libreria_sys',
-    password: '12345',
-    port: 5432,
-});
+// Configuración de la base de datos. Lee de .env para que cada instalación
+// pueda tener sus propias credenciales; usa valores por defecto si no hay .env
+// (compatibilidad con instalaciones existentes).
+const DB_CONFIG = {
+  user:     process.env.DB_USER     || 'postgres',
+  host:     process.env.DB_HOST     || 'localhost',
+  database: process.env.DB_NAME     || 'libreria_sys',
+  password: String(process.env.DB_PASSWORD ?? '12345'),
+  port:     Number(process.env.DB_PORT || 5432),
+};
+
+const pool = new Pool(DB_CONFIG);
 
 function extractUserIdFromRequestContext(req) {
   const candidates = [
@@ -130,3 +136,4 @@ pool.connect = (...args) => {
 };
 
 module.exports = pool;
+module.exports.DB_CONFIG = DB_CONFIG;

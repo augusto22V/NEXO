@@ -7,7 +7,7 @@
   <link rel="manifest" href="/manifest.json">
   <title>ALPX | Cobro</title>
   <link rel="stylesheet" href="../../compartido/css/base.css">
-  <link rel="stylesheet" href="./caja.css?v=2026.05.09.01">
+  <link rel="stylesheet" href="./caja.css?v=2026.08.28.01">
 </head>
 <body>
 
@@ -59,16 +59,16 @@
           <span class="totales-label">Total</span>
           <div class="totales-montos">
             <span class="tm-gs"><span class="tm-flag">&#x1F1F5;&#x1F1FE;</span><span id="totalHeaderGs">0</span></span>
-            <span class="tm-brl"><span class="tm-flag">&#x1F1E7;&#x1F1F7;</span><span id="totalHeaderBrl">0,00</span></span>
-            <span class="tm-usd"><span class="tm-flag">&#x1F1FA;&#x1F1F8;</span><span id="totalHeaderUsd">0,00</span></span>
+            <span class="tm-brl"><span class="tm-flag">&#x1F1E7;&#x1F1F7;</span>R$ <span id="totalHeaderBrl">0,00</span></span>
+            <span class="tm-usd"><span class="tm-flag">&#x1F1FA;&#x1F1F8;</span>US$ <span id="totalHeaderUsd">0,00</span></span>
           </div>
         </div>
         <div class="totales-row totales-apagar" id="filaPagar">
           <span class="totales-label">A pagar</span>
           <div class="totales-montos">
             <span class="tm-gs"><span class="tm-flag">&#x1F1F5;&#x1F1FE;</span><span id="aPagarGs">0</span></span>
-            <span class="tm-brl"><span class="tm-flag">&#x1F1E7;&#x1F1F7;</span><span id="aPagarBrl">0,00</span></span>
-            <span class="tm-usd"><span class="tm-flag">&#x1F1FA;&#x1F1F8;</span><span id="aPagarUsd">0,00</span></span>
+            <span class="tm-brl"><span class="tm-flag">&#x1F1E7;&#x1F1F7;</span>R$ <span id="aPagarBrl">0,00</span></span>
+            <span class="tm-usd"><span class="tm-flag">&#x1F1FA;&#x1F1F8;</span>US$ <span id="aPagarUsd">0,00</span></span>
           </div>
         </div>
       </div>
@@ -85,9 +85,13 @@
           <option value="BRL">REAL</option>
           <option value="USD">DÓLAR</option>
         </select>
-        <input type="number" id="montoInput" class="pago-monto-input"
-               placeholder="0" min="0" step="any"
-               onkeydown="if(event.key==='Enter') agregarPago()">
+        <div class="monto-input-wrap">
+          <span id="montoMonedaLabel" class="monto-moneda-label">Gs</span>
+          <input type="text" id="montoInput" class="pago-monto-input" inputmode="numeric"
+                 placeholder="0" autocomplete="off"
+                 oninput="formatearInputMonto(this)"
+                 onkeydown="if(event.key==='Enter') agregarPago()">
+        </div>
         <button class="btn-agregar-pago" onclick="agregarPago()">+</button>
       </div>
 
@@ -135,8 +139,8 @@
   <script src="/compartido/js/app.config.js?v=2026.04.17.03"></script>
   <script src="/compartido/js/session.manager.js?v=2026.04.17.03"></script>
   <script src="/compartido/js/cache.bootstrap.js?v=2026.04.17.03"></script>
-  <script src="/compartido/js/seguridad.js?v=2026.04.17.03"></script>
-  <script src="caja.js?v=2026.05.09.01"></script>
+  <script src="/compartido/js/seguridad.js?v=2026.05.26.01"></script>
+  <script src="caja.js?v=2026.08.28.01"></script>
 
 </body>
 </html>

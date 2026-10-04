@@ -94,6 +94,10 @@ function tienePermisoVentaRapida(clave) {
   return Boolean(PERMISOS_VENTA_RAPIDA_DEFAULT[clave]);
 }
 
+function esSuperUsuario() {
+  return String(permisos?.rol || "").trim().toLowerCase() === "super";
+}
+
 function validarPermisoVentaRapida(clave, mensaje) {
   if (tienePermisoVentaRapida(clave)) return true;
   mostrarMensaje(mensaje || "No tiene permiso para esta accion", "error");
@@ -517,7 +521,7 @@ function mostrarHintFullscreen() {
 
   document.body.appendChild(hint);
 
-  // posicionar EXACTO sobre el botï¿½n
+  // posicionar EXACTO sobre el botón
   const rect = btn.getBoundingClientRect();
 
   hint.style.top = (rect.bottom + 8) + "px";
@@ -1301,7 +1305,9 @@ async function confirmarSabores() {
     : baseDescripcion;
 
   const precioInput = parseGs(valor("editPrecioPizza"));
-  item.precioManual = precioInput > 0 ? precioInput : precioCalculado;
+  item.precioManual = esSuperUsuario()
+    ? (Number.isFinite(precioInput) ? precioInput : precioCalculado)
+    : ((item.precioManual != null ? item.precioManual : item.precio) || item.precioOriginal || precioCalculado);
 
   const saboresTexto = saboresSeleccionados.map(s => s.nombre).join(" / ");
   const obsManual = valor("editObsPizza");
@@ -1514,7 +1520,7 @@ function renderPedido() {
 
   pedidoActual.items.forEach((item, index) => {
 
-    const precioUsado = item.precioManual || item.precio || 0;
+    const precioUsado = (item.precioManual != null ? item.precioManual : item.precio) || 0;
     const subtotal = precioUsado * item.cantidad;
 
     total += subtotal;
@@ -1723,8 +1729,9 @@ if (!item || item.loading) {
     saboresSeleccionados = item.sabores ? [...item.sabores] : [];
 
     setValor("editCantidadPizza", item.cantidad);
-    setValor("editPrecioPizza", formatearGs(item.precioManual || item.precioOriginal || item.precio));
+    setValor("editPrecioPizza", formatearGs((item.precioManual != null ? item.precioManual : item.precioOriginal) || 0));
     setValor("editObsPizza", item.observacion || "");
+    setPrecioEditable("editPrecioPizza");
 
     $("contadorSabores").innerText =
       `${saboresSeleccionados.length} / ${item.max_sabores || productoActualSabores.max_sabores || 4}`;
@@ -1737,10 +1744,20 @@ if (!item || item.loading) {
   }
 
   setValor("editCantidad", item.cantidad);
-  setValor("editPrecio", formatearGs(item.precioManual || item.precio || 0));
+  setValor("editPrecio", formatearGs((item.precioManual != null ? item.precioManual : item.precio) || 0));
   setValor("editObservacion", item.observacion || "");
+  setPrecioEditable("editPrecio");
 
   abrirModal("modalEditarItem");
+}
+
+function setPrecioEditable(inputId) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const esSuper = esSuperUsuario();
+  input.readOnly = !esSuper;
+  if (!esSuper) input.title = "Solo el usuario SUPER puede modificar el precio";
+  else input.removeAttribute("title");
 }
 
 function cerrarModalEditar() {
@@ -1755,7 +1772,9 @@ async function guardarEdicion() {
   const cantidad = parseInt(document.getElementById("editCantidad").value);
   let precioTexto = document.getElementById("editPrecio").value;
   precioTexto = precioTexto.replace(/\./g, "");
-  const precio = parseFloat(precioTexto);
+  const precio = esSuperUsuario()
+    ? parseFloat(precioTexto)
+    : ((item.precioManual != null ? item.precioManual : item.precio) || 0);
   const observacion = document.getElementById("editObservacion").value;
 
   iniciarPersistenciaDetalle();
@@ -2276,21 +2295,21 @@ async function procesarVenta(modo = "detallado") {
 
   if (modoStr !== "rapido" && modoStr !== "rapido_ticket") {
     procesando = true;
-    try {
-      modoCobroSolicitado = modoStr;
-      localStorage.setItem("modoCobroPOS", modoStr);
-      const url = `/modulos/caja/caja.html?venta_id=${encodeURIComponent(String(ventaActual.id))}&from=venta`;
-      const esCapacitor = typeof window.Capacitor !== "undefined";
-      const esPantallaVertical = window.matchMedia(
-        "(max-width: 1024px) and (orientation: portrait)"
-      ).matches;
-      if (esCapacitor || esPantallaVertical) {
-        window.location.href = url;
-      } else {
-        window.open(url, "_blank");
-      }
-    } finally {
-      procesando = false;
+    modoCobroSolicitado = modoStr;
+    localStorage.setItem("modoCobroPOS", modoStr);
+    const url = `/modulos/caja/caja.html?venta_id=${encodeURIComponent(String(ventaActual.id))}&from=venta`;
+    const esCapacitor = typeof window.Capacitor !== "undefined";
+    const esPantallaVertical = window.matchMedia(
+      "(max-width: 1024px) and (orientation: portrait)"
+    ).matches;
+    if (esCapacitor || esPantallaVertical) {
+      window.location.href = url;
+      // navega fuera: no se libera procesando (la página se descarga)
+    } else {
+      window.open(url, "_blank");
+      // La página queda activa: liberar tras cooldown para evitar abrir
+      // dos ventanas de caja con doble-tap rápido sobre la misma venta.
+      setTimeout(() => { procesando = false; }, 2000);
     }
     return;
   }
@@ -2386,10 +2405,6 @@ async function reanudarVenta(id) {
   }
 
   await ejecutarReanudarDesdeEspera(vid);
-}
-
-async function reanudarVentaEnEspera(id) {
-  return reanudarVenta(id);
 }
 
 async function ponerVentaEnEspera() {
@@ -2557,7 +2572,8 @@ function abrirModalFactura() {
 
 function calcularTotalPedido() {
   return pedidoActual.items.reduce((acc, i) => {
-    return acc + (i.precioManual || i.precio) * i.cantidad;
+    const precio = (i.precioManual != null ? i.precioManual : i.precio) || 0;
+    return acc + precio * i.cantidad;
   }, 0);
 }
 
@@ -2635,10 +2651,6 @@ document.getElementById("rucFacturaInput")
   });
 
 
-function normalizarRuc(ruc) {
-  if (!ruc) return null;
-  return ruc.split("-")[0].trim();
-}
 
 async function confirmarFactura() {
 
@@ -2729,28 +2741,12 @@ async function confirmarFactura() {
     }
 
     // =========================
-    // 4. ABRIR FACTURA
+    // 4. BLOQUEAR + ABRIR FACTURA
     // =========================
-  window.location.href = `/modulos/factura/factura_ticket.html?id=${data.id}`;
-
-    mostrarMensaje("✓ Factura generada e impresa", "ok");
-
+    // Marcar como facturada ANTES de navegar; al volver, la venta queda bloqueada.
     ventaBloqueada = true;
-    bloquearVenta();
-    desactivarBotonEfectivizar();
     cerrarModalFactura();
-    // =========================
-    // 5. LIMPIAR
-    // =========================
-    setTimeout(() => {
-
-      const estadoDiv = document.getElementById("estadoPedido");
-      estadoDiv.innerText = "EFECTIVADO";
-      estadoDiv.className = "estado estado-efectivado";
-
-      vaciarPOS();
-
-    }, 300);
+    window.location.href = `/modulos/factura/factura_ticket.html?id=${data.id}`;
 
   } catch (err) {
     console.error(err);
@@ -3242,7 +3238,7 @@ async function printVenta() {
   }
 
   if (pedidoActual.items.length === 0) {
-    mostrarMensaje("El pedido esta vaciï¿½o", "error");
+    mostrarMensaje("El pedido esta vacío", "error");
     return;
   }
 
@@ -3555,9 +3551,14 @@ function abrirModuloVendedor() {
     "seleccionarVendedor",
     "width=900,height=600"
   );
+  if (!popup) {
+    mostrarToast("Permití las ventanas emergentes para seleccionar vendedor", "error");
+    return;
+  }
 
   const interval = setInterval(() => {
-    if (popup.closed) {
+    // Detener si el popup ya no es accesible (cerrado o navegación)
+    if (!popup || popup.closed) {
       clearInterval(interval);
       const vendedorSel = localStorage.getItem("vendedorSeleccionado");
       if (vendedorSel) {
@@ -3580,9 +3581,14 @@ function abrirModuloCliente() {
     "seleccionarCliente",
     "width=900,height=600"
   );
+  if (!popup) {
+    mostrarToast("Permití las ventanas emergentes para seleccionar cliente", "error");
+    return;
+  }
 
   const interval = setInterval(() => {
-    if (popup.closed) {
+    // Detener si el popup ya no es accesible (cerrado o navegación)
+    if (!popup || popup.closed) {
       clearInterval(interval);
       const clienteSel = localStorage.getItem("clienteSeleccionado");
       if (clienteSel) {
@@ -3671,7 +3677,7 @@ function mostrarMensaje(texto, tipo = "error") {
   if (!div) return;
 
   const config = {
-    ok: { icono: "ï¿½", duracion: 1000 },
+    ok: { icono: "&#x2714;", duracion: 1000 },
     error: { icono: "", duracion: 3000 },
     aviso: { icono: "", duracion: 1000 },
   };
@@ -3716,6 +3722,18 @@ function accionPrincipal() {
 }
 
 function salirPOS() {
+  const _params  = new URLSearchParams(window.location.search);
+  const _from    = _params.get('from')    || '';
+  const _ventaId = _params.get('venta_id') || '';
+
+  // Solo vuelve a movimientoVenta cuando el usuario llegó
+  // intencionalmente con doble-clic (tiene venta_id + from).
+  // Si falta alguno de los dos, va a home (navegación accidental).
+  if (_from === 'movimiento_venta' && _ventaId) {
+    window.location.href = '/modulos/movimientoVenta/movimientoVenta.html';
+    return;
+  }
+
   window.location.href = "/home.html";
 }
 
@@ -3887,7 +3905,7 @@ pedidoActual = {
     renderPedido();
     sincronizarEstadoPreparoActual();
 
-    mostrarMensaje(`ï¿½ Venta cargada (ID ${data.id})`, "ok");
+    mostrarMensaje(`✔ Venta cargada (ID ${data.id})`, "ok");
 
   } catch (err) {
     console.error("Error cargando venta:", err);
@@ -4374,7 +4392,7 @@ renderPedido(); //  FALTABA ESTO
       const input = document.getElementById("clienteCodigoFactura");
       const codigo = input.value.trim();
 
-      //  SI HAY CODIGO ï¿½ BUSCAR DIRECTO
+      //  SI HAY CODIGO → BUSCAR DIRECTO
       if (codigo) {
 
         try {
@@ -4400,7 +4418,7 @@ renderPedido(); //  FALTABA ESTO
         return; //  IMPORTANTE: no abrir popup
       }
 
-      //  SI NO HAY CODIGO ï¿½ ABRIR BUSCADOR
+      //  SI NO HAY CODIGO → ABRIR BUSCADOR
       buscarClienteFactura();
 
     });

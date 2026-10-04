@@ -11,6 +11,8 @@
   <button class="btn-volver" onclick="history.back()">Volver</button>
   <div class="titulo"><h1>ALPX</h1><span>Listado de Clientes</span></div>
   <div class="topbar-acciones">
+    <button class="btn-accion btn-pdf" onclick="exportarPDFListado()">⬇ PDF</button>
+    <button class="btn-accion btn-excel" onclick="exportarExcelListado()">⬇ Excel</button>
     <button class="btn-accion btn-imprimir" onclick="window.print()"> Imprimir</button>
   </div>
 </div>
@@ -39,7 +41,7 @@
   </table>
   <div class="informe-pie">
     <span>Generado el <span id="fecha"></span></span>
-    <span>NEXO © Ventas y stock para librerías</span>
+    <span>ALPX Systems © Ventas y stock para librerías</span>
   </div>
 </div>
 </div>
@@ -49,6 +51,7 @@
 <script>
 document.getElementById("fecha").textContent = new Date().toLocaleString("es-PY");
 let todos = [];
+let visibles = [];
 async function cargar() {
   document.getElementById("spinnerOverlay").classList.remove("hidden");
   try {
@@ -72,6 +75,7 @@ function filtrar() {
   ));
 }
 function renderizar(data) {
+  visibles = data;
   const tbody = document.getElementById("cuerpo");
   if (!data.length) { tbody.innerHTML = '<tr><td colspan="6" class="inf-cargando">Sin registros</td></tr>'; return; }
   tbody.innerHTML = data.map((c,i) => `<tr>
@@ -79,9 +83,18 @@ function renderizar(data) {
     <td>${c.ruc||"-"}</td><td>${c.telefono||"-"}</td><td>${c.direccion||"-"}</td>
   </tr>`).join("");
 }
+const COLUMNAS_EXPORT = [{label:"Nombre",campo:"nombre"},{label:"Razón Social",campo:"razon_social"},{label:"RUC",campo:"ruc"},{label:"Teléfono",campo:"telefono"},{label:"Dirección",campo:"direccion"}];
+function exportarExcelListado() {
+  SoftSysExport.exportarExcel("listado_clientes", "Listado de clientes", COLUMNAS_EXPORT, visibles);
+}
+function exportarPDFListado() {
+  SoftSysExport.exportarPDF();
+}
+
 cargar();
 </script>
-<script src="/compartido/js/seguridad.js"></script>
+<script src="/compartido/js/exportarTabla.js?v=2026.05.26.01"></script>
+<script src="/compartido/js/seguridad.js?v=2026.05.26.01"></script>
 </body>
 </html>
 

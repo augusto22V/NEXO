@@ -2,8 +2,12 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../db");
 const bcrypt = require("bcrypt");
+const authMiddleware = require("../Auth.middleware");
 const { ensurePermisosUsuario } = require("../services/permisos.service");
 const { ensureUsuarioSchema } = require("../services/usuario.service");
+
+// Gestión de usuarios es solo para sesiones autenticadas (panel admin)
+router.use(authMiddleware);
 
 // Aplica las migraciones de la tabla usuario antes de servir requests
 router.use(async (_req, res, next) => {

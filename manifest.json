@@ -1,7 +1,7 @@
 ﻿{
-  "name": "SoftSys",
-  "short_name": "SoftSys",
-  "description": "Sistema de ventas",
+  "name": "ALPX",
+  "short_name": "ALPX",
+  "description": "ALPX - Sistema de ventas y stock",
 "start_url": "/home.html",
 "scope": "/",
   "display": "standalone",

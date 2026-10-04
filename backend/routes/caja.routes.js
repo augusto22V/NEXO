@@ -1316,10 +1316,10 @@ router.post("/cobrar", requirePermisoVentaRapida("venta_rapida_efectivizar"), as
       ventasDB.push(venta);
     }
 
-    const pagos = normalizarPagos(req.body, cot);
+    const pagos = totalGeneral === 0 ? [] : normalizarPagos(req.body, cot);
     const resumenPagos = resumirPagos(pagos);
 
-    if (resumenPagos.total_pagado_gs < totalGeneral) {
+    if (totalGeneral > 0 && resumenPagos.total_pagado_gs < totalGeneral) {
       const falta = Math.round(totalGeneral - resumenPagos.total_pagado_gs);
       let detalle = `Monto insuficiente — falta Gs ${falta.toLocaleString("es-PY")}`;
       // Si la diferencia es por cotizacion en cero, decirlo claramente

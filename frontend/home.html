@@ -138,6 +138,7 @@
     <div class="drop-menu" id="menuHerramientas">
       <div class="drop-item" onclick="abrirCalculadora()">Calculadora</div>
       <div class="drop-item" onclick="ir('/modulos/herramientas/herramientas.html', '_blank')">Impresora - Reinicio</div>
+      <div class="drop-item" onclick="reiniciarServidor()">🔄 Reiniciar servidor</div>
     </div>
   </div>
 
@@ -736,6 +737,20 @@ function abrirCalculadora() {
   cerrarMenus();
 }
 
+async function reiniciarServidor() {
+  cerrarMenus();
+  if (!window.__electronAPI?.restartServer) {
+    alert("Esta función solo está disponible en la aplicación de escritorio.");
+    return;
+  }
+  if (!confirm("¿Reiniciar el servidor? La pantalla se recargará automáticamente.")) return;
+  try {
+    await window.__electronAPI.restartServer();
+  } catch (e) {
+    alert("Error al reiniciar: " + e.message);
+  }
+}
+
 function cerrarCalc() {
   document.getElementById("modalCalc").style.display = "none";
 }
@@ -748,7 +763,7 @@ window.addEventListener("DOMContentLoaded", init);
 <div id="modalCalc" class="modal-calc">
   <div class="modal-contenido">
     <div class="modal-header">
-      <span>SYS® Calculadora</span>
+      <span><img src="/recursos/img/alpx-logo.png" style="height:18px; vertical-align:middle; margin-right:6px;"> Calculadora</span>
       <button type="button" onclick="cerrarCalc()">x</button>
     </div>
 

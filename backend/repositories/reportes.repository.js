@@ -82,7 +82,7 @@ async function getComprasDetallado(filters = {}) {
       SELECT
         c.id,
         c.fecha,
-        COALESCE(c.numero_compra, CAST(c.id AS text)) AS numero_movimiento,
+        COALESCE(CAST(c.numero_compra AS text), CAST(c.id AS text)) AS numero_movimiento,
         c.estado,
         c.empresa_id,
         c.moneda_id,

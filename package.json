@@ -32,7 +32,9 @@
       "!**/node_modules/.bin/**",
       "!**/*.md",
       "!**/.git/**",
-      "!backend/uploads/**"
+      "!backend/uploads/**",
+      "!frontend/modulos/config/licencia_generador.html",
+      "!herramientas_vendedor/**"
     ],
     "win": {
       "target": "nsis",

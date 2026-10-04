@@ -382,7 +382,7 @@ function renderTabla(data) {
 
     const abrirVenta = () => {
       if (seleccionarVentaDesdeListado(v)) return;
-      window.location.href = `/modulos/venta/venta_rapida.html?venta_id=${v.id}`;
+      window.location.href = `/modulos/venta/venta_rapida.html?venta_id=${v.id}&from=movimiento_venta`;
     };
 
     tr.addEventListener("dblclick", abrirVenta);
@@ -394,7 +394,9 @@ function renderTabla(data) {
         const now = Date.now();
         const diff = now - lastTap;
 
-        if (diff < 300 && diff > 0) {
+        // 180 ms: ventana corta para doble-tap intencional.
+        // Valores > 300 ms causan activaciones accidentales.
+        if (diff < 180 && diff > 30) {
           e.preventDefault();
           abrirVenta();
         }
@@ -753,6 +755,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (acciones) acciones.style.display = "none";
   } else {
     document.getElementById("situacion").value = "CONCLUIDO";
+
+    // Texto del botón según origen
+    const topBtn = document.querySelector(".btn-volver");
+    if (topBtn) {
+      if (from === "venta" || from === "venta_rapida") {
+        topBtn.textContent = "← Volver a Venta";
+      } else {
+        topBtn.textContent = "← Volver";
+      }
+    }
   }
 
   document.getElementById("btnBuscarClienteFactura")?.addEventListener("click", buscarClienteFactura);
@@ -801,5 +813,12 @@ function salir() {
     }
   }
 
-  window.location.href = "/modulos/venta/venta_rapida.html?rapida=true";
+  // Si vino desde venta (rapida), volver a venta.
+  // Si vino desde home u otro lugar, volver a home.
+  if (from === "venta" || from === "venta_rapida") {
+    window.location.href = "/modulos/venta/venta_rapida.html?rapida=true";
+    return;
+  }
+
+  window.location.href = "/home.html";
 }

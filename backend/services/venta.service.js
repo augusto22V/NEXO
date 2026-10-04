@@ -188,9 +188,10 @@ async function actualizarDetalleVenta(client, detalleId, payload, options = {}) 
   const controlaStock = !producto.no_control_stock;
   const diferenciaCantidad = cantidadNueva - detalle.cantidad;
 
-  if (controlaStock && diferenciaCantidad > 0 && producto.stock < diferenciaCantidad) {
-    throw new Error("Stock insuficiente");
-  }
+  // Se permite vender en negativo (igual que al agregar el producto): no se
+  // bloquea por stock insuficiente. El stock simplemente queda en negativo y
+  // queda como advertencia visible para reponer.
+  const stockInsuficiente = controlaStock && diferenciaCantidad > 0 && producto.stock < diferenciaCantidad;
 
   if (controlaStock && diferenciaCantidad !== 0) {
     await client.query(
@@ -211,6 +212,35 @@ async function actualizarDetalleVenta(client, detalleId, payload, options = {}) 
       referenciaId: detalle.id,
       referenciaTipo: "VENTA_DETALLE_AJUSTE"
     });
+  }
+
+  // Perfil no-SUPER: solo puede cambiar cantidad/observacion, nunca el precio.
+  const keepPrecio = options.keepPrecio === true;
+
+  if (keepPrecio) {
+    const precioActualGs = toNumber(detalle.precio_gs ?? detalle.precio);
+    const subtotalNuevo = cantidadNueva * precioActualGs;
+
+    await client.query(
+      `
+        UPDATE venta_detalle
+        SET cantidad = $1,
+            subtotal = $2,
+            observacion = $3
+        WHERE id = $4
+      `,
+      [cantidadNueva, subtotalNuevo, payload.observacion || null, detalleId]
+    );
+
+    const { totalVenta, comision } = await recalcularVentaTotales(client, detalle.venta_id);
+
+    return {
+      ventaId: detalle.venta_id,
+      totalVenta,
+      comision,
+      stockInsuficiente,
+      precioMantenido: true
+    };
   }
 
   const cotizacion = await getCotizacionActiva(client);
@@ -269,7 +299,8 @@ async function actualizarDetalleVenta(client, detalleId, payload, options = {}) 
   return {
     ventaId: detalle.venta_id,
     totalVenta,
-    comision
+    comision,
+    stockInsuficiente
   };
 }
 

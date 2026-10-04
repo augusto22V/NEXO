@@ -209,7 +209,7 @@ router.get("/reporte", async (req, res) => {
       `
         SELECT
           c.fecha,
-          COALESCE(c.numero_compra, CAST(c.id AS text)) AS numero_movimiento,
+          COALESCE(CAST(c.numero_compra AS text), CAST(c.id AS text)) AS numero_movimiento,
           p.nombre AS proveedor,
           pr.nombre AS producto,
           cd.cantidad,

@@ -3,9 +3,10 @@ const router = express.Router();
 const jwt = require("jsonwebtoken");
 const db = require("../db");
 const bcrypt = require("bcrypt");
+const authMiddleware = require("../Auth.middleware");
 const licenciaService = require("../services/licencia.service");
 
-const JWT_SECRET = "stoptop_secret_2024";
+const JWT_SECRET = process.env.JWT_SECRET || "stoptop_secret_2024";
 
 function getTokenFromRequest(req) {
   if (req.cookies?.token) return req.cookies.token;
@@ -31,9 +32,7 @@ function getPayloadFromRequest(req) {
 ============================================== */
 router.post("/login", async (req, res) => {
   const { empresa_id, terminal_id, usuario, password } = req.body;
-  const bypassAdminDemo = String(usuario || "").trim().toUpperCase() === "ADMIN";
-
-  if (!empresa_id || !terminal_id || !usuario || (!password && !bypassAdminDemo)) {
+  if (!empresa_id || !terminal_id || !usuario || !password) {
     return res.status(400).json({ error: "Faltan datos para iniciar sesion" });
   }
 
@@ -69,13 +68,11 @@ router.post("/login", async (req, res) => {
       ""
     );
 
-    if (!secretActual && !bypassAdminDemo) {
+    if (!secretActual) {
       return res.status(401).json({ error: "Usuario o contrasena incorrectos" });
     }
 
-    if (bypassAdminDemo) {
-      passwordValido = true;
-    } else if ((secretActual || "").startsWith("$2")) {
+    if ((secretActual || "").startsWith("$2")) {
       passwordValido = await bcrypt.compare(password, secretActual);
     } else {
       passwordValido = (secretActual === password);
@@ -318,14 +315,16 @@ router.get("/usuarios/sugerir", async (req, res) => {
 });
 
 /* ==============================================
-   GET /api/auth/usuarios
+   GET /api/auth/usuarios  (requiere sesión, scope por empresa)
 ============================================== */
-router.get("/usuarios", async (req, res) => {
+router.get("/usuarios", authMiddleware, async (req, res) => {
   try {
     const r = await db.query(
       `SELECT id, usuario, nombre, rol, activo
        FROM usuario
-       ORDER BY id`
+       WHERE empresa_id = $1
+       ORDER BY id`,
+      [req.usuario.empresa_id]
     );
     res.json(r.rows);
   } catch (err) {
@@ -334,13 +333,21 @@ router.get("/usuarios", async (req, res) => {
 });
 
 /* ==============================================
-   PUT /api/auth/usuarios/:id
+   PUT /api/auth/usuarios/:id  (requiere sesión, scope por empresa)
 ============================================== */
-router.put("/usuarios/:id", async (req, res) => {
+router.put("/usuarios/:id", authMiddleware, async (req, res) => {
   const { usuario, nombre, password, rol, activo } = req.body;
   const id = Number(req.params.id);
 
   try {
+    // Verificar que el usuario pertenece a la empresa de la sesión
+    const dueno = await db.query(
+      `SELECT id FROM usuario WHERE id = $1 AND empresa_id = $2`,
+      [id, req.usuario.empresa_id]
+    );
+    if (!dueno.rowCount) {
+      return res.status(404).json({ error: "Usuario no encontrado" });
+    }
     if (password && password !== "") {
       const hash = await bcrypt.hash(password, 10);
 

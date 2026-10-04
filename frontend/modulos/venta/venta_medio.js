@@ -111,6 +111,7 @@ const refs = {
   eliminarBtn: document.getElementById("vmEliminarBtn"),
   cancelarBtn: document.getElementById("vmCancelarBtn"),
   enEsperaBtn: document.getElementById("vmEnEsperaBtn"),
+  recuperarBtn: document.getElementById("vmRecuperarBtn"),
   cobroRapidoBtn: document.getElementById("vmCobroRapidoBtn"),
   cobroRapidoTicketBtn: document.getElementById("vmCobroRapidoTicketBtn"),
   cobrarBtn: document.getElementById("vmCobrarBtn"),
@@ -472,6 +473,10 @@ function tienePermiso(clave) {
   return Boolean(PERMISOS_DEFAULT[clave]);
 }
 
+function esSuperUsuario() {
+  return String(state.permisos?.rol || "").trim().toLowerCase() === "super";
+}
+
 function mapProducto(raw, categoriaId = null) {
   return {
     id: toInt(raw.id, 0),
@@ -594,6 +599,13 @@ function abrirEditorItem(itemId) {
   refs.editCantidad.value = String(Math.max(1, toInt(item.cantidad, 1)));
   refs.editPrecio.value = String(Math.max(0, toNumber(item.precio, 0)));
   refs.editObservacion.value = String(item.observacion || "");
+  const esSuper = esSuperUsuario();
+  refs.editPrecio.readOnly = !esSuper;
+  if (!esSuper) {
+    refs.editPrecio.title = "Solo el usuario SUPER puede modificar el precio";
+  } else {
+    refs.editPrecio.removeAttribute("title");
+  }
   abrirModal("vmModalEditarItem");
 }
 
@@ -1598,7 +1610,9 @@ async function guardarEdicionItem() {
   const item = state.pedido.items.find((it) => toInt(it.id, 0) === itemId);
   if (!item) return;
   const cantidad = Math.max(1, toInt(refs.editCantidad.value, toInt(item.cantidad, 1)));
-  const precio = Math.max(0, toNumber(refs.editPrecio.value, toNumber(item.precio, 0)));
+  const precio = esSuperUsuario()
+    ? Math.max(0, toNumber(refs.editPrecio.value, toNumber(item.precio, 0)))
+    : Math.max(0, toNumber(item.precio, 0));
   const observacion = String(refs.editObservacion.value || "").trim();
   const conversion = buildPrecioMultimoneda(precio, MONEDA_IDS.PYG);
   const precioGs = conversion.precio_gs != null ? conversion.precio_gs : precio;
@@ -1813,6 +1827,110 @@ async function ponerPedidoEnEspera() {
     resetPedidoLocal();
   } catch (err) {
     mostrarMensaje(err.message || "No se pudo poner en espera", "error");
+  }
+}
+
+/* =========================================================
+   RECUPERAR PEDIDOS EN ESPERA
+   ========================================================= */
+let _panelEsperaVM = null;
+
+function cerrarPanelEsperaVM() {
+  if (_panelEsperaVM && _panelEsperaVM.parentNode) {
+    _panelEsperaVM.remove();
+    _panelEsperaVM = null;
+  }
+}
+
+async function mostrarPanelRecuperarVM() {
+  cerrarPanelEsperaVM();
+
+  const wrap = document.createElement("div");
+  wrap.id = "vmPanelEspera";
+  wrap.style.cssText =
+    "position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:10050;display:flex;align-items:center;justify-content:center;padding:16px;";
+  const box = document.createElement("div");
+  box.style.cssText =
+    "background:#fff;border-radius:10px;max-width:480px;width:100%;max-height:75vh;overflow:auto;padding:18px;box-shadow:0 8px 24px rgba(0,0,0,.25);";
+  box.innerHTML = `
+    <h3 style="margin:0 0 12px;color:#234">Pedidos en espera</h3>
+    <div id="vmListaEspera" style="min-height:48px;color:#555">Cargando...</div>
+    <div style="margin-top:14px;text-align:right">
+      <button type="button" id="vmCerrarEspera" class="vm-btn vm-btn-neutral">Cerrar</button>
+    </div>`;
+  wrap.appendChild(box);
+  wrap.addEventListener("click", (e) => { if (e.target === wrap) cerrarPanelEsperaVM(); });
+  box.querySelector("#vmCerrarEspera").addEventListener("click", cerrarPanelEsperaVM);
+  document.body.appendChild(wrap);
+  _panelEsperaVM = wrap;
+
+  try {
+    const res = await fetch("/api/venta/en-espera?limit=50", { credentials: "include" });
+    const data = await safeJson(res, []);
+    const ventas = Array.isArray(data) ? data : (data.ventas || data.data || []);
+    const lista = box.querySelector("#vmListaEspera");
+
+    if (!ventas.length) {
+      lista.innerHTML = '<p style="color:#999;text-align:center;padding:16px 0">No hay pedidos en espera</p>';
+      return;
+    }
+
+    lista.innerHTML = "";
+    ventas.forEach((v) => {
+      const totalStr = toNumber(v.total).toLocaleString("es-PY");
+      const nota = v.nota_espera ? ` — ${v.nota_espera}` : "";
+      const cliente = v.cliente_nombre ? `<br><small style="color:#888">${v.cliente_nombre}</small>` : "";
+      const row = document.createElement("div");
+      row.style.cssText =
+        "display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid #eee;";
+      row.innerHTML = `
+        <div>
+          <span style="font-weight:600">Pedido #${v.numero ?? v.id}</span>
+          <span style="color:#555"> — Gs ${totalStr}${nota}</span>
+          ${cliente}
+        </div>`;
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.textContent = "Recuperar";
+      btn.className = "vm-btn vm-btn-cobrar";
+      btn.style.cssText = "padding:8px 14px;flex:0 0 auto";
+      btn.addEventListener("click", () => reanudarPedidoVM(v.id));
+      row.appendChild(btn);
+      lista.appendChild(row);
+    });
+  } catch (_) {
+    const lista = box.querySelector("#vmListaEspera");
+    if (lista) lista.innerHTML = '<p style="color:#c62828;text-align:center">Error cargando pedidos en espera</p>';
+  }
+}
+
+async function reanudarPedidoVM(id) {
+  const vid = toInt(id, 0);
+  if (!vid) return;
+
+  // Si el carrito actual tiene items sin guardar, avisar
+  if (state.pedido.items.length > 0) {
+    if (!confirm("El pedido actual tiene productos. ¿Querés cambiarlo por el pedido en espera?")) {
+      return;
+    }
+  }
+
+  try {
+    const res = await fetch(`/api/venta/reanudar/${vid}`, {
+      method: "POST",
+      credentials: "include",
+      headers: baseHeaders
+    });
+    const data = await safeJson(res, {});
+    if (!res.ok) {
+      mostrarMensaje(data.error || "No se pudo recuperar el pedido", "error");
+      return;
+    }
+    cerrarPanelEsperaVM();
+    await cargarVentaPorId(vid);
+    mostrarMensaje("Pedido recuperado", "ok");
+  } catch (e) {
+    mostrarMensaje("Error de conexión al recuperar", "error");
   }
 }
 
@@ -2460,6 +2578,7 @@ function bindEventos() {
   refs.cancelarBtn.addEventListener("click", cancelarPedido);
   refs.cobrarBtn.addEventListener("click", cobrarPedido);
   refs.enEsperaBtn?.addEventListener("click", ponerPedidoEnEspera);
+  refs.recuperarBtn?.addEventListener("click", mostrarPanelRecuperarVM);
   refs.cobroRapidoBtn?.addEventListener("click", () => cobrarPedidoModo("rapido"));
   refs.cobroRapidoTicketBtn?.addEventListener("click", () => cobrarPedidoModo("rapido_ticket"));
 

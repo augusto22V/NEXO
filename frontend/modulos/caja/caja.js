@@ -8,6 +8,87 @@ let cobrando = false;
 
 const PERMISOS_DEFAULT = Object.freeze({ venta_rapida_efectivizar: true });
 
+/* === FORMATO / UTILIDADES === */
+function fmtGs(n) {
+  return Math.round(Number(n) || 0).toLocaleString("es-PY");
+}
+
+function fmtDecimal(n, maxDec = 2) {
+  const num = Number(n) || 0;
+  const fixed = num.toFixed(maxDec);
+  return fixed.replace(/\.0+$/, "").replace(/,0+$/, "").replace(".", ",");
+}
+
+// Convierte el texto que el usuario teclea a un numero (ignora puntos/guias de miles)
+function parseMontoTexto(txt) {
+  if (txt == null) return 0;
+  const limpio = String(txt).replace(/[^\d.,-]/g, "").replace(/\./g, "").replace(",", ".");
+  const n = Number(limpio);
+  return Number.isFinite(n) ? n : 0;
+}
+
+// Parsea montos decimales (BRL/USD) tolerando coma o punto como separador decimal
+function parseMontoTextoDecimal(txt) {
+  if (txt == null) return 0;
+  let limpio = String(txt).replace(/[^\d.,-]/g, "");
+  // Si hay coma y punto: el ultimo es el separador decimal, el resto son miles
+  if (limpio.includes(",") && limpio.includes(".")) {
+    if (limpio.lastIndexOf(",") > limpio.lastIndexOf(".")) {
+      limpio = limpio.replace(/\./g, "").replace(",", ".");
+    } else {
+      limpio = limpio.replace(/,/g, "");
+    }
+  } else if (limpio.includes(",")) {
+    limpio = limpio.replace(",", ".");
+  }
+  const n = Number(limpio);
+  return Number.isFinite(n) ? n : 0;
+}
+
+// Sufijo/etiqueta visible segun la moneda seleccionada
+function simbMoneda(moneda) {
+  if (moneda === "BRL") return "R$";
+  if (moneda === "USD") return "US$";
+  return "Gs";
+}
+
+// Actualiza la etiqueta de moneda pegada al input
+function actualizarEtiquetaMoneda() {
+  const moneda = document.getElementById("monedaSel")?.value || "PYG";
+  const label = document.getElementById("montoMonedaLabel");
+  if (label) label.textContent = simbMoneda(moneda);
+}
+
+// Aplica separador de miles en vivo mientras se escribe, segun la moneda.
+// Gs -> enteros con separador de miles; BRL/USD -> decimales con coma.
+function formatearInputMonto(el) {
+  if (!el) return;
+  const moneda = document.getElementById("monedaSel")?.value || "PYG";
+  const raw = el.value;
+
+  // Guardar posicion del cursor para no perderla al reformatear
+  const cursor = (el.selectionStart != null) ? el.selectionStart : raw.length;
+
+  let nuevo = raw;
+  if (moneda === "PYG") {
+    const n = parseMontoTexto(raw);
+    nuevo = n === 0 ? "" : fmtGs(Math.trunc(n));
+  } else {
+    // BRL/USD: format con separador de miles y coma decimal (6 decimales tecleados)
+    const num = parseMontoTextoDecimal(raw);
+    nuevo = num === 0 ? "" : num.toLocaleString("es-PY", { maximumFractionDigits: 6 }).replace(/\./g, ",");
+  }
+
+  if (nuevo !== raw) {
+    el.value = nuevo;
+    // Reubicar cursor al final (lo mas simple y predecible para montos)
+    const pos = el.value.length;
+    if (el.setSelectionRange) {
+      try { el.setSelectionRange(pos, pos); } catch (_) {}
+    }
+  }
+}
+
 /* === INIT === */
 document.addEventListener("DOMContentLoaded", async () => {
   centrarVentana();
@@ -19,8 +100,23 @@ document.addEventListener("DOMContentLoaded", async () => {
   setInterval(actualizarHora, 1000);
 
   // Cuando cambia el método de pago, ajusta dinámicamente las monedas válidas
-  document.getElementById("metodoPagoSel")?.addEventListener("change", aplicarMonedasSegunMetodo);
+  document.getElementById("metodoPagoSel")?.addEventListener("change", () => {
+    aplicarMonedasSegunMetodo();
+    document.getElementById("montoInput")?.focus();
+  });
+  document.getElementById("monedaSel")?.addEventListener("change", () => {
+    actualizarEtiquetaMoneda();
+    const mi = document.getElementById("montoInput");
+    if (mi) {
+      mi.value = "";
+      mi.focus();
+    }
+  });
   aplicarMonedasSegunMetodo();
+  actualizarEtiquetaMoneda();
+
+  // Enfocar el monto al arrancar para cobrar directo con teclado
+  setTimeout(() => document.getElementById("montoInput")?.focus(), 250);
 });
 
 /* === MONEDA SEGÚN MÉTODO === */
@@ -47,6 +143,8 @@ function aplicarMonedasSegunMetodo() {
     monedaSel.classList.remove("moneda-bloqueada");
     monedaSel.title = "";
   }
+
+  actualizarEtiquetaMoneda();
 }
 
 /* === CENTRAR VENTANA === */
@@ -54,10 +152,25 @@ function centrarVentana() {
   try {
     const w = Math.min(screen.availWidth,  960);
     const h = Math.min(screen.availHeight, 680);
+
+    // Forzamos el tamaño antes de centrar para que el calculo de posicion sea correcto
+    window.resizeTo(w, h);
+
+    // Intentamos centrar hasta que la ventana quede en su lugar
+    // (los popups pueden tardar en aplicar moveTo; reintentamos un par de veces)
     const left = Math.round((screen.availWidth  - w) / 2);
     const top  = Math.round((screen.availHeight - h) / 2);
-    window.moveTo(left, top);
-    window.resizeTo(w, h);
+
+    const intentarCentrar = (intento = 0) => {
+      try {
+        window.moveTo(left, top);
+        window.moveTo(left, top);
+        if (intento < 8) setTimeout(() => window.moveTo(left, top), 40 * (intento + 1));
+      } catch (_) {}
+    };
+
+    intentarCentrar(0);
+    setTimeout(() => intentarCentrar(2), 120);
   } catch (_) {}
 }
 
@@ -176,14 +289,14 @@ function renderItems(detalles) {
   const html = detalles.map(item => {
     const nombre  = item.descripcion || item.producto_nombre || "(sin nombre)";
     const gs      = Number(item.subtotal || 0);
-    const brlStr  = cotizacion.brl > 0 ? (gs / cotizacion.brl).toFixed(2).replace(".", ",") : "—";
-    const usdStr  = cotizacion.usd > 0 ? (gs / cotizacion.usd).toFixed(2).replace(".", ",") : "—";
+    const brlStr  = cotizacion.brl > 0 ? "R$ " + fmtDecimal(gs / cotizacion.brl) : "—";
+    const usdStr  = cotizacion.usd > 0 ? "US$ " + fmtDecimal(gs / cotizacion.usd) : "—";
     const qty     = fmtCantidad(item.cantidad);
 
     return `<div class="item-card">
       <div class="item-nombre"><span class="item-qty">${qty}×</span> ${nombre}</div>
       <div class="item-montos">
-        <span class="item-moneda-row"><span class="item-flag">🇵🇾</span>${gs.toLocaleString("es-PY")}</span>
+        <span class="item-moneda-row"><span class="item-flag">🇵🇾</span>${fmtGs(gs)} Gs</span>
         <span class="item-moneda-row"><span class="item-flag">🇧🇷</span>${brlStr}</span>
         <span class="item-moneda-row"><span class="item-flag">🇺🇸</span>${usdStr}</span>
       </div>
@@ -202,14 +315,14 @@ function actualizarHeader() {
   const pendienteGs = Math.max(0, totalGs - pagadoGs);
 
   // Fila "Total"
-  setEl("totalHeaderGs",  totalGs.toLocaleString("es-PY"));
-  setEl("totalHeaderBrl", cotizacion.brl > 0 ? (totalGs / cotizacion.brl).toFixed(2).replace(".", ",") : "0,00");
-  setEl("totalHeaderUsd", cotizacion.usd > 0 ? (totalGs / cotizacion.usd).toFixed(2).replace(".", ",") : "0,00");
+  setEl("totalHeaderGs",  fmtGs(totalGs) + " Gs");
+  setEl("totalHeaderBrl", fmtDecimal(cotizacion.brl > 0 ? totalGs / cotizacion.brl : 0));
+  setEl("totalHeaderUsd", fmtDecimal(cotizacion.usd > 0 ? totalGs / cotizacion.usd : 0));
 
   // Fila "A pagar"
-  setEl("aPagarGs",  pendienteGs.toLocaleString("es-PY"));
-  setEl("aPagarBrl", cotizacion.brl > 0 && pendienteGs > 0 ? (pendienteGs / cotizacion.brl).toFixed(2).replace(".", ",") : "0,00");
-  setEl("aPagarUsd", cotizacion.usd > 0 && pendienteGs > 0 ? (pendienteGs / cotizacion.usd).toFixed(2).replace(".", ",") : "0,00");
+  setEl("aPagarGs",  fmtGs(pendienteGs) + " Gs");
+  setEl("aPagarBrl", fmtDecimal(cotizacion.brl > 0 && pendienteGs > 0 ? pendienteGs / cotizacion.brl : 0));
+  setEl("aPagarUsd", fmtDecimal(cotizacion.usd > 0 && pendienteGs > 0 ? pendienteGs / cotizacion.usd : 0));
 
   const apRow = document.getElementById("filaPagar");
   if (apRow) {
@@ -229,7 +342,9 @@ function agregarPago() {
 
   const metodo = document.getElementById("metodoPagoSel")?.value || "EFECTIVO";
   const moneda = document.getElementById("monedaSel")?.value    || "PYG";
-  const monto  = parseFloat(document.getElementById("montoInput")?.value || "0");
+  const monto  = moneda === "PYG"
+    ? parseMontoTexto(document.getElementById("montoInput")?.value)
+    : parseMontoTextoDecimal(document.getElementById("montoInput")?.value);
 
   if (!monto || monto <= 0) { mostrarToast("Ingrese un monto válido", "error"); return; }
 
@@ -270,9 +385,9 @@ function renderPagos() {
 
     let vueltoStr = "—";
     if (vueltoGs > 0) {
-      const vGs  = Math.round(vueltoGs).toLocaleString("es-PY");
-      const vBrl = cotizacion.brl > 0 ? (vueltoGs / cotizacion.brl).toFixed(2).replace(".", ",") : null;
-      const vUsd = cotizacion.usd > 0 ? (vueltoGs / cotizacion.usd).toFixed(2).replace(".", ",") : null;
+      const vGs  = fmtGs(vueltoGs) + " Gs";
+      const vBrl = cotizacion.brl > 0 ? "R$ " + fmtDecimal(vueltoGs / cotizacion.brl) : null;
+      const vUsd = cotizacion.usd > 0 ? "US$ " + fmtDecimal(vueltoGs / cotizacion.usd) : null;
       vueltoStr = `<div class="vuelto-multi">
         <span class="vm-row"><span class="vm-flag">🇵🇾</span>${vGs}</span>
         ${vBrl ? `<span class="vm-row"><span class="vm-flag">🇧🇷</span>${vBrl}</span>` : ""}
@@ -281,8 +396,8 @@ function renderPagos() {
     }
 
     const montoFmt = p.moneda === "PYG"
-      ? Math.round(p.monto).toLocaleString("es-PY")
-      : p.monto.toFixed(2).replace(".", ",");
+      ? fmtGs(p.monto) + " Gs"
+      : (p.moneda === "BRL" ? "R$ " : "US$ ") + fmtDecimal(p.monto);
 
     return `<tr>
       <td class="vuelto-col ${vueltoGs > 0 ? "vuelto-positivo" : ""}">${vueltoStr}</td>
@@ -375,7 +490,11 @@ async function efectivizar(imprimirTicket = true) {
   }
   if (cobrando) return;
   if (!ventaActual) { mostrarToast("Sin venta cargada", "error"); return; }
-  if (!pagos.length) { mostrarToast("Agregue al menos un pago", "error"); return; }
+
+  const totalGs  = Number(ventaActual.total) || 0;
+  const esVentaCero = totalGs === 0;
+
+  if (!pagos.length && !esVentaCero) { mostrarToast("Agregue al menos un pago", "error"); return; }
 
   // Cliente obligatorio si hay pagos por tarjeta o transferencia (para SIFEN/respaldo)
   const tienePagoElectronico = pagos.some(
@@ -387,12 +506,11 @@ async function efectivizar(imprimirTicket = true) {
     return;
   }
 
-  const totalGs  = Number(ventaActual.total);
   const pagadoGs = pagos.reduce((s, p) => s + p.montoGs, 0);
 
   if (pagadoGs < totalGs) {
     const falta = Math.round(totalGs - pagadoGs);
-    mostrarToast(`Monto insuficiente — falta Gs ${falta.toLocaleString("es-PY")}`, "error");
+    mostrarToast(`Monto insuficiente — falta ${fmtGs(falta)} Gs`, "error");
     return;
   }
 
@@ -450,7 +568,7 @@ async function efectivizar(imprimirTicket = true) {
     const vueltoGs = Math.max(0, Math.round(pagadoGs - totalGs));
     mostrarToast(
       vueltoGs > 0
-        ? `✔ Cobrado — Vuelto: Gs ${vueltoGs.toLocaleString("es-PY")}`
+        ? `✔ Cobrado — Vuelto: ${fmtGs(vueltoGs)} Gs`
         : "✔ Cobrado correctamente",
       "success"
     );

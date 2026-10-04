@@ -18,9 +18,11 @@ const { ensureMenuDigitalSchema } = require("./services/menu_digital.service");
 const { ensureKitchenPrintSchema } = require("./services/cocina_print.service");
 const { ensureTerminalConfigSchema } = require("./services/terminal_config.service");
 const { ensureSchemaCompat } = require("./services/schema_compat.service");
+const { bootstrapPrimerArranque } = require("./services/bootstrap.service");
+const { ensureProduccionSchema } = require("./services/produccion.schema.service");
 const { POS_SIN_COCINA } = require("./config/pos.mode");
 
-const JWT_SECRET       = "stoptop_secret_2024";
+const JWT_SECRET       = process.env.JWT_SECRET || "stoptop_secret_2024";
 const PAGINAS_PUBLICAS = ["/login/login.html"];
 const DEV_MODE         = true; 
 const ASSET_VERSION    = process.env.ASSET_VERSION || "2026.04.17.03";
@@ -78,7 +80,29 @@ app.use("/recursos", express.static(path.join(__dirname, "../frontend/recursos")
    CONFIGURACION BASE
 ============================== */
 
-app.use(cors({ origin: true, credentials: true }));
+// ─── CORS: permitir solo orígenes confiables (con cookie de sesión) ───────────
+// Acepta: app de escritorio (Electron, sin origin), red local (LAN por IP),
+// y apps móviles (Capacitor/Ionic). Bloquea sitios públicos de internet, que es
+// el vector real por el que un sitio malicioso podría usar tu sesión.
+function origenPermitido(origin) {
+  if (!origin) return true;                              // Electron / app nativa / mismo origen
+  if (/^(capacitor|ionic):\/\//i.test(origin)) return true; // apps móviles
+  try {
+    const { hostname } = new URL(origin);
+    if (hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1") return true;
+    if (/^192\.168\.\d{1,3}\.\d{1,3}$/.test(hostname)) return true;            // 192.168.x.x
+    if (/^10\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(hostname)) return true;          // 10.x.x.x
+    if (/^172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}$/.test(hostname)) return true; // 172.16-31.x.x
+  } catch (_) {
+    return false;
+  }
+  return false;
+}
+
+app.use(cors({
+  origin: (origin, cb) => cb(null, origenPermitido(origin)),
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -211,6 +235,15 @@ app.use(globalErrorMiddleware);
 const PORT = Number(process.env.PORT) || 3000;
 
 async function bootstrapSchemas() {
+  // PASO 0 — Primer arranque: crear la BD, el esquema y los datos iniciales si
+  // es una instalación limpia. Debe ir PRIMERO: las demás migraciones usan el
+  // pool y fallarían si la base aún no existe.
+  try {
+    await bootstrapPrimerArranque();
+  } catch (error) {
+    console.error("[bootstrap] No se pudo inicializar la base en primer arranque:", error.message);
+  }
+
   try {
     await ensureSchemaCompat();
   } catch (error) {
@@ -289,6 +322,12 @@ async function bootstrapSchemas() {
     await ensureTerminalConfigSchema();
   } catch (error) {
     console.error("No se pudo preparar configuracion extendida de terminal:", error.message);
+  }
+
+  try {
+    await ensureProduccionSchema();
+  } catch (error) {
+    console.error("No se pudo preparar esquema de produccion:", error.message);
   }
 }
 

@@ -266,7 +266,10 @@ async function verificarSeguridad() {
       }
     }
 
-    const habilitada = servicio.estaRutaHabilitadaParaUsuario(user, paginaActual);
+    // Páginas abiertas en modo=seleccion son helpers lanzados desde otro módulo
+    // con acceso ya validado — el backend protege los datos por sesión.
+    const esModoSeleccion = new URLSearchParams(window.location.search).get("modo") === "seleccion";
+    const habilitada = esModoSeleccion || servicio.estaRutaHabilitadaParaUsuario(user, paginaActual);
     if (!habilitada) {
       const programa = servicio.buscarProgramaPorRuta(paginaActual);
       let destino = redireccionPorZona(programa);

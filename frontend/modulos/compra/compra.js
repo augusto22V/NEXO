@@ -537,8 +537,8 @@ function showError(message) {
 }
 
 function showConfirm({ title, message, onConfirm }) {
-  if (window.baseModalOpenConfirmGeneric) {
-    baseModalOpenConfirmGeneric({
+  if (window.baseModalOpenConfirm) {
+    baseModalOpenConfirm({
       titulo: title,
       mensaje: message,
       onConfirm
@@ -841,6 +841,22 @@ function bindEvents() {
   // el relay localStorage popup → mainWindow, para consumo inmediato sin
   // depender del timer de 250ms ni del evento focus.
   window.addEventListener("__relayStorageReady", consumirSeleccionesPendientes);
+
+  // BroadcastChannel: mecanismo primario para recibir selecciones de popups.
+  // Funciona directamente entre ventanas Electron del mismo origen/sesión,
+  // sin necesitar relay ni executeJavaScript desde el proceso principal.
+  try {
+    const bcSel = new BroadcastChannel('alpx_selector_channel');
+    bcSel.onmessage = ({ data }) => {
+      if (!data || !data.type) return;
+      if (data.type === 'proveedor')  recibirProveedor(data.payload);
+      else if (data.type === 'comprador') recibirComprador(data.payload);
+      else if (data.type === 'producto')  recibirProducto(data.payload);
+      else if (data.type === 'operacion') recibirOperacion(data.payload);
+      else if (data.type === 'compra')    recibirCompra(data.payload);
+    };
+  } catch (_) { /* BroadcastChannel no disponible — se usan mecanismos de respaldo */ }
+
   window.addEventListener("beforeunload", prevenirSalidaConItems);
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) consumirSeleccionesPendientes();
@@ -2118,17 +2134,23 @@ function consumirSeleccionesPendientes() {
 }
 
 function registrarCallbacksSelectores() {
-  window.recibirCompra = (payload) => recibirCompra(payload);
-  window.recibirOperacion = (payload) => recibirOperacion(payload);
-  window.recibirProveedor = (payload) => recibirProveedor(payload);
-  window.recibirComprador = (payload) => recibirComprador(payload);
-  window.recibirProducto = (payload) => recibirProducto(payload);
+  // Las declaraciones de función top-level YA son propiedades de window
+  // automáticamente (hoisting global). NO se sobreescriben con wrappers de
+  // flecha: hacerlo crea recursión infinita porque dentro del wrapper
+  // window.recibirX apunta al mismo wrapper recién asignado.
+  // Los popups con window.opener acceden a las funciones directamente.
 }
 
 function salir() {
+  // Si entró desde Consulta/Movimiento de compra, volver ahí en vez de al inicio.
+  const fromParam = new URLSearchParams(window.location.search).get("from") || "";
+  const destino = fromParam === "movimiento_compra"
+    ? "/modulos/movimientoCompra/movimientoCompra.html"
+    : "../../home.html";
+
   const ejecutarSalida = () => {
     habilitarSalidaPagina();
-    window.location.href = "../../home.html";
+    window.location.href = destino;
   };
 
   if (!tieneItemsEnDetalle()) {

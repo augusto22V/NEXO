@@ -61,7 +61,7 @@ function cerrarAdvertencia(refocus = false) {
 
 function volverSeguro() {
   if (formDirty) {
-    baseModalOpenConfirmGeneric({
+    baseModalOpenConfirm({
       titulo: "Salir",
       mensaje: "Hay cambios sin guardar. Desea salir?",
       onConfirm: () => {
@@ -212,7 +212,7 @@ async function guardar() {
 
 async function eliminar() {
   if (!tipoPedidoId.value) return;
-  baseModalOpenConfirmGeneric({
+  baseModalOpenConfirm({
     titulo: "Eliminar",
     mensaje: "Desea eliminar el tipo de pedido seleccionado?",
     onConfirm: async () => {

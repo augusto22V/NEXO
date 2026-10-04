@@ -11,6 +11,8 @@
   <button class="btn-volver" onclick="history.back()">Volver</button>
   <div class="titulo"><h1>ALPX</h1><span>Listado de libros y artículos</span></div>
   <div class="topbar-acciones">
+    <button class="btn-accion btn-pdf" onclick="exportarPDFListado()">⬇ PDF</button>
+    <button class="btn-accion btn-excel" onclick="exportarExcelListado()">⬇ Excel</button>
     <button class="btn-accion btn-imprimir" onclick="window.print()"> Imprimir</button>
   </div>
 </div>
@@ -39,7 +41,7 @@
   </table>
   <div class="informe-pie">
     <span>Generado el <span id="fecha"></span></span>
-    <span>NEXO © Ventas y stock para librerías</span>
+    <span>ALPX Systems © Ventas y stock para librerías</span>
   </div>
 </div>
 </div>
@@ -49,10 +51,21 @@
 <script>
 document.getElementById("fecha").textContent = new Date().toLocaleString("es-PY");
 let todos = [];
+let visibles = [];
+
+// Formatea stock numérico: 1.000000 → "1", 1.5 → "1,5"
+function fmtStock(v) {
+  if (v == null || v === "") return "-";
+  return Number(v).toLocaleString("es-PY");
+}
+function fmtPrecio(p) {
+  return "Gs " + Number(p.precio || p.precio_venta || 0).toLocaleString("es-PY");
+}
+
 async function cargar() {
   document.getElementById("spinnerOverlay").classList.remove("hidden");
   try {
-    const res = await fetch("/api/productos");
+    const res = await fetch("/api/productos?limit=100000");
     todos = await res.json();
     renderizar(todos);
   } catch {
@@ -61,26 +74,51 @@ async function cargar() {
     document.getElementById("spinnerOverlay").classList.add("hidden");
   }
 }
+// Código mostrado: código de barras si tiene, si no el ID interno
+function fmtCodigo(p) {
+  return (p.codigo_barra && String(p.codigo_barra).trim()) || String(p.id || "-");
+}
+function fmtCategoria(p) {
+  return p.categoria || "-";
+}
+
 function filtrar() {
   const q = document.getElementById("buscador").value.toLowerCase();
   renderizar(todos.filter(p =>
     (p.nombre||"").toLowerCase().includes(q) ||
-    (p.codigo||"").toLowerCase().includes(q) ||
+    fmtCodigo(p).toLowerCase().includes(q) ||
     (p.categoria||"").toLowerCase().includes(q)
   ));
 }
 function renderizar(data) {
+  visibles = data;
   const tbody = document.getElementById("cuerpo");
   if (!data.length) { tbody.innerHTML = '<tr><td colspan="6" class="inf-cargando">Sin registros</td></tr>'; return; }
   tbody.innerHTML = data.map((p,i) => `<tr>
-    <td>${i+1}</td><td>${p.codigo||"-"}</td><td>${p.nombre||"-"}</td><td>${p.categoria||"-"}</td>
-    <td class="text-right">Gs ${Number(p.precio||p.precio_venta||0).toLocaleString("es-PY")}</td>
-    <td class="text-right">${p.stock??"-"}</td>
+    <td>${i+1}</td><td>${fmtCodigo(p)}</td><td>${p.nombre||"-"}</td><td>${fmtCategoria(p)}</td>
+    <td class="text-right">${fmtPrecio(p)}</td>
+    <td class="text-right">${fmtStock(p.stock)}</td>
   </tr>`).join("");
 }
+
+const COLUMNAS_EXPORT = [
+  { label: "Código",    valor: (p) => fmtCodigo(p) },
+  { label: "Nombre",    campo: "nombre" },
+  { label: "Categoría", valor: (p) => fmtCategoria(p) },
+  { label: "Precio",    valor: (p) => fmtPrecio(p) },
+  { label: "Stock",     valor: (p) => fmtStock(p.stock) },
+];
+function exportarExcelListado() {
+  SoftSysExport.exportarExcel("listado_productos", "Listado de libros y artículos", COLUMNAS_EXPORT, visibles);
+}
+function exportarPDFListado() {
+  SoftSysExport.exportarPDF("listado_productos", "Listado de libros y artículos", COLUMNAS_EXPORT, visibles);
+}
+
 cargar();
 </script>
-<script src="/compartido/js/seguridad.js"></script>
+<script src="/compartido/js/exportarTabla.js?v=2026.05.31.02"></script>
+<script src="/compartido/js/seguridad.js?v=2026.05.26.01"></script>
 </body>
 </html>
 

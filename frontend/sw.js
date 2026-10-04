@@ -28,7 +28,7 @@ const CORE_ASSETS = [
   "/modulos/venta/venta_rapida.js",
   "/modulos/venta/venta_medio.js",
   "/recursos/css/all.min.css",
-  "/recursos/img/logo_softsys.png",
+  "/recursos/img/alpx-logo.png",
   "/recursos/img/icono.png",
   "/recursos/webfonts/fa-solid-900.woff2",
   "/recursos/webfonts/fa-regular-400.woff2",

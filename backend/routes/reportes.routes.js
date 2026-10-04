@@ -1,6 +1,5 @@
 const express = require("express");
-const fs = require("fs");
-const path = require("path");
+const { PassThrough } = require("stream");
 const ExcelJS = require("exceljs");
 const PDFDocument = require("pdfkit");
 const pool = require("../db");
@@ -10,14 +9,7 @@ const authMiddleware = require("../Auth.middleware");
 const reportesService = require("../services/reportes.service");
 const { ensureComisionSchema } = require("../services/comision.service");
 
-const EXPORT_DIR = "C:\\Sys\\doc";
-
 router.use(authMiddleware);
-
-function ensureExportDir() {
-  fs.mkdirSync(EXPORT_DIR, { recursive: true });
-  return EXPORT_DIR;
-}
 
 function safeText(value) {
   return String(value ?? "").trim();
@@ -91,7 +83,7 @@ function todayIso() {
   return `${y}-${m}-${day}`;
 }
 
-async function writeXlsxFile(payload, fullPath) {
+async function buildXlsxBuffer(payload) {
   const workbook = new ExcelJS.Workbook();
   const ws = workbook.addWorksheet("Reporte");
 
@@ -149,17 +141,23 @@ async function writeXlsxFile(payload, fullPath) {
     column.width = Math.min(max + 2, 45);
   });
 
-  await workbook.xlsx.writeFile(fullPath);
+  // Generar en memoria como Buffer (sin escribir a disco)
+  return await workbook.xlsx.writeBuffer();
+}
+
+function safeW(w, fallback = 45) {
+  const n = Number(w);
+  return Number.isFinite(n) && n > 0 ? n : fallback;
 }
 
 function drawPdfTableHeader(doc, x, y, colWidths, headers, rowHeight) {
   let cursorX = x;
   headers.forEach((h, idx) => {
-    const w = colWidths[idx];
+    const w = safeW(colWidths[idx]);
     doc.rect(cursorX, y, w, rowHeight).fillAndStroke("#1F4E78", "#CCCCCC");
     doc.fillColor("#FFFFFF")
       .fontSize(9)
-      .text(String(h || ""), cursorX + 3, y + 4, { width: w - 6, align: "center" });
+      .text(String(h || ""), cursorX + 3, y + 4, { width: Math.max(6, w - 6), align: "center" });
     cursorX += w;
   });
   doc.fillColor("#111111");
@@ -168,8 +166,9 @@ function drawPdfTableHeader(doc, x, y, colWidths, headers, rowHeight) {
 function computeRowHeight(doc, row, colWidths) {
   let maxHeight = 16;
   row.forEach((cell, idx) => {
+    const w = safeW(colWidths[idx]);
     const text = String(cell ?? "");
-    const h = doc.heightOfString(text, { width: colWidths[idx] - 6, align: "left" }) + 8;
+    const h = doc.heightOfString(text, { width: Math.max(6, w - 6), align: "left" }) + 8;
     if (h > maxHeight) maxHeight = h;
   });
   return maxHeight;
@@ -178,50 +177,67 @@ function computeRowHeight(doc, row, colWidths) {
 function drawPdfDataRow(doc, x, y, row, colWidths, rowHeight) {
   let cursorX = x;
   row.forEach((cell, idx) => {
-    const w = colWidths[idx];
+    const w = safeW(colWidths[idx]);
     doc.rect(cursorX, y, w, rowHeight).stroke("#DDDDDD");
     doc.fontSize(8).fillColor("#111111")
-      .text(String(cell ?? ""), cursorX + 3, y + 4, { width: w - 6, align: "left" });
+      .text(String(cell ?? ""), cursorX + 3, y + 4, { width: Math.max(6, w - 6), align: "left" });
     cursorX += w;
   });
 }
 
-async function writePdfFile(payload, fullPath) {
-  await new Promise((resolve, reject) => {
+async function buildPdfBuffer(payload) {
+  return new Promise((resolve, reject) => {
     const doc = new PDFDocument({ size: "A4", margin: 30 });
-    const stream = fs.createWriteStream(fullPath);
-    doc.pipe(stream);
+    const chunks = [];
+    const pass = new PassThrough();
+    pass.on("data", (chunk) => chunks.push(chunk));
+    pass.on("end", () => resolve(Buffer.concat(chunks)));
+    pass.on("error", reject);
+    doc.on("error", reject);
+    doc.pipe(pass);
 
     doc.fontSize(16).text(payload.title, { align: "left" });
     doc.moveDown(0.5);
-    doc.fontSize(10).text(`Tipo: ${payload.tipo}`);
-    doc.text(`Desde: ${payload.desde}`);
-    doc.text(`Hasta: ${payload.hasta}`);
+    // Meta opcional: solo se muestra si tiene valor (los listados no la usan).
+    doc.fontSize(10);
+    if (payload.tipo)  doc.text(`Tipo: ${payload.tipo}`);
+    if (payload.desde) doc.text(`Desde: ${payload.desde}`);
+    if (payload.hasta) doc.text(`Hasta: ${payload.hasta}`);
     doc.moveDown(0.8);
 
-    const pageWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right;
-    const colCount = payload.headers.length || 1;
+    const { left, right, top, bottom } = doc.page.margins;
+    const pageWidth = doc.page.width - left - right;
+    const colCount = (payload.headers && payload.headers.length) || 1;
     const colWidth = Math.max(45, Math.floor(pageWidth / colCount));
     const colWidths = Array.from({ length: colCount }, () => colWidth);
 
     let y = doc.y;
-    const x = doc.page.margins.left;
+    const x = left;
     const headerHeight = 22;
 
     drawPdfTableHeader(doc, x, y, colWidths, payload.headers, headerHeight);
     y += headerHeight;
 
-    payload.rows.forEach((row) => {
-      const rowHeight = computeRowHeight(doc, row, colWidths);
-      const bottomLimit = doc.page.height - doc.page.margins.bottom;
-      if (y + rowHeight > bottomLimit) {
-        doc.addPage();
-        y = doc.page.margins.top;
-        drawPdfTableHeader(doc, x, y, colWidths, payload.headers, headerHeight);
-        y += headerHeight;
+    payload.rows.forEach((row, rowIdx) => {
+      const safeRow = Array.isArray(row)
+        ? row.map((cell) => (cell == null || (typeof cell === "number" && isNaN(cell)) ? "-" : String(cell)))
+        : [];
+
+      try {
+        const rowHeight = Math.max(16, computeRowHeight(doc, safeRow, colWidths));
+        const bottomLimit = doc.page.height - doc.page.margins.bottom;
+        if (y + rowHeight > bottomLimit) {
+          doc.addPage();
+          y = doc.page.margins.top;
+          drawPdfTableHeader(doc, x, y, colWidths, payload.headers, headerHeight);
+          y += headerHeight;
+        }
+        drawPdfDataRow(doc, x, y, safeRow, colWidths, rowHeight);
+        y += rowHeight;
+      } catch (rowErr) {
+        console.error(`[PDF] Fila ${rowIdx} saltada: ${rowErr.message}`);
+        y += 16;
       }
-      drawPdfDataRow(doc, x, y, row, colWidths, rowHeight);
-      y += rowHeight;
     });
 
     if (y + 80 > doc.page.height - doc.page.margins.bottom) {
@@ -229,15 +245,18 @@ async function writePdfFile(payload, fullPath) {
       y = doc.page.margins.top;
     }
 
-    doc.y = y + 10;
-    doc.fontSize(11).fillColor("#111111").text("Totales", { underline: true });
+    // IMPORTANTE: pasar X explícito. Sin él, el texto hereda el doc.x corrupto
+    // que deja el dibujo de la tabla y el subrayado calcula un ancho NaN
+    // ("unsupported number: NaN" → el PDF no se generaba).
+    let ty = y + 10;
+    doc.fontSize(11).fillColor("#111111").text("Totales", x, ty, { underline: true });
+    ty = doc.y + 2;
     payload.totals.forEach((t) => {
-      doc.fontSize(10).text(`${t.label}: ${t.value}`);
+      doc.fontSize(10).text(`${t.label}: ${t.value}`, x, ty);
+      ty = doc.y;
     });
 
     doc.end();
-    stream.on("finish", resolve);
-    stream.on("error", reject);
   });
 }
 
@@ -248,6 +267,13 @@ async function fetchVentasRows(filters) {
   const hasta = safeText(filters.hasta) || null;
   const cliente = safeText(filters.cliente) || null;
   const producto = safeText(filters.producto) || null;
+
+  // Modo de costo: historico (foto al vender) por defecto, o actual (recalcula).
+  const usarCostoActual = String(filters.modo_costo || "historico").trim().toLowerCase() === "actual";
+  const costoExpr = usarCostoActual
+    ? `(COALESCE(pp.precio_compra,0) + COALESCE(pp.costo_transporte,0))`
+    : `COALESCE(vd.costo_unitario_gs, COALESCE(pp.precio_compra,0) + COALESCE(pp.costo_transporte,0))`;
+
   const comisionDetalleExpr = `
     CASE
       WHEN COALESCE(v.total, 0) > 0
@@ -286,8 +312,8 @@ async function fetchVentasRows(filters) {
         p.nombre AS producto,
         SUM(vd.cantidad) AS cantidad,
         vd.precio,
-        pp.precio_compra,
-        pp.costo_transporte,
+        MAX(${costoExpr}) AS precio_compra,
+        0 AS costo_transporte,
         SUM(vd.cantidad * vd.precio) AS subtotal,
         SUM(${comisionDetalleExpr}) AS comision_total
       FROM venta_detalle vd
@@ -303,7 +329,7 @@ async function fetchVentasRows(filters) {
     if (hasta) { sql += ` AND v.fecha::date <= $${i++}`; params.push(hasta); }
     if (producto) { sql += ` AND LOWER(p.nombre) LIKE LOWER($${i++})`; params.push(`%${producto}%`); }
     if (cliente) { sql += ` AND LOWER(COALESCE(c.nombre,v.cliente_nombre)) LIKE LOWER($${i++})`; params.push(`%${cliente}%`); }
-    sql += ` GROUP BY p.nombre, vd.precio, pp.precio_compra, pp.costo_transporte ORDER BY producto `;
+    sql += ` GROUP BY p.nombre, vd.precio ORDER BY producto `;
     const r = await pool.query(sql, params);
     return r.rows;
   }
@@ -375,8 +401,8 @@ async function fetchVentasRows(filters) {
       p.nombre AS producto,
       SUM(vd.cantidad) AS cantidad,
       vd.precio,
-      pp.precio_compra,
-      pp.costo_transporte,
+      MAX(${costoExpr}) AS precio_compra,
+      0 AS costo_transporte,
       SUM(vd.cantidad * vd.precio) AS subtotal,
       SUM(${comisionDetalleExpr}) AS comision
     FROM venta_detalle vd
@@ -396,7 +422,7 @@ async function fetchVentasRows(filters) {
   if (producto) { sql += ` AND LOWER(p.nombre) LIKE LOWER($${i++})`; params.push(`%${producto}%`); }
 
   sql += `
-    GROUP BY v.id, v.fecha, v.numero, c.nombre, v.cliente_nombre, ve.nombre, p.nombre, vd.precio, v.total, v.comision, pp.precio_compra, pp.costo_transporte
+    GROUP BY v.id, v.fecha, v.numero, c.nombre, v.cliente_nombre, ve.nombre, p.nombre, vd.precio, v.total, v.comision
     ORDER BY v.fecha DESC
   `;
 
@@ -416,7 +442,7 @@ async function fetchComprasRows(filters, req) {
   let sql = `
     SELECT
       c.fecha,
-      COALESCE(c.numero_compra, CAST(c.id AS text)) AS numero_movimiento,
+      COALESCE(CAST(c.numero_compra AS text), CAST(c.id AS text)) AS numero_movimiento,
       p.nombre AS proveedor,
       pr.nombre AS producto,
       cd.cantidad,
@@ -482,6 +508,7 @@ function buildVentasExportData(rows, filters, range) {
   let totalVenta = 0;
   let totalCosto = 0;
   let totalComision = 0;
+  let totalCantidad = 0;
 
   rows.forEach((v) => {
     if (tipo === "producto") {
@@ -491,6 +518,7 @@ function buildVentasExportData(rows, filters, range) {
       dataRows.push(["-", "-", "-", "-", v.producto || "-", formatQty(cantidad), "-", "-", formatGs(total), formatGs(comision), "-", "-", "-"]);
       totalVenta += total;
       totalComision += comision;
+      totalCantidad += cantidad;
       return;
     }
 
@@ -501,6 +529,7 @@ function buildVentasExportData(rows, filters, range) {
       dataRows.push(["-", "-", "-", "-", v.categoria || "-", formatQty(cantidad), "-", "-", formatGs(total), formatGs(comision), "-", "-", "-"]);
       totalVenta += total;
       totalComision += comision;
+      totalCantidad += cantidad;
       return;
     }
 
@@ -520,6 +549,7 @@ function buildVentasExportData(rows, filters, range) {
       totalCosto += costoTotal;
       totalComision += comision;
       totalGanancia += ganancia;
+      totalCantidad += cantidad;
       return;
     }
 
@@ -530,6 +560,7 @@ function buildVentasExportData(rows, filters, range) {
       dataRows.push(["-", "-", "-", v.vendedor || "-", "-", formatQty(ventas), "-", "-", formatGs(totalVentas), formatGs(comision), "-", "-", "-"]);
       totalVenta += totalVentas;
       totalComision += comision;
+      totalCantidad += ventas;
       return;
     }
 
@@ -563,6 +594,7 @@ function buildVentasExportData(rows, filters, range) {
     totalCosto += costoTotal;
     totalComision += comision;
     totalGanancia += ganancia;
+    totalCantidad += cantidad;
   });
 
   const margenTotal = totalVenta > 0 && tipo !== "comision_vendedor" ? (totalGanancia / totalVenta) * 100 : 0;
@@ -574,6 +606,7 @@ function buildVentasExportData(rows, filters, range) {
     headers,
     rows: dataRows,
     totals: [
+      { label: "Cantidad total", value: formatQty(totalCantidad) },
       { label: "Total Costo", value: formatGs(totalCosto) },
       { label: "Total Venta", value: formatGs(totalVenta) },
       { label: "Total Comision", value: formatGs(totalComision) },
@@ -638,6 +671,15 @@ async function buildExportPayload(req) {
   const tipo = normalizeTipo(req.body?.tipo || filtros.tipo);
   const desdeRaw = safeText(req.body?.desde || filtros.desde);
   const hastaRaw = safeText(req.body?.hasta || filtros.hasta);
+
+  // Exigir rango de fechas para no volcar toda la base en un solo archivo.
+  if (!desdeRaw || !hastaRaw) {
+    throw new Error("Debe indicar fecha desde y hasta para exportar");
+  }
+  if (desdeRaw > hastaRaw) {
+    throw new Error("La fecha desde no puede ser mayor que la fecha hasta");
+  }
+
   const range = {
     desde: formatDateOnly(desdeRaw),
     hasta: formatDateOnly(hastaRaw)
@@ -649,7 +691,8 @@ async function buildExportPayload(req) {
       desde: desdeRaw,
       hasta: hastaRaw,
       cliente: filtros.cliente || req.body?.cliente,
-      producto: filtros.producto || req.body?.producto
+      producto: filtros.producto || req.body?.producto,
+      modo_costo: filtros.modo_costo || req.body?.modo_costo
     });
     return { ...buildVentasExportData(rows, { tipo }, range), modulo };
   }
@@ -706,22 +749,67 @@ router.post("/exportar", async (req, res) => {
     const modulo = exportData.modulo;
     const baseName = `${modulo}_${todayIso()}`;
 
-    ensureExportDir();
-
     if (formato === "excel") {
       const fileName = `${baseName}.xlsx`;
-      const fullPath = path.join(EXPORT_DIR, fileName);
-      await writeXlsxFile(exportData, fullPath);
-      return res.json({ ok: true, formato, archivo: fileName, ruta: fullPath });
+      const buffer = await buildXlsxBuffer(exportData);
+      res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+      res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
+      res.setHeader("Content-Length", buffer.length);
+      return res.end(buffer);
     }
 
     const fileName = `${baseName}.pdf`;
-    const fullPath = path.join(EXPORT_DIR, fileName);
-    await writePdfFile(exportData, fullPath);
-    return res.json({ ok: true, formato, archivo: fileName, ruta: fullPath });
+    const pdfBuffer = await buildPdfBuffer(exportData);
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
+    res.setHeader("Content-Length", pdfBuffer.length);
+    return res.end(pdfBuffer);
+
   } catch (err) {
     console.error("POST /reportes/exportar", err);
-    res.status(500).json({ error: "No se pudo exportar el reporte" });
+    if (!res.headersSent) res.status(500).json({ error: err.message || "No se pudo exportar el reporte" });
+  }
+});
+
+// Exportación genérica de cualquier tabla (listados): recibe título, encabezados
+// y filas, y devuelve un PDF o Excel real para descargar.
+router.post("/exportar-tabla", async (req, res) => {
+  try {
+    const formato = safeText(req.body?.formato).toLowerCase();
+    if (formato !== "pdf" && formato !== "excel") {
+      return res.status(400).json({ error: "Formato invalido" });
+    }
+
+    const titulo  = safeText(req.body?.titulo) || "Listado";
+    const headers = Array.isArray(req.body?.headers) ? req.body.headers.map((h) => String(h ?? "")) : [];
+    const rows    = Array.isArray(req.body?.rows)
+      ? req.body.rows.map((fila) => (Array.isArray(fila) ? fila.map((c) => String(c ?? "")) : []))
+      : [];
+
+    if (!headers.length || !rows.length) {
+      return res.status(400).json({ error: "No hay datos para exportar" });
+    }
+
+    const payload = { title: titulo, tipo: "", desde: "", hasta: "", headers, rows, totals: [] };
+    const baseName = `${safeText(req.body?.nombre) || "listado"}_${todayIso()}`;
+
+    if (formato === "excel") {
+      const buffer = await buildXlsxBuffer(payload);
+      res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+      res.setHeader("Content-Disposition", `attachment; filename="${baseName}.xlsx"`);
+      res.setHeader("Content-Length", buffer.length);
+      return res.end(buffer);
+    }
+
+    const pdfBuffer = await buildPdfBuffer(payload);
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="${baseName}.pdf"`);
+    res.setHeader("Content-Length", pdfBuffer.length);
+    return res.end(pdfBuffer);
+
+  } catch (err) {
+    console.error("POST /reportes/exportar-tabla", err);
+    if (!res.headersSent) res.status(500).json({ error: err.message || "No se pudo exportar" });
   }
 });
 

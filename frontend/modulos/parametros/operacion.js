@@ -207,7 +207,7 @@ function volverSeguro() {
   }
   const destino = "/modulos/parametros/parametros.html";
   if (formDirty) {
-    baseModalOpenConfirmGeneric({
+    baseModalOpenConfirm({
       titulo: "Salir",
       mensaje: "Hay cambios sin guardar. Desea salir?",
       onConfirm: () => {
@@ -402,7 +402,7 @@ async function guardar() {
 
 async function eliminar() {
   if (!operacionId.value) return;
-  baseModalOpenConfirmGeneric({
+  baseModalOpenConfirm({
     titulo: "Inactivar",
     mensaje: "Desea inactivar la operacion seleccionada?",
     onConfirm: async () => {

@@ -14,3 +14,5 @@ frontend/.env
 
 *.log
 *.tmp
+# Claude Code worktrees
+.claude/worktrees/

@@ -1,8 +1,9 @@
 {
-  "appName": "SoftSys Casa",
+  "appName": "ALPX SYSTEM Casa",
   "setupDescription": "Conecta la app con tu servidor remoto o en la nube.",
-  "setupHint": "Ejemplo: https://mi-servidor.com o http://181.123.45.67:3000",
+  "setupHint": "Ejemplo: https://mi-servidor.com o http://181.123.45.67:3003",
   "serverMode": "baseUrl",
   "baseUrlLabel": "URL publica del servidor",
-  "baseUrlPlaceholder": "https://mi-servidor.com"
+  "baseUrlPlaceholder": "https://mi-servidor.com",
+  "fixedBaseUrl": "https://continuing-kelkoo-done-pregnancy.trycloudflare.com"
 }

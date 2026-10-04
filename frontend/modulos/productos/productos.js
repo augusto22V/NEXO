@@ -408,7 +408,7 @@ function volverSeguro() {
 
   if (hayCambiosSinGuardar()) {
 
-    baseModalOpenConfirmGeneric({
+    baseModalOpenConfirm({
       titulo: "Salir",
       mensaje: "Hay cambios sin guardar. ¿Desea salir?",
       onConfirm: () => {

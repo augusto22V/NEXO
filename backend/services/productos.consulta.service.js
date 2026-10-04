@@ -307,7 +307,7 @@ async function consultarDetalleProducto(productoIdRaw, empresaIdRaw = null) {
     SELECT
       c.fecha AS fecha_ultima_compra,
       COALESCE(pr.id::text || '-' || pr.nombre, '-') AS ultimo_proveedor,
-      COALESCE(c.numero_compra, c.id::text, '-') AS numero_ultimo_movimiento,
+      COALESCE(c.numero_compra::text, c.id::text, '-') AS numero_ultimo_movimiento,
       COALESCE(cd.costo_moneda_origen, cd.costo, 0) AS ultima_compra,
       COALESCE(
         cd.costo_moneda_origen,

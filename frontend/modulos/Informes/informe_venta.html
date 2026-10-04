@@ -130,6 +130,21 @@ onclick="abrirBuscadorProducto()"
 </div>
 
 
+<!-- COSTO A USAR (histórico real vs actual recalculado) -->
+<div class="filtro-fecha-campo">
+
+<label>Costo a usar</label>
+
+<select id="modoCosto" title="Histórico = costo real al momento de cada venta. Actual = recalcula con el costo de hoy.">
+
+<option value="historico">Histórico (real)</option>
+<option value="actual">Actual (recalcular)</option>
+
+</select>
+
+</div>
+
+
 <!-- BOTONES -->
 <div class="filtro-botones">
 
@@ -192,7 +207,7 @@ Seleccione un rango de fechas
 
 <td colspan="5"><strong>TOTALES</strong></td>
 
-<td class="text-right"></td>
+<td class="text-right"><strong>Cant:</strong> <span id="totalCantidad">0</span></td>
 
 <td class="text-right">
 <strong>T.Costo:</strong> <span id="totalCosto">Gs 0</span>
@@ -232,7 +247,7 @@ Seleccione un rango de fechas
 
 <span>Generado el <span id="fechaGenerado"></span></span>
 
-<span>SofSys © Ventas y stock para librerías</span>
+<span>ALPX Systems © Ventas y stock para librerías</span>
 
 </div>
 
@@ -264,8 +279,8 @@ Seleccione un rango de fechas
 
 
 
-<script src="informe_venta.js"></script>
-<script src="/compartido/js/seguridad.js"></script>
+<script src="informe_venta.js?v=2026.05.31.02"></script>
+<script src="/compartido/js/seguridad.js?v=2026.05.26.01"></script>
 
 </body>
 </html>

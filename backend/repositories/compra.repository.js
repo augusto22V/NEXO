@@ -105,10 +105,12 @@ async function insertCompra(client, payload) {
           movimiento,
           tipo_operacion_id,
           numero_compra,
+          nro_comprobante,
+          timbrado,
           usuario_id,
           fecha_emision
         )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'COMPRA',$9,$10,$11,$12)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'COMPRA',$9,$10,$11,$12,$13,$14)
       RETURNING *
     `,
     [
@@ -122,6 +124,8 @@ async function insertCompra(client, payload) {
       payload.total,
       payload.tipo_operacion_id,
       payload.numero_compra,
+      payload.nro_comprobante || null,
+      payload.timbrado || null,
       payload.usuario_id,
       payload.fecha_emision
     ]

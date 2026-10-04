@@ -1,4 +1,4 @@
-package com.softsys.lanapp;
+package com.alpx.lanapp;
 
 import android.app.AlertDialog;
 import android.os.Bundle;

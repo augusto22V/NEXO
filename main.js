@@ -19,7 +19,7 @@ const fs    = require('fs');
 
 // ─── Configuración ───────────────────────────────────────────────────────────
 
-const PORT        = 3001;
+const PORT        = 3003;
 const LOGIN_URL   = `http://localhost:${PORT}/login/login.html`;
 const BACKEND_DIR = path.join(__dirname, 'backend');
 const ICON_PATH   = path.join(__dirname, 'frontend', 'recursos', 'img', 'alpx-logo.ico');
@@ -114,18 +114,62 @@ function buildIcon() {
 // mainWindow y dispara '__relayStorageReady' para consumo inmediato.
 // La Promise se resuelve DESPUÉS de escribir, garantizando que el popup
 // puede llamar window.close() sin race conditions.
+// Guardar archivo con diálogo nativo
+ipcMain.handle('save-file', async (_event, { fileName, base64 }) => {
+  const downloadsDir = path.join(require('os').homedir(), 'Downloads');
+  const defaultPath = path.join(downloadsDir, fileName);
+
+  const { canceled, filePath } = await dialog.showSaveDialog(mainWindow, {
+    title: 'Guardar archivo',
+    defaultPath,
+    buttonLabel: 'Guardar'
+  });
+
+  if (canceled || !filePath) return { ok: false, cancelled: true };
+
+  try {
+    await fs.promises.writeFile(filePath, Buffer.from(base64, 'base64'));
+    return { ok: true, path: filePath };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+});
+
+ipcMain.handle('restart-server', async () => {
+  console.log('[IPC restart-server] Reiniciando backend…');
+  stopBackend();
+  setTimeout(() => {
+    startBackend();
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      waitForBackend(15000)
+        .then(() => {
+          if (mainWindow && !mainWindow.isDestroyed()) mainWindow.reload();
+        })
+        .catch((err) => console.error('[restart-server] Backend no respondió:', err.message));
+    }
+  }, 600);
+  return 'restarting';
+});
+
 ipcMain.handle('set-main-storage', async (_event, { key, value }) => {
+  console.log('[IPC set-main-storage]', key, '→', String(value).slice(0, 80));
   if (mainWindow && !mainWindow.isDestroyed()) {
-    // Escribir en localStorage Y llamar consumirSeleccionesPendientes en un solo
-    // executeJavaScript para garantizar que el valor esté disponible cuando se llama.
-    await mainWindow.webContents.executeJavaScript(`(function(){
-      localStorage.setItem(${JSON.stringify(key)}, ${JSON.stringify(value)});
-      if (typeof window.__consumirSelecciones === 'function') {
-        window.__consumirSelecciones();
-      } else {
-        window.dispatchEvent(new CustomEvent('__relayStorageReady'));
-      }
-    })()`);
+    try {
+      await mainWindow.webContents.executeJavaScript(`(function(){
+        localStorage.setItem(${JSON.stringify(key)}, ${JSON.stringify(value)});
+        if (typeof window.__consumirSelecciones === 'function') {
+          window.__consumirSelecciones();
+        } else {
+          window.dispatchEvent(new CustomEvent('__relayStorageReady'));
+        }
+        return 'ok';
+      })()`);
+      console.log('[IPC set-main-storage] executeJavaScript OK');
+    } catch(e) {
+      console.error('[IPC set-main-storage] executeJavaScript ERROR:', e.message);
+    }
+  } else {
+    console.error('[IPC set-main-storage] mainWindow no disponible');
   }
   return 'ok';
 });
@@ -244,7 +288,17 @@ function createWindow() {
   });
 
   // Atajos de zoom: Ctrl + / Ctrl - / Ctrl 0
+  // F12: abre DevTools en ventana separada (para depuración)
   mainWindow.webContents.on('before-input-event', (_e, input) => {
+    // F12 — DevTools
+    if (input.type === 'keyDown' && input.key === 'F12') {
+      if (mainWindow.webContents.isDevToolsOpened()) {
+        mainWindow.webContents.closeDevTools();
+      } else {
+        mainWindow.webContents.openDevTools({ mode: 'detach' });
+      }
+      return;
+    }
     if (!input.control) return;
     const current = mainWindow.webContents.getZoomFactor();
     if (input.key === '+' || input.key === '=') {
@@ -301,6 +355,12 @@ function createTray() {
         }, 500);
       },
     },
+    {
+      label: 'DevTools (depuración)',
+      click() {
+        if (mainWindow) mainWindow.webContents.openDevTools({ mode: 'detach' });
+      },
+    },
     { type: 'separator' },
     {
       label: 'Salir',
@@ -317,6 +377,25 @@ function createTray() {
     if (mainWindow) { mainWindow.show(); mainWindow.focus(); }
   });
 }
+
+// ─── Instancia única ─────────────────────────────────────────────────────────
+// Si el usuario abre la app y ya hay una instancia corriendo, en vez de crear
+// una segunda (con otro tray icon), simplemente mostramos la ventana existente.
+
+const gotLock = app.requestSingleInstanceLock();
+if (!gotLock) {
+  // Esta es la segunda instancia — cerramos inmediatamente
+  app.quit();
+}
+
+app.on('second-instance', () => {
+  // Alguien intentó abrir una segunda instancia — mostramos la existente
+  if (mainWindow) {
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.show();
+    mainWindow.focus();
+  }
+});
 
 // ─── Ciclo de vida de Electron ────────────────────────────────────────────────
 

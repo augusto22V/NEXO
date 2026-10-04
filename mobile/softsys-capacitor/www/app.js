@@ -1,11 +1,11 @@
 (function () {
-  const KEY = "softsys_lan_server";
-  const KEY_LOCK = "softsys_lan_server_locked_v1";
+  const KEY = "alpx_lan_server";
+  const KEY_LOCK = "alpx_lan_server_locked_v1";
   const RETRY_MS = 5000;
   const DEFAULT_APP_CONFIG = {
-    appName: "SoftSys",
+    appName: "ALPX SYSTEM",
     setupDescription: "Configura o valida el servidor local.",
-    setupHint: "Ejemplo: http://192.168.X.X:3000",
+    setupHint: "Ejemplo: http://192.168.X.X:3003",
     fixedBaseUrl: "",
     serverMode: "local",
     baseUrlLabel: "URL del servidor",
@@ -13,7 +13,7 @@
     ipLabel: "IP del servidor",
     ipPlaceholder: "192.168.1.50",
     portLabel: "Puerto",
-    defaultPort: 3000
+    defaultPort: 3003
   };
 
   const setupScreen = document.getElementById("setupScreen");
@@ -117,7 +117,7 @@
 
   function getDefaultPort() {
     const port = Number(appConfig.defaultPort);
-    return port > 0 ? port : 3000;
+    return port > 0 ? port : 3003;
   }
 
   function getDefaultBaseUrl() {

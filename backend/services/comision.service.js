@@ -150,6 +150,14 @@ async function ensureComisionSchema() {
       WHERE es_servicio IS NULL
     `);
 
+    // Costo unitario "foto" al momento de la venta (precio_compra + costo_transporte
+    // del producto ese día). NULL en ventas viejas → el informe usa el costo actual
+    // como respaldo. Permite distinguir ganancia histórica real vs recalculada.
+    await db.query(`
+      ALTER TABLE venta_detalle
+      ADD COLUMN IF NOT EXISTS costo_unitario_gs NUMERIC(14,2)
+    `);
+
     await db.query(`
       CREATE INDEX IF NOT EXISTS idx_producto_es_servicio
       ON producto(es_servicio)

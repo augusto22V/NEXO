@@ -705,15 +705,20 @@ async function editarCompra(client, compraId, payload, req) {
   const moneda = await resolveMoneda(client, {
     moneda_id: payload.moneda_id || actual.moneda_id
   });
+
+  // La operación NO se puede cambiar una vez que la compra aplicó stock
+  // (CONCLUIDO/EFECTIVADO). En vez de bloquear TODO el guardado/efectivizado,
+  // se conserva la operación original cuando el stock ya está aplicado.
+  const stockYaAplicado = estadoAplicaStock(actual.estado) && !!actual.tipo_operacion_id;
+  const tipoOperacionIdEfectivo = stockYaAplicado
+    ? actual.tipo_operacion_id
+    : (payload.tipo_operacion_id || actual.tipo_operacion_id);
+
   const tipoOperacion = await resolveTipoOperacion(client, {
-    tipo_operacion_id: payload.tipo_operacion_id || actual.tipo_operacion_id
+    tipo_operacion_id: tipoOperacionIdEfectivo
   });
   validarOperacionConCondicionPago(tipoOperacion, condicionPago);
   const estadoNuevo = normalizeEstado(payload.estado || actual.estado);
-
-  if (actual.tipo_operacion_id && toNumber(actual.tipo_operacion_id) !== tipoOperacion.id && estadoAplicaStock(actual.estado)) {
-    throw new Error("No se puede cambiar tipo de operaciÃ³n en una compra con stock aplicado");
-  }
 
   if (!estadoAplicaStock(actual.estado) && estadoAplicaStock(estadoNuevo)) {
     const detalles = await repo.listCompraDetalles(client, compraId);
@@ -811,7 +816,7 @@ async function buscarCompras(client, payload, req) {
 
   if (payload.numero_movimiento) {
     params.push(`%${String(payload.numero_movimiento).trim()}%`);
-    where.push(`AND COALESCE(c.numero_compra, CAST(c.id AS text)) ILIKE $${params.length}`);
+    where.push(`AND COALESCE(CAST(c.numero_compra AS text), CAST(c.id AS text)) ILIKE $${params.length}`);
   }
 
   if (payload.proveedor) {

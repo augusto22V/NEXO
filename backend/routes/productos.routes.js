@@ -405,11 +405,14 @@ router.get('/', async (req, res) => {
         COALESCE(pp.precio_venta, 0) AS precio_mayorista,
         pp.costo_transporte,
         p.facturacion_directa,
-        COALESCE(pp.precio_venta, 0) AS precio
+        COALESCE(pp.precio_venta, 0) AS precio,
+        c.nombre AS categoria
       FROM producto p
       LEFT JOIN producto_precio pp
         ON pp.producto_id = p.id
         AND pp.activo = true
+      LEFT JOIN categoria c
+        ON c.id = p.categoria_id
       WHERE p.activo = true
       AND (
         $3 = ''
@@ -708,8 +711,12 @@ router.put('/:id', authMiddleware, upload.single('imagen'), async (req, res) => 
     ];
 
     if (req.body.stock !== undefined) {
+      const stockVal = Number(req.body.stock);
+      if (!Number.isFinite(stockVal) || stockVal < 0) {
+        return res.status(400).json({ error: "Stock inválido: debe ser un número mayor o igual a 0" });
+      }
       query += `, stock = $${values.length + 1}`;
-      values.push(req.body.stock);
+      values.push(stockVal);
     }
 
     if (req.file) {

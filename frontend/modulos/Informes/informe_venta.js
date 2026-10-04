@@ -22,11 +22,11 @@ document.getElementById("spinnerOverlay").classList.add("hidden");
 function toast(mensaje,tipo="info",duracion=3500){
 
 const cfg={
-success:{bg:"#2e7d32",icon:"âœ”"},
-error:{bg:"#c62828",icon:"âœ–"},
-warning:{bg:"#f57f17",icon:"âš "},
-info:{bg:"#1565c0",icon:"â„¹"}
-}[tipo]||{bg:"#1565c0",icon:"â„¹"};
+success:{bg:"#2e7d32",icon:"&#x2714;"},
+error:{bg:"#c62828",icon:"&#x2716;"},
+warning:{bg:"#f57f17",icon:"&#x26A0;"},
+info:{bg:"#1565c0",icon:"&#x2139;"}
+}[tipo]||{bg:"#1565c0",icon:"&#x2139;"};
 
 const t=document.createElement("div");
 
@@ -100,6 +100,7 @@ const hasta=document.getElementById("filtroHasta").value;
 const cliente=document.getElementById("filtroCliente").value;
 const producto=document.getElementById("filtroProducto").value;
 const tipo = document.getElementById("tipoInforme").value;
+const modoCosto = document.getElementById("modoCosto") ? document.getElementById("modoCosto").value : "historico";
 
 if(!desde||!hasta){
 toast("Seleccione rango de fechas","warning");
@@ -120,6 +121,7 @@ const params = new URLSearchParams();
 params.append("desde", desde);
 params.append("hasta", hasta);
 params.append("tipo", tipo);
+params.append("modo_costo", modoCosto);
 
 const thProducto = document.querySelector("th:nth-child(5)");
 
@@ -184,6 +186,7 @@ document.getElementById("totalCosto").textContent="Gs 0";
 document.getElementById("totalComision").textContent="Gs 0";
 document.getElementById("totalGanancia").textContent="Gs 0";
 document.getElementById("totalMargen").textContent="0 %";
+document.getElementById("totalCantidad").textContent="0";
 return;
 
 }
@@ -192,6 +195,7 @@ let total=0;
 let totalVenta = 0;
 let totalCosto = 0;
 let totalComision = 0;
+let totalCantidad = 0;
 
 lista.forEach(v=>{
 
@@ -211,6 +215,7 @@ if(tipo==="producto"){
 
   total += totalItem;
   totalComision += comision;
+  totalCantidad += cantidad;
 
   tr.innerHTML = `
   <td>-</td>
@@ -252,6 +257,7 @@ const comision = Number(v.comision_total || 0);
 totalVenta += ventaTotal;
 totalCosto += costoTotal;
 totalComision += comision;
+totalCantidad += cantidad;
 
 const ganancia = ventaTotal - costoTotal;
 
@@ -346,6 +352,7 @@ const comision = Number(v.total_comision || 0);
 
 totalVenta += totalVendedor;
 totalComision += comision;
+totalCantidad += ventas;
 
 tr.innerHTML = `
 
@@ -378,6 +385,8 @@ const fechaTexto = formatearFechaPY(v.fecha);
 const subtotal = Number(v.subtotal || 0);
 const costo = Number(v.precio_compra || 0) + Number(v.costo_transporte || 0);
 const cantidad = Number(v.cantidad || 0);
+
+totalCantidad += cantidad;
 
 const costoTotal = costo * cantidad;
 const ganancia = subtotal - costoTotal;
@@ -567,6 +576,10 @@ tdComisionTotal.style.display = "none";
 
 }
 
+// Cantidad total de unidades vendidas (suma de la columna "Cant") — todos los tipos
+document.getElementById("totalCantidad").textContent =
+  totalCantidad.toLocaleString("es-PY");
+
 }
 
 
@@ -588,6 +601,7 @@ document.getElementById("totalCosto").textContent="Gs 0";
 document.getElementById("totalComision").textContent="Gs 0";
 document.getElementById("totalGanancia").textContent="Gs 0";
 document.getElementById("totalMargen").textContent="0 %";
+document.getElementById("totalCantidad").textContent="0";
 
 }
 
@@ -627,6 +641,7 @@ function construirPayloadExportVentas(formato) {
   const hasta = document.getElementById('filtroHasta').value;
   const cliente = document.getElementById('filtroCliente').value.trim();
   const producto = document.getElementById('filtroProducto').value.trim();
+  const modoCosto = document.getElementById('modoCosto') ? document.getElementById('modoCosto').value : 'historico';
 
   return {
     modulo: 'ventas',
@@ -635,12 +650,24 @@ function construirPayloadExportVentas(formato) {
     tipo,
     desde,
     hasta,
-    filtros: { cliente, producto, tipo, desde, hasta }
+    modo_costo: modoCosto,
+    filtros: { cliente, producto, tipo, desde, hasta, modo_costo: modoCosto }
   };
 }
 
 async function exportarInforme(formato) {
   try {
+    const desde = document.getElementById('filtroDesde').value;
+    const hasta = document.getElementById('filtroHasta').value;
+    if (!desde || !hasta) {
+      toast('Seleccione rango de fechas antes de exportar', 'warning');
+      return;
+    }
+    if (desde > hasta) {
+      toast('Fecha desde no puede ser mayor', 'warning');
+      return;
+    }
+
     mostrarSpinner(formato === 'pdf' ? 'Generando PDF...' : 'Generando Excel...');
 
     const payload = construirPayloadExportVentas(formato);
@@ -651,12 +678,44 @@ async function exportarInforme(formato) {
       body: JSON.stringify(payload)
     });
 
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok || !data?.ok) {
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
       throw new Error(data?.error || 'No se pudo exportar');
     }
 
-    toast(`Archivo generado: ${data.archivo} en C:/Sys/doc`, 'success');
+    // Obtener nombre del archivo desde el header Content-Disposition
+    const disposition = res.headers.get('Content-Disposition') || '';
+    const match = disposition.match(/filename="?([^"]+)"?/);
+    const fileName = match ? match[1] : `informe_ventas.${formato === 'excel' ? 'xlsx' : 'pdf'}`;
+
+    const arrayBuffer = await res.arrayBuffer();
+
+    // En Electron: convertir a base64 por chunks (evita stack overflow en archivos grandes)
+    if (window.__electronAPI?.saveFile) {
+      const bytes = new Uint8Array(arrayBuffer);
+      let binary = '';
+      const CHUNK = 8192;
+      for (let i = 0; i < bytes.length; i += CHUNK) {
+        binary += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
+      }
+      const result = await window.__electronAPI.saveFile(fileName, btoa(binary));
+      if (result?.cancelled) { toast('Descarga cancelada', 'info'); return; }
+      if (!result?.ok) throw new Error(result?.error || 'No se pudo guardar el archivo');
+      toast(`&#x2714; Guardado en: ${result.path}`, 'success');
+      return;
+    }
+
+    // Fallback navegador: usar arrayBuffer directamente, sin base64
+    const blob = new Blob([arrayBuffer]);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast(`Descargando: ${fileName}`, 'success');
   } catch (err) {
     console.error(err);
     toast(err.message || 'Error al exportar', 'error');

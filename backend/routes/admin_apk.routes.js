@@ -6,6 +6,9 @@ const router = express.Router();
 
 const APK_DIR = path.resolve(__dirname, "../../mobile/Aplicacion");
 const APK_FILES = Object.freeze({
+  "ALPX.apk": "ALPX.apk",
+  "ALPXCasa.apk": "ALPXCasa.apk",
+  // Compatibilidad con builds viejos (se pueden borrar cuando ya no se usen)
   "SoftSys.apk": "SoftSys.apk",
   "SoftSysCasa.apk": "SoftSysCasa.apk"
 });

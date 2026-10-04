@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../db");
+const authMiddleware = require("../Auth.middleware");
 const {
   actualizarDetalleVenta,
   eliminarDetalleVenta,
@@ -69,6 +70,10 @@ function getTerminalIdFromReq(req) {
 function getUsuarioIdFromReq(req) {
   const uid = Number(req?.usuario?.id || 0);
   return Number.isFinite(uid) && uid > 0 ? Math.trunc(uid) : null;
+}
+
+function esRolSuper(req) {
+  return String(req?.usuario?.rol || "").trim().toLowerCase() === "super";
 }
 
 async function resolveEmpresaIdParaVenta(client, req) {
@@ -458,6 +463,7 @@ router.post("/agregar-item", requirePermisoVentaRapida("venta_rapida_ver"), asyn
   try {
     await client.query("BEGIN");
     await ensureMonedaSchema();
+    await ensureComisionSchema(); // garantiza columna venta_detalle.costo_unitario_gs
 
     const cotizacion = await getCotizacionActiva(client);
     const monedaId = resolveMonedaId(precio_moneda_id ?? moneda_id, MONEDA_IDS.PYG);
@@ -477,7 +483,7 @@ router.post("/agregar-item", requirePermisoVentaRapida("venta_rapida_ver"), asyn
     // VERIFICAR PRODUCTO
     // =====================================
     const prod = await client.query(`
-      SELECT stock, no_control_stock, facturacion_directa
+      SELECT stock, no_control_stock, facturacion_directa, nombre
       FROM producto
       WHERE id = $1
       FOR UPDATE
@@ -488,6 +494,17 @@ router.post("/agregar-item", requirePermisoVentaRapida("venta_rapida_ver"), asyn
     }
 
     const esFacturacionDirecta = prod.rows[0].facturacion_directa === true;
+
+    // Costo "foto" al momento de la venta (precio_compra + transporte vigente).
+    // Se guarda en venta_detalle para preservar la ganancia histórica real.
+    const costoRow = await client.query(`
+      SELECT COALESCE(precio_compra,0) + COALESCE(costo_transporte,0) AS costo_unitario
+      FROM producto_precio
+      WHERE producto_id = $1 AND activo = true
+      ORDER BY fecha DESC NULLS LAST, id DESC
+      LIMIT 1
+    `, [productoId]);
+    const costoUnitarioGs = Number(costoRow.rows[0]?.costo_unitario || 0);
 
     // =====================================
     // VALIDAR MEZCLA DE PRODUCTOS
@@ -596,9 +613,10 @@ router.post("/agregar-item", requirePermisoVentaRapida("venta_rapida_ver"), asyn
         precio_usd,
         cotizacion_id,
         cotizacion_brl,
-        cotizacion_usd
+        cotizacion_usd,
+        costo_unitario_gs
       )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
       RETURNING id
     `, [
       ventaId,
@@ -614,7 +632,8 @@ router.post("/agregar-item", requirePermisoVentaRapida("venta_rapida_ver"), asyn
       conversion.monto_usd,
       conversion.cotizacion_id,
       conversion.cotizacion_brl,
-      conversion.cotizacion_usd
+      conversion.cotizacion_usd,
+      costoUnitarioGs
     ]);
 
     const itemId = insert.rows[0].id;
@@ -718,7 +737,8 @@ router.post("/agregar-por-codigo", requirePermisoVentaRapida("venta_rapida_ver")
       `SELECT p.id, p.nombre, p.stock, p.no_control_stock, p.facturacion_directa,
               COALESCE(pp.precio_venta, 0)        AS precio_venta,
               COALESCE(pp.precio_minimo, 0)       AS precio_minimo,
-              COALESCE(pp.precio_promocional, 0)  AS precio_promocional
+              COALESCE(pp.precio_promocional, 0)  AS precio_promocional,
+              COALESCE(pp.precio_compra, 0) + COALESCE(pp.costo_transporte, 0) AS costo_unitario
        FROM producto p
        LEFT JOIN producto_precio pp ON pp.producto_id = p.id AND pp.activo = true
        WHERE TRIM(p.codigo_barra) = $1
@@ -833,18 +853,20 @@ router.post("/agregar-por-codigo", requirePermisoVentaRapida("venta_rapida_ver")
 
     // Insertar nueva línea
     const subtotal = precioGs * cantidadValue;
+    const costoUnitarioGs = Number(prod.costo_unitario || 0);
     const insert = await client.query(
       `INSERT INTO venta_detalle
         (venta_id, producto_id, cantidad, precio, subtotal,
          precio_moneda_id, precio_moneda_origen, precio_gs, precio_brl, precio_usd,
-         cotizacion_id, cotizacion_brl, cotizacion_usd)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+         cotizacion_id, cotizacion_brl, cotizacion_usd, costo_unitario_gs)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
        RETURNING id`,
       [
         ventaId, productoId, cantidadValue, precioGs, subtotal,
         conversion.moneda_id, conversion.monto_origen, conversion.monto_gs,
         conversion.monto_brl, conversion.monto_usd,
-        conversion.cotizacion_id, conversion.cotizacion_brl, conversion.cotizacion_usd
+        conversion.cotizacion_id, conversion.cotizacion_brl, conversion.cotizacion_usd,
+        costoUnitarioGs
       ]
     );
 
@@ -893,6 +915,7 @@ router.post("/agregar-por-codigo", requirePermisoVentaRapida("venta_rapida_ver")
 router.put("/editar-item-legacy/:id", requirePermisoVentaRapida("venta_rapida_ver"), async (req, res) => {
 
   const id = Number(req.params.id);
+  const esSuper = esRolSuper(req);
 
   if (!Number.isInteger(id) || id <= 0) {
     return res.status(400).json({ error: "ID inválido" });
@@ -902,8 +925,9 @@ router.put("/editar-item-legacy/:id", requirePermisoVentaRapida("venta_rapida_ve
 
   try {
     const { cantidad, precio, observacion } = req.body;
+    const precioValue = Number(precio);
 
-    if (!cantidad || cantidad <= 0 || !precio || precio < 0) {
+    if (!cantidad || cantidad <= 0 || !Number.isFinite(precioValue) || precioValue < 0) {
       return res.status(400).json({ error: "Datos inválidos" });
     }
 
@@ -911,8 +935,10 @@ router.put("/editar-item-legacy/:id", requirePermisoVentaRapida("venta_rapida_ve
 
     const { totalVenta, comision } = await actualizarDetalleVenta(client, id, {
       cantidad,
-      precio,
+      precio: precioValue,
       observacion
+    }, {
+      keepPrecio: !esSuper
     });
 
     await client.query("COMMIT");
@@ -942,6 +968,7 @@ router.put("/editar-item-legacy/:id", requirePermisoVentaRapida("venta_rapida_ve
 router.put("/editar-item/:id", requirePermisoVentaRapida("venta_rapida_ver"), async (req, res) => {
 
   const id = Number(req.params.id);
+  const esSuper = esRolSuper(req);
 
   if (!Number.isInteger(id) || id <= 0) {
     return res.status(400).json({ error: "ID invalido" });
@@ -983,7 +1010,8 @@ router.put("/editar-item/:id", requirePermisoVentaRapida("venta_rapida_ver"), as
       precio_moneda_id: conversion.moneda_id,
       precio_moneda_origen: conversion.monto_origen
     }, {
-      empresa_id: getEmpresaIdFromReq(req)
+      empresa_id: getEmpresaIdFromReq(req),
+      keepPrecio: !esSuper
     });
 
     await client.query("COMMIT");
@@ -1624,6 +1652,7 @@ router.post("/en-espera/:id", requirePermisoVentaRapida("venta_rapida_ver"), asy
     if (estado === "EFECTIVADO") throw new Error("No se puede poner en espera una venta cobrada");
     if (estado === "CANCELADO")  throw new Error("No se puede poner en espera una venta cancelada");
     if (estado === "CONCLUIDO")  throw new Error("No se puede poner en espera una venta concluida");
+    if (estado === "EN_ESPERA")  throw new Error("La venta ya está en espera");
 
     await client.query(
       `
@@ -1847,11 +1876,11 @@ router.post("/cancelar/:id", requirePermisoVentaRapida("venta_rapida_cancelar"),
     }
 
 // =====================================
-// DEVOLVER STOCK SI YA ESTABA CONCLUIDO, EFECTIVADO O PENDIENTE
-// NOTA: EN_ESPERA queda excluido — el stock ya fue devuelto al poner la venta
-//       en espera (endpoint /en-espera/:id). Incluirlo aquí causaría doble devolución.
+// DEVOLVER STOCK SOLO SI YA FUE DESCONTADO: CONCLUIDO o EFECTIVADO
+// PENDIENTE: no descuenta stock → no se devuelve nada al cancelar
+// EN_ESPERA:  el stock ya fue devuelto al poner en espera → no se toca aquí
 // =====================================
-if (estado === "CONCLUIDO" || estado === "EFECTIVADO" || estado === "PENDIENTE") {
+if (estado === "CONCLUIDO" || estado === "EFECTIVADO") {
 
   const detalle = await client.query(`
     SELECT producto_id, cantidad, precio_gs, precio
@@ -1937,81 +1966,86 @@ router.post("/concluir/:id", requirePermisoVentaRapida("venta_rapida_ver"), asyn
     return res.status(400).json({ error: "ID inválido" });
   }
 
+  const client = await pool.connect();
   try {
     await ensureOperacionCatalogSchema();
+    await client.query("BEGIN");
 
-    const venta = await pool.query(
-      "SELECT id, numero, estado, tipo_operacion_id FROM venta WHERE id = $1",
+    // FOR UPDATE: bloquea la fila para que dos /concluir concurrentes no
+    // pasen ambos el chequeo de estado (evita doble conclusion / carrera).
+    const venta = await client.query(
+      "SELECT id, numero, estado, tipo_operacion_id FROM venta WHERE id = $1 FOR UPDATE",
       [id]
     );
 
     if (!venta.rowCount) {
+      await client.query("ROLLBACK");
       return res.status(404).json({ error: "Venta no encontrada" });
     }
 
     const ventaRow = venta.rows[0];
     const estado = ventaRow.estado;
 
-    // ðŸ”’ evitar estados invÃ¡lidos
     if (estado === "EFECTIVADO") {
+      await client.query("ROLLBACK");
       return res.status(400).json({ error: "La venta ya fue cobrada" });
     }
-
     if (estado === "CANCELADO") {
-      return res.status(400).json({ error: "La venta está cancelada" });
+      await client.query("ROLLBACK");
+      return res.status(400).json({ error: "La venta esta cancelada" });
     }
-
-    // ðŸ” si ya estÃ¡ concluida â†’ ok
     if (estado === "CONCLUIDO") {
+      await client.query("ROLLBACK");
       return res.json({ ok: true });
+    }
+    if (estado === "EN_ESPERA") {
+      // EN_ESPERA devolvio stock al pausar; concluir sin reanudar dejaria stock fantasma.
+      await client.query("ROLLBACK");
+      return res.status(400).json({ error: "Debe reanudar la venta antes de concluirla" });
     }
 
     let tipoOperacionId = toOperacionId(ventaRow.tipo_operacion_id);
     if (!tipoOperacionId) {
       tipoOperacionId = await findDefaultOperacionVentaId();
       if (!tipoOperacionId) {
+        await client.query("ROLLBACK");
         return res.status(400).json({ error: "No hay operacion de venta activa configurada" });
       }
-
-      await pool.query(
-        `
-          UPDATE venta
-          SET tipo_operacion_id = $1
-          WHERE id = $2
-        `,
+      await client.query(
+        "UPDATE venta SET tipo_operacion_id = $1 WHERE id = $2",
         [tipoOperacionId, id]
       );
     }
 
-    const operacion = await resolveOperacionVenta(pool, tipoOperacionId);
+    const operacion = await resolveOperacionVenta(client, tipoOperacionId);
     if (operacion.requiere_credito === true) {
+      await client.query("ROLLBACK");
       return res.status(400).json({
         error: "La operacion seleccionada requiere credito y no puede concluirse para cobro contado"
       });
     }
     if (operacion.genera_financiero === false) {
+      await client.query("ROLLBACK");
       return res.status(400).json({
         error: "La operacion seleccionada no genera movimiento financiero/caja"
       });
     }
 
-    await pool.query(
+    await client.query(
       "UPDATE venta SET estado = 'CONCLUIDO' WHERE id = $1",
       [id]
     );
 
+    await client.query("COMMIT");
     res.json({ ok: true });
 
   } catch (err) {
-
+    await client.query("ROLLBACK").catch(() => {});
     console.error("ERROR CONCLUIR:", err);
-
-    res.status(500).json({
-      error: "Error concluyendo venta"
-    });
-
+    res.status(500).json({ error: "Error concluyendo venta" });
+  } finally {
+    client.release();
   }
-
 });
 
 
@@ -2209,6 +2243,17 @@ router.get("/reporte", async (req, res) => {
 
   const { desde, hasta, cliente, producto, tipo } = req.query;
   const tipoReporte = String(tipo || "detallado").trim().toLowerCase();
+
+  // Modo de costo para la ganancia:
+  //   historico (por defecto) = costo "foto" guardado en cada venta (ganancia real)
+  //   actual                  = costo vigente del producto (recalcula todo)
+  // Ventas viejas sin foto (costo_unitario_gs NULL) usan el costo actual como respaldo.
+  const modoCosto = String(req.query.modo_costo || "historico").trim().toLowerCase();
+  const usarCostoActual = modoCosto === "actual";
+  const costoExpr = usarCostoActual
+    ? `(COALESCE(pp.precio_compra,0) + COALESCE(pp.costo_transporte,0))`
+    : `COALESCE(vd.costo_unitario_gs, COALESCE(pp.precio_compra,0) + COALESCE(pp.costo_transporte,0))`;
+
   const comisionDetalleExpr = `
     CASE
       WHEN COALESCE(v.total, 0) > 0
@@ -2268,15 +2313,15 @@ if (tipoReporte === "ganancia") {
     p.nombre AS producto,
     SUM(vd.cantidad) AS cantidad,
     vd.precio,
-    pp.precio_compra,
-    pp.costo_transporte,
+    MAX(${costoExpr}) AS precio_compra,
+    0 AS costo_transporte,
     SUM(vd.cantidad * vd.precio) AS subtotal,
     SUM(${comisionDetalleExpr}) AS comision_total
   FROM venta_detalle vd
   JOIN venta v ON v.id = vd.venta_id
   JOIN producto p ON p.id = vd.producto_id
 
-  LEFT JOIN producto_precio pp 
+  LEFT JOIN producto_precio pp
   ON pp.producto_id = p.id
   AND pp.activo = true
   LEFT JOIN cliente c ON c.id = v.cliente_id
@@ -2310,9 +2355,7 @@ if (tipoReporte === "ganancia") {
   sql += `
   GROUP BY
     p.nombre,
-    vd.precio,
-    pp.precio_compra,
-    pp.costo_transporte
+    vd.precio
   ORDER BY producto
   `;
 
@@ -2442,8 +2485,8 @@ WHERE v.estado = 'EFECTIVADO'
   SUM(vd.cantidad) AS cantidad,
   vd.precio,
 
-  pp.precio_compra,
-  pp.costo_transporte,
+  MAX(${costoExpr}) AS precio_compra,
+  0 AS costo_transporte,
 
   SUM(vd.cantidad * vd.precio) AS subtotal,
   SUM(${comisionDetalleExpr}) AS comision
@@ -2452,7 +2495,7 @@ WHERE v.estado = 'EFECTIVADO'
   JOIN venta v ON v.id = vd.venta_id
   JOIN producto p ON p.id = vd.producto_id
 
-  LEFT JOIN producto_precio pp 
+  LEFT JOIN producto_precio pp
   ON pp.producto_id = p.id
   AND pp.activo = true
 
@@ -2496,15 +2539,81 @@ v.fecha,
   p.nombre,
   vd.precio,
   v.total,
-  v.comision,
-  pp.precio_compra,
-  pp.costo_transporte
+  v.comision
 ORDER BY v.fecha DESC
   `;
 
   const r = await pool.query(sql, params);
 
   res.json(r.rows);
+});
+
+
+// =======================================
+// CORREGIR COSTO EN VENTAS ANTERIORES
+// Re-estampa la "foto" del costo (costo_unitario_gs) de las ventas
+// anteriores de un producto con su costo ACTUAL vigente.
+// Úsalo cuando el costo estaba MAL cargado: corrige la ganancia histórica.
+// (Una suba real de costo NO usa esto — esas ventas viejas se dejan como están.)
+// POST /api/venta/recosto-producto  { producto_id, desde?, hasta? }
+// =======================================
+router.post("/recosto-producto", authMiddleware, async (req, res) => {
+  const productoId = Number(req.body?.producto_id || 0);
+  const desde = String(req.body?.desde || "").trim() || null;
+  const hasta = String(req.body?.hasta || "").trim() || null;
+
+  if (!productoId) {
+    return res.status(400).json({ error: "producto_id requerido" });
+  }
+
+  const client = await pool.connect();
+  try {
+    await ensureComisionSchema();
+    await client.query("BEGIN");
+
+    // Costo actual vigente del producto (el corregido que acaban de guardar)
+    const costoRow = await client.query(`
+      SELECT COALESCE(precio_compra,0) + COALESCE(costo_transporte,0) AS costo
+      FROM producto_precio
+      WHERE producto_id = $1 AND activo = true
+      ORDER BY fecha DESC NULLS LAST, id DESC
+      LIMIT 1
+    `, [productoId]);
+
+    if (!costoRow.rowCount) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({ error: "El producto no tiene costo configurado" });
+    }
+    const costoActual = Number(costoRow.rows[0].costo || 0);
+
+    // Re-estampar la foto del costo en las ventas anteriores de este producto
+    let sql = `
+      UPDATE venta_detalle vd
+      SET costo_unitario_gs = $1
+      FROM venta v
+      WHERE vd.venta_id = v.id
+        AND vd.producto_id = $2
+    `;
+    const params = [costoActual, productoId];
+    let i = 3;
+    if (desde) { sql += ` AND v.fecha::date >= $${i++}`; params.push(desde); }
+    if (hasta) { sql += ` AND v.fecha::date <= $${i++}`; params.push(hasta); }
+
+    const r = await client.query(sql, params);
+    await client.query("COMMIT");
+
+    return res.json({
+      ok: true,
+      actualizadas: r.rowCount,
+      costo_aplicado: costoActual
+    });
+  } catch (err) {
+    await client.query("ROLLBACK").catch(() => {});
+    console.error("ERROR recosto-producto:", err);
+    return res.status(500).json({ error: "No se pudo corregir el costo de ventas anteriores" });
+  } finally {
+    client.release();
+  }
 });
 
 

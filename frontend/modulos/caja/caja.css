@@ -279,21 +279,48 @@ body {
 #metodoPagoSel { flex: 0 0 86px; }
 #monedaSel     { flex: 0 0 72px; }
 
+.monto-input-wrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.monto-moneda-label {
+  flex-shrink: 0;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  padding: 0 8px 0 10px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #fff;
+  background: #5E4F8E;
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+  letter-spacing: 0.02em;
+}
+
 .pago-monto-input {
   flex: 1;
   min-width: 0;
-  padding: 7px 8px;
-  border: 1px solid #dde1e7;
-  border-radius: 5px;
-  font-size: 15px;
+  padding: 8px 9px;
+  border: 2px solid #5E4F8E;
+  border-left: none;
+  border-radius: 6px;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  font-size: 17px;
   font-weight: 700;
   text-align: right;
   outline: none;
   font-family: inherit;
-  color: #5E4F8E;
+  color: #3F3463;
+  background: #fff;
 }
-.pago-monto-input:focus { border-color: #5E4F8E; box-shadow: 0 0 0 2px rgba(26,100,116,0.12); }
-.pago-monto-input::placeholder { color: #ccc; font-weight: 400; font-size: 13px; }
+.pago-monto-input:focus { border-color: #2a6fba; box-shadow: 0 0 0 3px rgba(94,79,142,0.18); }
+.pago-monto-input::placeholder { color: #ccc; font-weight: 400; font-size: 14px; }
 
 .btn-agregar-pago {
   flex-shrink: 0;

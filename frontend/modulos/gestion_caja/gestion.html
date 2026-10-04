@@ -114,7 +114,7 @@
           <div class="gc-form-row three">
             <div class="gc-form-group">
               <label>Monto inicial Gs</label>
-              <input type="number" id="iniGs" placeholder="0" min="0" step="1">
+              <input type="text" inputmode="numeric" id="iniGs" placeholder="0" oninput="formatearGsInput(this)">
             </div>
             <div class="gc-form-group">
               <label>Monto inicial R$</label>
@@ -151,7 +151,7 @@
         <div class="gc-form-row three">
           <div class="gc-form-group">
             <label>Contado Gs</label>
-            <input type="number" id="arqMontoGs" class="gc-editable-input" placeholder="0" min="0" step="1" oninput="calcularArqueo()">
+            <input type="text" inputmode="numeric" id="arqMontoGs" class="gc-editable-input" placeholder="0" oninput="formatearGsInput(this); calcularArqueo()">
           </div>
           <div class="gc-form-group">
             <label>Contado R$</label>
@@ -166,15 +166,15 @@
         <div class="gc-form-row three">
           <div class="gc-form-group">
             <label>Tarjeta</label>
-            <input type="number" id="arqMontoTarjeta" class="gc-editable-input" placeholder="0" min="0" step="1" oninput="calcularArqueo()">
+            <input type="text" inputmode="numeric" id="arqMontoTarjeta" class="gc-editable-input" placeholder="0" oninput="formatearGsInput(this); calcularArqueo()">
           </div>
           <div class="gc-form-group">
             <label>Transferencia</label>
-            <input type="number" id="arqMontoTransferencia" class="gc-editable-input" placeholder="0" min="0" step="1" oninput="calcularArqueo()">
+            <input type="text" inputmode="numeric" id="arqMontoTransferencia" class="gc-editable-input" placeholder="0" oninput="formatearGsInput(this); calcularArqueo()">
           </div>
           <div class="gc-form-group">
             <label>PIX</label>
-            <input type="number" id="arqMontoPix" class="gc-editable-input" placeholder="0" min="0" step="1" oninput="calcularArqueo()">
+            <input type="text" inputmode="numeric" id="arqMontoPix" class="gc-editable-input" placeholder="0" oninput="formatearGsInput(this); calcularArqueo()">
           </div>
         </div>
 
@@ -598,8 +598,8 @@
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="../../compartido/js/panelAuditoria.js"></script>
-  <script src="gestion.js?v=20260420.2"></script>
-  <script src="/compartido/js/seguridad.js"></script>
+  <script src="gestion.js?v=2026.05.31.01"></script>
+  <script src="/compartido/js/seguridad.js?v=2026.05.26.01"></script>
 
 </body>
 

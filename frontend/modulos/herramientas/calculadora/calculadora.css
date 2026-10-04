@@ -34,6 +34,26 @@ body{
   align-items: center;
 }
 
+/* INDICADOR TECLADO */
+.teclado-indicador{
+  font-size: 18px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 13px;
+  cursor: default;
+  transition: 0.3s;
+}
+
+.teclado-indicador.activo{
+  background: #d4edda;
+  color: #27ae60;
+}
+
+.teclado-indicador.inactivo{
+  background: #f8d7da;
+  color: #c0392b;
+}
+
 .btn-cerrar{
   background: transparent;
   color: #999;
@@ -110,11 +130,22 @@ button{
 
 /* CLEAR */
 .btn-clear{
-  grid-column: span 4;
+  grid-column: span 3;
   background: #c0392b;
   color: white;
 }
 
 .btn-clear:hover{
   background: #a93226;
+}
+
+/* BORRAR */
+.btn-borrar{
+  background: #e67e22;
+  color: white;
+  font-size: 18px;
+}
+
+.btn-borrar:hover{
+  background: #ca6f1e;
 }

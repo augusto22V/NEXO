@@ -225,14 +225,21 @@ function devolverProductoSeleccionadoCompra(row) {
   const json = JSON.stringify(payload);
   function cerrar() { try { window.close(); } catch (_) {} }
 
+  // 1. BroadcastChannel — mecanismo principal (mismo origen/sesion en Electron)
+  try {
+    const bc = new BroadcastChannel('alpx_selector_channel');
+    bc.postMessage({ type: 'producto', payload });
+    bc.close();
+  } catch (_) {}
+
+  // 2. IPC Electron (si el preload esta disponible)
   if (window.__electronAPI) {
-    // Electron con preload: IPC garantizado
     window.__electronAPI.setStorage(COMPRA_PRODUCTO_STORAGE_KEY, json)
       .then(cerrar).catch(cerrar);
     return;
   }
 
-  // Fallback: localStorage + espera 500ms para que el relay de Electron lo lea
+  // 3. Fallback: localStorage + opener + 500ms
   localStorage.setItem(COMPRA_PRODUCTO_STORAGE_KEY, json);
   if (window.opener && !window.opener.closed) {
     try {
@@ -240,9 +247,7 @@ function devolverProductoSeleccionadoCompra(row) {
         window.opener.recibirProducto(payload);
       }
       window.opener.focus();
-    } catch (e) {
-      console.error("Error transfiriendo producto al compra:", e);
-    }
+    } catch (_) {}
   }
   setTimeout(cerrar, 500);
 }

@@ -11,8 +11,19 @@ const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('__electronAPI', {
   /**
    * Escribe una clave en el localStorage de la ventana principal.
-   * Retorna una Promise que resuelve CUANDO el valor ya está escrito —
-   * el popup puede llamar window.close() inmediatamente después.
    */
-  setStorage: (key, value) => ipcRenderer.invoke('set-main-storage', { key, value })
+  setStorage: (key, value) => ipcRenderer.invoke('set-main-storage', { key, value }),
+
+  /**
+   * Reinicia el proceso backend Node.js sin cerrar la ventana.
+   */
+  restartServer: () => ipcRenderer.invoke('restart-server'),
+
+  /**
+   * Guarda un archivo en disco usando el diálogo nativo de Electron.
+   * @param {string} fileName - Nombre sugerido del archivo
+   * @param {string} base64 - Contenido del archivo en base64
+   * @returns {Promise<{ok:boolean, path?:string, cancelled?:boolean}>}
+   */
+  saveFile: (fileName, base64) => ipcRenderer.invoke('save-file', { fileName, base64 })
 });

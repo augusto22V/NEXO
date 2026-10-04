@@ -180,6 +180,15 @@ _listenerConfirm = function (e) {
 };
 
     document.addEventListener("keydown", _listenerConfirm);
+    return;
+  }
+
+  /* ================= FALLBACK ================= */
+  // La página no tiene ninguna estructura de modal (ni modalOverlay ni
+  // modalEliminar). Usamos el confirm nativo para que el botón igual funcione
+  // (sin esto, Volver/Cancelar parecían "no hacer nada").
+  if (window.confirm(mensaje || "¿Desea continuar?")) {
+    if (onConfirm) onConfirm();
   }
 }
 
@@ -205,6 +214,21 @@ function cerrarModalEliminar() {
   }
 
   _onConfirm = null;
+}
+
+/* =======================================================
+   ================= MODAL INFO ===========================
+   ======================================================= */
+
+function baseModalOpenInfo({ titulo = "Información", mensaje, detalle = "" }) {
+  baseModalOpenConfirm({
+    titulo,
+    mensaje,
+    detalle,
+    confirmText: "Aceptar",
+    cancelText: null,
+    onConfirm: null
+  });
 }
 
 /* =======================================================

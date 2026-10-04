@@ -208,14 +208,21 @@ function seleccionarCompradorDirecto(c) {
 
   function cerrar() { try { window.close(); } catch (_) {} }
 
+  // 1. BroadcastChannel — mecanismo principal (mismo origen/sesion en Electron)
+  try {
+    const bc = new BroadcastChannel('alpx_selector_channel');
+    bc.postMessage({ type: 'comprador', payload: compradorSeleccionado });
+    bc.close();
+  } catch (_) {}
+
+  // 2. IPC Electron (si el preload esta disponible)
   if (window.__electronAPI) {
-    // Electron con preload: IPC garantizado
     window.__electronAPI.setStorage("softsysCompradorSeleccionado", json)
       .then(cerrar).catch(cerrar);
     return;
   }
 
-  // Fallback: localStorage + espera 500ms para que el relay de Electron lo lea
+  // 3. Fallback: localStorage + opener + 500ms
   localStorage.setItem("softsysCompradorSeleccionado", json);
   if (window.opener && !window.opener.closed) {
     try {
@@ -223,7 +230,7 @@ function seleccionarCompradorDirecto(c) {
         window.opener.recibirComprador(compradorSeleccionado);
       }
       window.opener.focus();
-    } catch { /* localStorage ya escrito */ }
+    } catch (_) {}
   }
   setTimeout(cerrar, 500);
 }

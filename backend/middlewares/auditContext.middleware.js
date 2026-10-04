@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const { AsyncLocalStorage } = require('node:async_hooks');
 
-const JWT_SECRET = 'stoptop_secret_2024';
+const JWT_SECRET = process.env.JWT_SECRET || "stoptop_secret_2024";
 const storage = new AsyncLocalStorage();
 
 function extractUserIdFromRequest(req) {

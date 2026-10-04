@@ -1,6 +1,6 @@
 {
-	"appId": "com.softsys.lanapp.casa",
-	"appName": "SoftSys Casa",
+	"appId": "com.alpx.lanapp.casa",
+	"appName": "ALPX SYSTEM Casa",
 	"webDir": "www",
 	"server": {
 		"cleartext": true,

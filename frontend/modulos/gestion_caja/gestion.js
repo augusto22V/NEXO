@@ -265,6 +265,20 @@ function fGs(n)  { return 'Gs '  + Number(n || 0).toLocaleString('es-PY'); }
 function fBrl(n) { return 'R$ '  + Number(n || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 function fUsd(n) { return 'US$ ' + Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 
+// Formatea un input de Guaraníes con separador de miles (319500 -> "319.500")
+// mientras se escribe. Gs no usa centavos, así que solo dígitos.
+function formatearGsInput(input) {
+  if (!input) return;
+  const soloDigitos = String(input.value || '').replace(/\D/g, '');
+  input.value = soloDigitos ? Number(soloDigitos).toLocaleString('es-PY') : '';
+}
+
+// Lee el valor numérico real de un input de Gs formateado (quita los puntos).
+function leerGsInput(id) {
+  const v = String(document.getElementById(id)?.value || '').replace(/\D/g, '');
+  return Number(v) || 0;
+}
+
 function setBadge(estado) {
   const b = document.getElementById('estadoBadge');
   if (!b) return;
@@ -425,7 +439,7 @@ async function abrirCaja() {
   }
 
   const r = await apiPost(`${API}/abrir`, {
-    monto_inicial:       parseFloat(document.getElementById('iniGs').value)  || 0,
+    monto_inicial:       leerGsInput('iniGs'),
     monto_inicial_real:  parseFloat(document.getElementById('iniBrl').value) || 0,
     monto_inicial_dolar: parseFloat(document.getElementById('iniUsd').value) || 0,
     observacion:         document.getElementById('obsApertura').value
@@ -519,12 +533,12 @@ async function cargarResumenArqueo() {
 
 function getArqueoContado() {
   return {
-    gs: toNumber(document.getElementById('arqMontoGs')?.value, 0),
+    gs: leerGsInput('arqMontoGs'),
     brl: toNumber(document.getElementById('arqMontoBrl')?.value, 0),
     usd: toNumber(document.getElementById('arqMontoUsd')?.value, 0),
-    tarjeta: toNumber(document.getElementById('arqMontoTarjeta')?.value, 0),
-    transferencia: toNumber(document.getElementById('arqMontoTransferencia')?.value, 0),
-    pix: toNumber(document.getElementById('arqMontoPix')?.value, 0)
+    tarjeta: leerGsInput('arqMontoTarjeta'),
+    transferencia: leerGsInput('arqMontoTransferencia'),
+    pix: leerGsInput('arqMontoPix')
   };
 }
 
@@ -752,7 +766,7 @@ async function ejecutarCierre() {
     if (btnCierre) { btnCierre.disabled = true; btnCierre.textContent = 'Caja cerrada'; }
 
     setTimeout(() => cargarHistorial(), 500);
-    const tabHistorial = document.querySelector('.gc-tab[data-tab=”historial”]');
+    const tabHistorial = document.querySelector('.gc-tab[data-tab="historial"]');
     if (tabHistorial && !tabHistorial.classList.contains('is-hidden')) {
       showTab('historial', tabHistorial);
     }

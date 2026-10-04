@@ -455,10 +455,10 @@ if (btnLicenciaCerrar) {
 function aplicarFallbackLogo() {
   const logos = Array.from(document.querySelectorAll("[data-login-logo]"));
   const candidates = [
+    "/recursos/img/alpx-logo.png",
     "/recursos/img/logo_softsys.png",
     "/recursos/img/Logo.png",
-    "/recursos/img/softSys.png",
-    "../recursos/img/logo_softsys.png"
+    "../recursos/img/alpx-logo.png"
   ];
 
   logos.forEach((imgEl) => {

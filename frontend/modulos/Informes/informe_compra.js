@@ -229,6 +229,17 @@ function construirPayloadExportCompras(formato) {
 
 async function exportarInforme(formato) {
   try {
+    const desde = document.getElementById("filtroDesde").value;
+    const hasta = document.getElementById("filtroHasta").value;
+    if (!desde || !hasta) {
+      toast("Seleccione rango de fechas antes de exportar", "warning");
+      return;
+    }
+    if (desde > hasta) {
+      toast("Fecha desde no puede ser mayor", "warning");
+      return;
+    }
+
     mostrarSpinner(formato === "pdf" ? "Generando PDF..." : "Generando Excel...");
     const payload = construirPayloadExportCompras(formato);
 
@@ -239,12 +250,44 @@ async function exportarInforme(formato) {
       body: JSON.stringify(payload)
     });
 
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok || !data?.ok) {
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
       throw new Error(data?.error || "No se pudo exportar");
     }
 
-    toast(`Archivo generado: ${data.archivo} en C:/Sys/doc`, "success");
+    // Obtener nombre del archivo desde el header Content-Disposition
+    const disposition = res.headers.get("Content-Disposition") || "";
+    const match = disposition.match(/filename="?([^"]+)"?/);
+    const fileName = match ? match[1] : `informe_compras.${formato === "excel" ? "xlsx" : "pdf"}`;
+
+    const arrayBuffer = await res.arrayBuffer();
+
+    // En Electron: convertir a base64 por chunks (evita stack overflow en archivos grandes)
+    if (window.__electronAPI?.saveFile) {
+      const bytes = new Uint8Array(arrayBuffer);
+      let binary = "";
+      const CHUNK = 8192;
+      for (let i = 0; i < bytes.length; i += CHUNK) {
+        binary += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
+      }
+      const result = await window.__electronAPI.saveFile(fileName, btoa(binary));
+      if (result?.cancelled) { toast("Descarga cancelada", "info"); return; }
+      if (!result?.ok) throw new Error(result?.error || "No se pudo guardar el archivo");
+      toast(`&#x2714; Guardado en: ${result.path}`, "success");
+      return;
+    }
+
+    // Fallback navegador: usar arrayBuffer directamente, sin base64
+    const blob = new Blob([arrayBuffer]);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast(`Descargando: ${fileName}`, "success");
   } catch (err) {
     console.error(err);
     toast(err.message || "Error al exportar", "error");

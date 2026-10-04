@@ -8,8 +8,10 @@ const FALLBACK_ADMIN = [
   { nombre: "Permisos", categoria: "Seguridad", ruta: "/modulos/config/permisos/permisos.html", icono: "fa-key" },
   { nombre: "Empresa", categoria: "Configuracion", ruta: "/modulos/config/empresa/empresa.html", icono: "fa-building" },
   { nombre: "Terminales", categoria: "Configuracion", ruta: "/modulos/config/terminal/terminal.html", icono: "fa-desktop" },
-  { nombre: "Parametros", categoria: "Configuracion", ruta: "/modulos/parametros/parametros.html", icono: "fa-sliders" },
-  { nombre: "Generador Control", categoria: "Sistema", ruta: "/modulos/config/licencia_generador.html", icono: "fa-shield-halved" }
+  { nombre: "Parametros", categoria: "Configuracion", ruta: "/modulos/parametros/parametros.html", icono: "fa-sliders" }
+  // "Generador Control" se quitó del menú: la renovación de licencias se hace
+  // desde herramientas_vendedor/generar_licencia.js (en la PC del vendedor),
+  // NO desde la app del cliente.
 ];
 
 function normalizarRol(rol) {
