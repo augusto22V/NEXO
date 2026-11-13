@@ -158,7 +158,7 @@ function crearResumenGanadores() {
    CARGAR PARTICIPANTES (BACKEND)
 ========================== */
 async function cargarParticipantes() {
-  const res = await fetch("http://localhost:3000/sorteo/participantes");
+  const res = await fetch("/sorteo/participantes");
   todos = await res.json();
 
   dividirEnGrupos();
@@ -188,7 +188,7 @@ async function agregarParticipante() {
     }
   }
 
-  await fetch("http://localhost:3000/sorteo/participantes", {
+  await fetch("/sorteo/participantes", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ nombre })
@@ -304,7 +304,7 @@ async function eliminarParticipanteGlobal(id) {
   if (!ok) return;
 
   // 2️⃣ Eliminar del backend
-  await fetch(`http://localhost:3000/sorteo/participantes/${id}`, {
+  await fetch(`/sorteo/participantes/${id}`, {
     method: "DELETE"
   });
 
@@ -502,7 +502,7 @@ function cerrarModal() {
    ELIMINAR PARTICIPANTE (solo vista 1)
 ========================== */
 async function eliminarParticipante(id) {
-  await fetch(`http://localhost:3000/sorteo/participantes/${id}`, {
+  await fetch(`/sorteo/participantes/${id}`, {
     method: "DELETE"
   });
   await cargarParticipantes();
@@ -521,7 +521,7 @@ function cerrarConfirmacion() {
 
 async function confirmarNuevoSorteo() {
   // 1️⃣ borrar backend
-  await fetch("http://localhost:3000/sorteo/participantes", {
+  await fetch("/sorteo/participantes", {
     method: "DELETE"
   });
 
@@ -563,7 +563,7 @@ async function confirmarNuevoSorteo() {
 let clientesSistema = [];
 
 async function abrirModalClientes() {
-  const res = await fetch("http://localhost:3000/api/clientes");
+  const res = await fetch("/api/clientes");
   clientesSistema = await res.json();
 
   renderClientesModal(clientesSistema);
@@ -622,7 +622,7 @@ async function agregarClientesSeleccionados() {
     // evitar duplicados
     if (todos.some(p => p.nombre === nombre)) continue;
 
-    await fetch("http://localhost:3000/sorteo/participantes", {
+    await fetch("/sorteo/participantes", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ nombre })

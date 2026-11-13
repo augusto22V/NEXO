@@ -16,6 +16,7 @@ const {
   syncItemFromSource
 } = require("../services/menu_digital.service");
 const { POS_SIN_COCINA } = require("../config/pos.mode");
+const { guardarArchivoEnBase } = require("../services/archivos_db.service");
 
 /* ================= MULTER ================= */
 const storage = multer.diskStorage({
@@ -495,6 +496,7 @@ router.post('/', authMiddleware, upload.single('imagen'), async (req, res) => {
 
       fs.unlink(req.file.path, () => {});
       imagenPath = `/uploads/productos/${nombreWebp}`;
+      await guardarArchivoEnBase(imagenPath, rutaFinal);
     }
 
     const result = await pool.query(
@@ -724,6 +726,7 @@ router.put('/:id', authMiddleware, upload.single('imagen'), async (req, res) => 
       fs.unlink(req.file.path, () => {});
 
       const nuevaImagen = `/uploads/productos/${nombreWebp}`;
+      await guardarArchivoEnBase(nuevaImagen, rutaFinal);
       query += `, imagen = $${values.length + 1}`;
       values.push(nuevaImagen);
     }

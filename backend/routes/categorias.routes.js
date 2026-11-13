@@ -6,6 +6,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const sharp = require("sharp");
+const { guardarArchivoEnBase } = require("../services/archivos_db.service");
 const {
   ensureMenuDigitalSchema,
   getScopeFromReq,
@@ -112,6 +113,7 @@ router.post('/', authMiddleware, upload.single('imagen'), async (req, res) => {
       fs.unlinkSync(req.file.path);
 
       imagen = `/uploads/categorias/${nombreWebp}`;
+      await guardarArchivoEnBase(imagen, rutaFinal);
     }
 
     const activoBool = (String(activo).toLowerCase() === "true");
@@ -196,6 +198,7 @@ if (imagen) {
   fs.unlink(req.file.path, () => {});
 
   imagen = `/uploads/categorias/${nombreWebp}`;
+  await guardarArchivoEnBase(imagen, rutaFinal);
 }
 
     const activoBool = req.body.activo === undefined

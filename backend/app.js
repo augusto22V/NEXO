@@ -19,13 +19,15 @@ const { ensureKitchenPrintSchema } = require("./services/cocina_print.service");
 const { ensureTerminalConfigSchema } = require("./services/terminal_config.service");
 const { ensureSchemaCompat } = require("./services/schema_compat.service");
 const { POS_SIN_COCINA } = require("./config/pos.mode");
+const { ensureArchivosSchema, ensureUploadDirs, servirDesdeBase } = require("./services/archivos_db.service");
 
-const JWT_SECRET       = "stoptop_secret_2024";
+const JWT_SECRET       = require("./config/jwt");
 const PAGINAS_PUBLICAS = ["/login/login.html"];
 const DEV_MODE         = true; 
 const ASSET_VERSION    = process.env.ASSET_VERSION || "2026.04.17.03";
 const authMiddleware = require("./Auth.middleware");
 const app = express();
+ensureUploadDirs();
 
 function setNoStoreHeaders(res) {
   res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, private");
@@ -71,6 +73,7 @@ app.use("/recursos", express.static(path.join(__dirname, "../frontend/recursos")
   lastModified: true,
   setHeaders: setStaticHeaders
 }));
+app.use("/recursos", servirDesdeBase("/recursos"));
 
 
 
@@ -189,6 +192,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads"), {
   lastModified: true,
   setHeaders: setStaticHeaders
 }));
+app.use("/uploads", servirDesdeBase("/uploads"));
 
 app.use(express.static(path.join(__dirname, "../frontend"), {
   etag: true,
@@ -211,6 +215,12 @@ app.use(globalErrorMiddleware);
 const PORT = Number(process.env.PORT) || 3000;
 
 async function bootstrapSchemas() {
+  try {
+    await ensureArchivosSchema();
+  } catch (error) {
+    console.error("No se pudo preparar la tabla de imagenes:", error.message);
+  }
+
   try {
     await ensureSchemaCompat();
   } catch (error) {

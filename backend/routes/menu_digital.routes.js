@@ -3,6 +3,7 @@ const path = require("path");
 const fs = require("fs");
 const multer = require("multer");
 const sharp = require("sharp");
+const { guardarArchivoEnBase } = require("../services/archivos_db.service");
 const PDFDocument = require("pdfkit");
 const qr = require("qr-image");
 const db = require("../db");
@@ -78,7 +79,9 @@ async function saveImageAsset(file, options = {}) {
     fs.unlink(file.path, () => {});
   }
 
-  return `/uploads/menu_digital/${outputName}`;
+  const rutaPublica = `/uploads/menu_digital/${outputName}`;
+  await guardarArchivoEnBase(rutaPublica, outputPath);
+  return rutaPublica;
 }
 
 async function getScopedConfig(client, req) {
