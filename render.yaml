@@ -1,0 +1,19 @@
+# Configuracion para publicar la app gratis en Render (https://render.com).
+# La base de datos va en Neon (https://neon.tech), tambien gratis.
+# Pasos completos en PUBLICAR_EN_LA_NUBE.md
+services:
+  - type: web
+    name: libreria-sys
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: DATABASE_URL
+        sync: false          # se pega a mano: la direccion de la base de Neon
+      - key: JWT_SECRET
+        generateValue: true  # Render inventa una clave segura

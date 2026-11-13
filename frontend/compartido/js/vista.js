@@ -1,4 +1,4 @@
-const API = 'http://localhost:3000/api';
+const API = '/api';
 
 async function cargarCategorias() {
     const res = await fetch(`${API}/productos/categorias`);
@@ -19,7 +19,7 @@ async function cargarProductos() {
     const texto = document.getElementById('buscador').value.toLowerCase();
     const categoriaId = document.getElementById('categoriaSelect').value;
 
-    const res = await fetch('http://localhost:3000/productos');
+    const res = await fetch('/productos');
     let productos = await res.json();
 
     if (categoriaId) {
@@ -41,7 +41,7 @@ async function cargarProductos() {
     <div class="img">
         ${
             p.imagen
-                ? `<img src="http://localhost:3000/uploads/productos/${p.imagen}" alt="${p.nombre}">`
+                ? `<img src="/uploads/productos/${p.imagen}" alt="${p.nombre}">`
                 : ``
         }
     </div>

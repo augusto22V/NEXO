@@ -777,7 +777,7 @@ router.get("/:id/pdf", async (req, res) => {
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
 
-    const url = `http://localhost:3000/modulos/factura/factura_ticket.html?id=${id}`;
+    const url = `http://127.0.0.1:${process.env.PORT || 3000}/modulos/factura/factura_ticket.html?id=${id}`;
 
     await page.goto(url, { waitUntil: "networkidle0" });
 

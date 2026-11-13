@@ -1,13 +1,20 @@
 const { Pool } = require('pg');
 const { getAuditContext } = require('./middlewares/auditContext.middleware');
 
-const pool = new Pool({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'libreria_sys',
-    password: '12345',
-    port: 5432,
-});
+// En la nube (Render + Neon) se usa DATABASE_URL; en la PC local sigue la configuracion de siempre.
+const pool = process.env.DATABASE_URL
+  ? new Pool({
+      connectionString: process.env.DATABASE_URL,
+      ssl: { rejectUnauthorized: false },
+      max: Number(process.env.PG_POOL_MAX) || 5,
+    })
+  : new Pool({
+      user: 'postgres',
+      host: 'localhost',
+      database: 'libreria_sys',
+      password: '12345',
+      port: 5432,
+    });
 
 function extractUserIdFromRequestContext(req) {
   const candidates = [

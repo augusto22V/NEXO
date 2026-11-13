@@ -20,7 +20,7 @@ const { ensureTerminalConfigSchema } = require("./services/terminal_config.servi
 const { ensureSchemaCompat } = require("./services/schema_compat.service");
 const { POS_SIN_COCINA } = require("./config/pos.mode");
 
-const JWT_SECRET       = "stoptop_secret_2024";
+const JWT_SECRET       = require("./config/jwt");
 const PAGINAS_PUBLICAS = ["/login/login.html"];
 const DEV_MODE         = true; 
 const ASSET_VERSION    = process.env.ASSET_VERSION || "2026.04.17.03";

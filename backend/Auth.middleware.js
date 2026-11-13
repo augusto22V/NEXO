@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 
-const JWT_SECRET = "stoptop_secret_2024";
+const JWT_SECRET = require("./config/jwt");
 
 function authMiddleware(req, res, next) {
 

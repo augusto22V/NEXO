@@ -5,7 +5,7 @@ const db = require("../db");
 const bcrypt = require("bcrypt");
 const licenciaService = require("../services/licencia.service");
 
-const JWT_SECRET = "stoptop_secret_2024";
+const JWT_SECRET = require("../config/jwt");
 
 function getTokenFromRequest(req) {
   if (req.cookies?.token) return req.cookies.token;
