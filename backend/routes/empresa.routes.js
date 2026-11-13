@@ -4,6 +4,7 @@ const db = require("../db");
 const authMiddleware = require("../Auth.middleware");
 
 const multer = require("multer");
+const { guardarArchivoEnBase } = require("../services/archivos_db.service");
 const path = require("path");
 const fs = require("fs");
 
@@ -137,6 +138,7 @@ router.post("/", authMiddleware, upload.single("logo"), async (req, res) => {
       fs.renameSync(rutaTemp, nuevaRuta);
 
       logo = nombreArchivo;
+      await guardarArchivoEnBase(`/recursos/img/${nombreArchivo}`, nuevaRuta);
 
       await db.query(
         "UPDATE empresa SET logo = $1 WHERE id = $2",
@@ -228,6 +230,7 @@ router.put("/:id", authMiddleware, upload.single("logo"), async (req, res) => {
 
       fs.renameSync(rutaTemp, nuevaRuta);
       logo = nombreArchivo;
+      await guardarArchivoEnBase(`/recursos/img/${nombreArchivo}`, nuevaRuta);
     }
 
     await db.query(`

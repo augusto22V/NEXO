@@ -15,7 +15,7 @@ Así la app funciona desde el celular, en cualquier red, **aunque tu PC esté ap
 
 1. En tu PC (con PostgreSQL prendido), hacé doble clic en `subir_base_a_la_nube.bat` (está en la carpeta del proyecto).
 2. Pegá la dirección de Neon y presioná Enter.
-3. Esperá a que diga **Listo**.
+3. Esperá a que diga **Listo**. Esto sube tus datos **y las fotos** de productos y categorías.
 
 ## 3. Publicar la app en Render (5 min)
 
@@ -34,6 +34,6 @@ Para tenerla como app: menú del navegador → **Agregar a pantalla de inicio**.
 
 - Si nadie la usa por 15 minutos, se "duerme". La primera vez que entrás después tarda **~1 minuto** en abrir; después anda normal.
 - Las **impresoras térmicas** de tu red local no se pueden usar desde la nube.
-- Las **fotos de productos** de tu PC no se suben (están fuera de GitHub), y las que subas desde la nube se pueden borrar cuando Render reinicia. Los datos sí quedan bien guardados en Neon.
+- Las **fotos** (productos, categorías, menú digital y logos) se guardan dentro de la base, así no se pierden cuando Render reinicia. El plan gratis de Neon tiene 0,5 GB: alcanza para miles de fotos.
 - Los datos que cargues en la nube quedan en Neon, **separados** de la base de tu PC. Elegí una de las dos para trabajar.
 - Cada vez que se suban cambios a la rama `main` en GitHub, Render actualiza la app solo.

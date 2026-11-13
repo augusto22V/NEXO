@@ -20,9 +20,21 @@ if "%NEON_URL%"=="" (
   exit /b 1
 )
 
+echo.
+echo 1/3 Guardando las fotos de productos dentro de la base...
+pushd "%~dp0backend"
+node scripts\fotos_a_base.js
+if errorlevel 1 (
+  popd
+  echo No se pudieron copiar las fotos. Revisa que Node y PostgreSQL esten funcionando.
+  pause
+  exit /b 1
+)
+popd
+
 set "PGPASSWORD=12345"
 echo.
-echo 1/2 Copiando la base de tu PC...
+echo 2/3 Copiando la base de tu PC...
 "%PGBIN%\pg_dump.exe" -h localhost -U postgres -d libreria_sys --no-owner --no-privileges -f "%TEMP%\libreria_sys_backup.sql"
 if errorlevel 1 (
   echo Fallo la copia local. Revisa que PostgreSQL este prendido.
@@ -31,7 +43,7 @@ if errorlevel 1 (
 )
 set "PGPASSWORD="
 
-echo 2/2 Subiendo a Neon...
+echo 3/3 Subiendo a Neon (puede tardar si hay muchas fotos)...
 "%PGBIN%\psql.exe" "%NEON_URL%" -v ON_ERROR_STOP=0 -q -f "%TEMP%\libreria_sys_backup.sql"
 echo.
 echo Listo. Si arriba no hay errores en rojo, la base ya esta en la nube.
