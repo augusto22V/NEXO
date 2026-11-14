@@ -15,6 +15,7 @@ const { ensureLoteSchema } = require("./services/lote.schema.service");
 const { ensureMonedaSchema } = require("./services/moneda.schema.service");
 const { ensureOperacionCatalogSchema } = require("./services/operacion.catalog.service");
 const { ensureMenuDigitalSchema } = require("./services/menu_digital.service");
+const { ensureCatalogoSchema, getDefaultPublishedSlug } = require("./services/catalogo.service");
 const { ensureKitchenPrintSchema } = require("./services/cocina_print.service");
 const { ensureTerminalConfigSchema } = require("./services/terminal_config.service");
 const { ensureSchemaCompat } = require("./services/schema_compat.service");
@@ -143,6 +144,7 @@ app.use('/api/produccion',      require('./routes/produccion.routes'));
 app.use('/api/recetas',         require('./routes/receta.routes'));
 app.use('/api/programas',       authMiddleware, require('./routes/programas.routes'));
 app.use("/api/menu-digital",    require("./routes/menu_digital.routes"));
+app.use("/api/catalogo",        require("./routes/catalogo.routes"));
 app.use("/admin/apk",           authMiddleware, require("./routes/admin_apk.routes"));
 
 
@@ -154,6 +156,21 @@ app.use("/api/print-preview", require("./routes/print.routes"));
 
 app.get("/menu/:slug", (req, res) => {
   res.sendFile(path.join(__dirname, "../frontend/modulos/menu_digital/menu_publico.html"));
+});
+
+// Catalogo online publico (productos, servicios y pedidos sin descontar stock)
+app.get("/catalogo", async (req, res) => {
+  try {
+    const slug = await getDefaultPublishedSlug(require("./db"));
+    if (slug) return res.redirect(`/catalogo/${encodeURIComponent(slug)}`);
+  } catch (error) {
+    console.error("No se pudo resolver el catalogo por defecto:", error.message);
+  }
+  res.sendFile(path.join(__dirname, "../frontend/modulos/catalogo/catalogo_publico.html"));
+});
+
+app.get("/catalogo/:slug", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/modulos/catalogo/catalogo_publico.html"));
 });
 
 // pRIVADO (CON LOGIN)
@@ -285,6 +302,12 @@ async function bootstrapSchemas() {
     await ensureMenuDigitalSchema();
   } catch (error) {
     console.error("No se pudo preparar esquema de menu digital:", error.message);
+  }
+
+  try {
+    await ensureCatalogoSchema();
+  } catch (error) {
+    console.error("No se pudo preparar esquema de catalogo online:", error.message);
   }
 
   if (!POS_SIN_COCINA) {

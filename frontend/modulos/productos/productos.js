@@ -26,6 +26,7 @@ const mostrarVentaMedioInput = document.getElementById("mostrarVentaMedioProduct
 const mostrarMenuDigitalInput = document.getElementById("mostrarMenuDigitalProducto");
 const esInsumoInput = document.getElementById("esInsumo");
 const esServicioInput = document.getElementById("esServicio");
+const ocultarCatalogoInput = document.getElementById("ocultarCatalogo");
 const filtroCategoriaInput = document.getElementById("filtroCategoria");
 const filtroCategoriaNombreInput = document.getElementById("filtroCategoriaNombre");
 const btnBuscarFiltroCategoria = document.getElementById("btnBuscarFiltroCategoria");
@@ -208,6 +209,10 @@ function estadoInicial() {
   esServicioInput.checked = false;
   esInsumoInput.disabled = true;
   esServicioInput.disabled = true;
+  if (ocultarCatalogoInput) {
+    ocultarCatalogoInput.checked = false;
+    ocultarCatalogoInput.disabled = true;
+  }
 
   if (previewURL) {
     URL.revokeObjectURL(previewURL);
@@ -545,6 +550,7 @@ async function seleccionarProducto(id) {
   mostrarMenuDigitalInput.checked = toBoolUi(p.mostrar_menu_digital);
   esInsumoInput.checked = toBoolUi(p.es_insumo);
   esServicioInput.checked = toBoolUi(p.es_servicio);
+  if (ocultarCatalogoInput) ocultarCatalogoInput.checked = toBoolUi(p.ocultar_catalogo);
   imagenInput.disabled = false;
 
 
@@ -625,6 +631,7 @@ function habilitarCampos() {
   mostrarMenuDigitalInput.disabled = false;
   esInsumoInput.disabled = false;
   esServicioInput.disabled = false;
+  if (ocultarCatalogoInput) ocultarCatalogoInput.disabled = false;
 
 }
 
@@ -650,7 +657,8 @@ function obtenerEstadoActual() {
     mostrarMenuDigital: mostrarMenuDigitalInput.checked,
     mostrarVentaMedio: mostrarVentaMedioInput.checked,
     esInsumo: esInsumoInput.checked,
-    esServicio: esServicioInput.checked
+    esServicio: esServicioInput.checked,
+    ocultarCatalogo: ocultarCatalogoInput ? ocultarCatalogoInput.checked : false
   };
 }
 
@@ -805,6 +813,10 @@ form.addEventListener("submit", async (e) => {
     "es_servicio",
     esServicioInput.checked
   );
+
+  if (ocultarCatalogoInput) {
+    data.set("ocultar_catalogo", ocultarCatalogoInput.checked);
+  }
 
   //  evitar que stock se resetee
   data.delete("stock");

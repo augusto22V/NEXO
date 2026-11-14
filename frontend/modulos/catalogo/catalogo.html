@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="/manifest.json">
+  <title>Catálogo online y pedidos</title>
+  <link rel="stylesheet" href="/compartido/css/base.css">
+  <link rel="stylesheet" href="/recursos/css/all.min.css">
+  <link rel="stylesheet" href="catalogo.css">
+</head>
+<body class="ca-body">
+  <header class="ca-top">
+    <button type="button" class="ca-back" onclick="window.location.href='/home.html'">
+      <i class="fa-solid fa-arrow-left"></i><span>Volver</span>
+    </button>
+    <div class="ca-title">
+      <p>Marketing</p>
+      <h1>Catálogo online y pedidos</h1>
+    </div>
+    <a id="abrirCatalogo" class="ca-btn ca-btn-primary" href="#" target="_blank" rel="noopener">
+      <i class="fa-solid fa-up-right-from-square"></i><span>Ver catálogo</span>
+    </a>
+  </header>
+
+  <nav class="ca-tabs" role="tablist">
+    <button type="button" class="ca-tab active" data-tab="pedidos">
+      <i class="fa-solid fa-inbox"></i> Pedidos y consultas <span id="badgePendientes" class="ca-count" hidden>0</span>
+    </button>
+    <button type="button" class="ca-tab" data-tab="servicios"><i class="fa-solid fa-screwdriver-wrench"></i> Servicios</button>
+    <button type="button" class="ca-tab" data-tab="config"><i class="fa-solid fa-link"></i> Enlace y datos</button>
+  </nav>
+
+  <main class="ca-main">
+    <!-- ================= PEDIDOS ================= -->
+    <section class="ca-panel active" data-panel="pedidos">
+      <div class="ca-info">
+        <i class="fa-solid fa-circle-info"></i>
+        <span>Los pedidos del catálogo <strong>no descuentan stock</strong>. Llamá o escribí al cliente, y si se concreta, cargá la venta normalmente en caja. Después marcalo como <em>Atendido</em>.</span>
+      </div>
+      <div class="ca-filters">
+        <button type="button" class="ca-filter active" data-estado="PENDIENTE">Pendientes</button>
+        <button type="button" class="ca-filter" data-estado="ATENDIDO">Atendidos</button>
+        <button type="button" class="ca-filter" data-estado="CANCELADO">Cancelados</button>
+        <button type="button" class="ca-filter" data-estado="">Todos</button>
+        <button type="button" class="ca-btn ca-btn-ghost" id="recargarPedidos" style="margin-left:auto"><i class="fa-solid fa-rotate"></i> Actualizar</button>
+      </div>
+      <div id="listaPedidos" class="ca-pedidos"></div>
+    </section>
+
+    <!-- ================= SERVICIOS ================= -->
+    <section class="ca-panel" data-panel="servicios">
+      <div class="ca-info">
+        <i class="fa-solid fa-circle-info"></i>
+        <span>Acá cargás los servicios que ofrecés (fotocopias, impresiones, anillados, plastificado, etc.). También aparecen solos los productos que tengan marcado <em>“Es servicio”</em>.</span>
+      </div>
+      <div class="ca-grid-2">
+        <form id="servicioForm" class="ca-card" autocomplete="off">
+          <h2 id="servicioFormTitulo">Nuevo servicio</h2>
+          <input type="hidden" id="sId">
+          <label class="ca-field">Nombre
+            <input id="sNombre" required maxlength="180" placeholder="Ej. Fotocopias blanco y negro">
+          </label>
+          <label class="ca-field">Descripción
+            <textarea id="sDescripcion" rows="3" maxlength="1500" placeholder="Ej. Tamaño A4 y oficio. Descuento por cantidad."></textarea>
+          </label>
+          <div class="ca-row">
+            <label class="ca-field">Precio (Gs, opcional)
+              <input id="sPrecio" inputmode="numeric" placeholder="Ej. 500">
+            </label>
+            <label class="ca-field">Texto del precio (opcional)
+              <input id="sPrecioTexto" maxlength="80" placeholder="Ej. desde · por hoja · a convenir">
+            </label>
+          </div>
+          <div class="ca-row">
+            <label class="ca-field">Orden
+              <input id="sOrden" type="number" min="0" value="0">
+            </label>
+            <label class="ca-check"><input type="checkbox" id="sActivo" checked> Mostrar en el catálogo</label>
+          </div>
+          <label class="ca-field">Foto (opcional)
+            <input id="sImagen" type="file" accept="image/*">
+          </label>
+          <div id="sImagenActual" class="ca-img-actual" hidden></div>
+          <div class="ca-actions">
+            <button type="submit" class="ca-btn ca-btn-primary"><i class="fa-solid fa-floppy-disk"></i> Guardar</button>
+            <button type="button" class="ca-btn ca-btn-ghost" id="servicioCancelar">Limpiar</button>
+          </div>
+        </form>
+        <div class="ca-card">
+          <h2>Servicios cargados</h2>
+          <div id="listaServicios" class="ca-servicios"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= CONFIG ================= -->
+    <section class="ca-panel" data-panel="config">
+      <div class="ca-grid-2">
+        <div class="ca-card">
+          <h2>Enlace para compartir</h2>
+          <p class="ca-muted">Mandá este enlace por WhatsApp, Instagram o Facebook, o imprimí el código QR para el mostrador.</p>
+          <div class="ca-link-box">
+            <input id="enlacePublico" readonly>
+            <button type="button" class="ca-btn ca-btn-primary" id="copiarEnlace"><i class="fa-regular fa-copy"></i> Copiar</button>
+          </div>
+          <div id="avisoLocal" class="ca-warn" hidden>
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>Este enlace solo funciona dentro de tu red local. Para que cualquiera lo abra desde su celular, la app tiene que estar publicada en internet (ver la guía <em>PUBLICAR_EN_LA_NUBE.md</em>).</span>
+          </div>
+          <div class="ca-qr">
+            <img id="qrImg" alt="Código QR del catálogo">
+            <div class="ca-actions">
+              <a id="qrDescargar" class="ca-btn ca-btn-ghost" download="catalogo-qr.png"><i class="fa-solid fa-download"></i> Descargar QR</a>
+            </div>
+          </div>
+        </div>
+
+        <form id="configForm" class="ca-card" autocomplete="off">
+          <h2>Datos del catálogo</h2>
+          <label class="ca-check ca-check-big"><input type="checkbox" id="cPublicado"> Catálogo visible al público</label>
+          <label class="ca-field">Nombre que se muestra
+            <input id="cNombre" maxlength="180" required>
+          </label>
+          <label class="ca-field">Mensaje de bienvenida
+            <textarea id="cMensaje" rows="2" maxlength="600"></textarea>
+          </label>
+          <label class="ca-field">WhatsApp del negocio (con código de país)
+            <input id="cWhatsapp" inputmode="tel" placeholder="Ej. 595981123456">
+            <small>Los pedidos se pueden reenviar a este número. Sin espacios ni “+”.</small>
+          </label>
+          <div class="ca-row">
+            <label class="ca-field">Horario
+              <input id="cHorario" maxlength="180" placeholder="Lun a Sáb 7:00 a 19:00">
+            </label>
+            <label class="ca-field">Dirección
+              <input id="cDireccion" maxlength="300">
+            </label>
+          </div>
+          <div class="ca-row">
+            <label class="ca-field">Dirección del enlace
+              <input id="cSlug" maxlength="60" placeholder="mi-libreria">
+              <small>Lo que va después de /catalogo/</small>
+            </label>
+            <label class="ca-field">Color
+              <input id="cColor" type="color" value="#7B6BAD">
+            </label>
+          </div>
+          <label class="ca-check"><input type="checkbox" id="cPrecios"> Mostrar precios</label>
+          <label class="ca-check"><input type="checkbox" id="cSinStock"> Mostrar productos sin stock (con “consultá”)</label>
+          <p class="ca-muted" style="margin-top:8px">Para ocultar un producto puntual, editá el producto y marcá <em>“Ocultar del catálogo online”</em>. Los insumos de uso interno no se muestran.</p>
+          <div class="ca-actions">
+            <button type="submit" class="ca-btn ca-btn-primary"><i class="fa-solid fa-floppy-disk"></i> Guardar cambios</button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <div id="caToast" class="ca-toast" hidden></div>
+
+  <script src="catalogo.js"></script>
+  <script src="/compartido/js/seguridad.js"></script>
+</body>
+</html>
