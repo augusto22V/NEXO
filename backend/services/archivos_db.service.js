@@ -47,7 +47,7 @@ function ensureArchivosSchema() {
 }
 
 function ensureUploadDirs() {
-  for (const sub of ["productos", "categorias", "menu_digital"]) {
+  for (const sub of ["productos", "categorias", "menu_digital", "catalogo"]) {
     fs.mkdirSync(path.join(UPLOADS_DIR, sub), { recursive: true });
   }
 }

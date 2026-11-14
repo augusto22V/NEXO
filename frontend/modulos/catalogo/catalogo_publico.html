@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#7B6BAD">
+  <meta name="description" content="Catálogo de productos y servicios. Hacé tu pedido o consultá disponibilidad.">
+  <title>Catálogo</title>
+  <link rel="stylesheet" href="/recursos/css/all.min.css">
+  <link rel="stylesheet" href="/modulos/catalogo/catalogo_publico.css">
+</head>
+<body>
+  <div id="app" class="cp-app">
+    <div class="cp-loading">
+      <i class="fa-solid fa-book-open"></i>
+      <p>Cargando catálogo…</p>
+    </div>
+  </div>
+
+  <!-- Detalle de producto -->
+  <div id="detalleModal" class="cp-modal" hidden>
+    <div class="cp-modal-backdrop" data-close="detalle"></div>
+    <div class="cp-modal-card" role="dialog" aria-modal="true" aria-labelledby="detalleNombre">
+      <button type="button" class="cp-modal-close" data-close="detalle" aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>
+      <div id="detalleContenido"></div>
+    </div>
+  </div>
+
+  <!-- Pedido / consulta -->
+  <div id="pedidoPanel" class="cp-modal cp-modal-side" hidden>
+    <div class="cp-modal-backdrop" data-close="pedido"></div>
+    <div class="cp-modal-card cp-drawer" role="dialog" aria-modal="true" aria-labelledby="pedidoTitulo">
+      <button type="button" class="cp-modal-close" data-close="pedido" aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>
+      <div id="pedidoContenido"></div>
+    </div>
+  </div>
+
+  <button type="button" id="carritoBtn" class="cp-cart-fab" hidden>
+    <i class="fa-solid fa-basket-shopping"></i>
+    <span id="carritoTexto">Ver pedido</span>
+    <span id="carritoCantidad" class="cp-cart-count">0</span>
+  </button>
+
+  <div id="toast" class="cp-toast" hidden></div>
+
+  <script src="/modulos/catalogo/catalogo_publico.js"></script>
+</body>
+</html>
