@@ -1,11 +1,11 @@
 :root {
-  --cp-primary: #7B6BAD;
-  --cp-primary-soft: rgba(123, 107, 173, 0.12);
-  --cp-bg: #F6F3EF;
+  --cp-primary: #0A6CDB;
+  --cp-primary-soft: rgba(10, 108, 219, 0.12);
+  --cp-bg: #F1F4F9;
   --cp-card: #FFFFFF;
   --cp-text: #26212F;
   --cp-muted: #6B6177;
-  --cp-line: #E7E1D9;
+  --cp-line: #E1E6EF;
   --cp-ok: #2F7D57;
   --cp-ok-bg: #E4F3EA;
   --cp-warn: #9A6A12;
@@ -50,18 +50,20 @@ img { display: block; max-width: 100%; }
 
 /* ---------- Cabecera ---------- */
 .cp-hero {
-  background: linear-gradient(140deg, var(--cp-primary) 0%, color-mix(in srgb, var(--cp-primary) 70%, #000) 100%);
+  /* Negro con brillo azul, como el logo de NEXO */
+  background:
+    radial-gradient(120% 90% at 85% -10%, color-mix(in srgb, var(--cp-primary) 70%, transparent) 0%, transparent 60%),
+    linear-gradient(160deg, #0B0D12 0%, #0A1426 100%);
   color: #fff;
   padding: 28px 16px 64px;
 }
 .cp-hero-inner { max-width: 1100px; margin: 0 auto; display: flex; gap: 16px; align-items: center; }
 .cp-logo {
   width: 72px; height: 72px; flex: none;
-  border-radius: 18px;
-  background: #fff;
-  object-fit: contain;
-  padding: 6px;
-  box-shadow: 0 4px 14px rgba(0,0,0,.15);
+  border-radius: 50%;
+  background: #000;
+  object-fit: cover;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--cp-primary) 70%, transparent), 0 6px 18px rgba(0,0,0,.35);
 }
 .cp-hero h1 { margin: 0; font-size: clamp(22px, 5vw, 32px); line-height: 1.15; }
 .cp-hero p { margin: 6px 0 0; opacity: .92; max-width: 640px; }
@@ -145,7 +147,7 @@ img { display: block; max-width: 100%; }
 .cp-card:hover { transform: translateY(-2px); box-shadow: var(--cp-shadow); }
 .cp-card-img {
   aspect-ratio: 1 / 1; width: 100%;
-  background: #F1ECE6; object-fit: cover;
+  background: #E9EEF6; object-fit: cover;
 }
 .cp-card-ph {
   aspect-ratio: 1 / 1; width: 100%;
@@ -188,7 +190,7 @@ img { display: block; max-width: 100%; }
   padding: 14px; display: flex; gap: 12px; align-items: flex-start;
   box-shadow: 0 1px 3px rgba(38,33,47,.06);
 }
-.cp-service-img { width: 64px; height: 64px; border-radius: 12px; object-fit: cover; flex: none; background: #F1ECE6; }
+.cp-service-img { width: 64px; height: 64px; border-radius: 12px; object-fit: cover; flex: none; background: #E9EEF6; }
 .cp-service-ph {
   width: 64px; height: 64px; border-radius: 12px; flex: none;
   display: grid; place-items: center; background: var(--cp-primary-soft); color: var(--cp-primary); font-size: 24px;
@@ -243,7 +245,7 @@ img { display: block; max-width: 100%; }
   display: grid; place-items: center; font-size: 18px;
 }
 
-.cp-detail-img { width: calc(100% + 32px); margin: -20px -16px 16px; max-height: 50vh; object-fit: contain; background: #F1ECE6; }
+.cp-detail-img { width: calc(100% + 32px); margin: -20px -16px 16px; max-height: 50vh; object-fit: contain; background: #E9EEF6; }
 @media (min-width: 720px) { .cp-detail-img { width: calc(100% + 48px); margin: -24px -24px 16px; border-radius: 20px 20px 0 0; } }
 .cp-detail-cat { color: var(--cp-primary); font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; }
 .cp-detail h2 { margin: 4px 0 8px; font-size: 22px; line-height: 1.25; padding-right: 36px; }

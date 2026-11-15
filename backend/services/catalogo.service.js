@@ -98,7 +98,7 @@ async function ensureCatalogoSchema() {
         whatsapp VARCHAR(30) NULL,
         direccion TEXT NULL,
         horario VARCHAR(180) NULL,
-        color VARCHAR(20) NOT NULL DEFAULT '#7B6BAD',
+        color VARCHAR(20) NOT NULL DEFAULT '#0A6CDB',
         mostrar_sin_stock BOOLEAN NOT NULL DEFAULT true,
         mostrar_precios BOOLEAN NOT NULL DEFAULT true,
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -176,7 +176,8 @@ function mapConfig(row = {}) {
     whatsapp: normalizeWhatsapp(row.whatsapp),
     direccion: toText(row.direccion),
     horario: toText(row.horario),
-    color: normalizeColor(row.color, "#7B6BAD"),
+    // El violeta era el color inicial anterior: se reemplaza por el azul del logo.
+    color: String(row.color || "").toUpperCase() === "#7B6BAD" ? "#0A6CDB" : normalizeColor(row.color, "#0A6CDB"),
     mostrar_sin_stock: row.mostrar_sin_stock !== false,
     mostrar_precios: row.mostrar_precios !== false,
     empresa_nombre: toText(row.empresa_nombre),

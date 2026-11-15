@@ -265,7 +265,7 @@
     $("cHorario").value = c.horario;
     $("cDireccion").value = c.direccion;
     $("cSlug").value = c.slug;
-    $("cColor").value = c.color && c.color.length === 7 ? c.color : "#7B6BAD";
+    $("cColor").value = c.color && c.color.length === 7 ? c.color : "#0A6CDB";
     $("cPrecios").checked = c.mostrar_precios;
     $("cSinStock").checked = c.mostrar_sin_stock;
   }
