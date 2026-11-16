@@ -1,3 +1,4 @@
+const { ensureCatalogoSchema } = require("../services/catalogo.service");
 const express = require('express');
 const router = express.Router();
 const pool = require('../db');
@@ -533,6 +534,14 @@ router.post('/', authMiddleware, upload.single('imagen'), async (req, res) => {
       ]
     );
 
+    if (req.body.ocultar_catalogo !== undefined) {
+      await ensureCatalogoSchema();
+      await pool.query(
+        `UPDATE producto SET ocultar_catalogo = $1 WHERE id = $2`,
+        [toBool(req.body.ocultar_catalogo, false), result.rows[0].id]
+      );
+    }
+
     await syncProductoMenuDigital(req, result.rows[0].id);
     res.json(result.rows[0]);
 
@@ -547,6 +556,7 @@ router.get('/:id', async (req, res) => {
   try {
     await ensureComisionSchema();
     await ensureMonedaSchema();
+    await ensureCatalogoSchema();
     const { id } = req.params;
 
     const result = await pool.query(`
@@ -571,6 +581,7 @@ router.get('/:id', async (req, res) => {
         p.mostrar_venta_medio,
         p.es_insumo,
         p.es_servicio,
+        COALESCE(p.ocultar_catalogo, false) AS ocultar_catalogo,
         pp.precio_compra,
         COALESCE(pp.precio_compra_origen, pp.precio_compra, 0) AS precio_compra_origen,
         COALESCE(pp.precio_compra_moneda_id, 1) AS precio_compra_moneda_id,
@@ -712,6 +723,12 @@ router.put('/:id', authMiddleware, upload.single('imagen'), async (req, res) => 
     if (req.body.stock !== undefined) {
       query += `, stock = $${values.length + 1}`;
       values.push(req.body.stock);
+    }
+
+    if (req.body.ocultar_catalogo !== undefined) {
+      await ensureCatalogoSchema();
+      query += `, ocultar_catalogo = $${values.length + 1}`;
+      values.push(toBool(req.body.ocultar_catalogo, false));
     }
 
     if (req.file) {
