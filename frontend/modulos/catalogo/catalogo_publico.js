@@ -408,9 +408,12 @@
           </div>
           <div class="cp-hp" aria-hidden="true"><label>No completar<input name="sitio_web" tabindex="-1" autocomplete="off"></label></div>
           ${error ? `<p class="cp-error">${esc(error)}</p>` : ""}
-          <button type="submit" class="cp-btn" id="pedidoEnviar" ${state.enviando ? "disabled" : ""}>
-            <i class="fa-solid fa-paper-plane"></i>${state.enviando ? "Enviando…" : (esConsulta ? "Enviar consulta" : "Enviar pedido")}
+          <button type="submit" class="cp-btn${state.data.config.whatsapp ? " wa" : ""}" id="pedidoEnviar" ${state.enviando ? "disabled" : ""}>
+            ${state.data.config.whatsapp
+              ? `<i class="fa-brands fa-whatsapp"></i>${esConsulta ? "Consultar por WhatsApp" : "Enviar pedido por WhatsApp"}`
+              : `<i class="fa-solid fa-paper-plane"></i>${state.enviando ? "Enviando…" : (esConsulta ? "Enviar consulta" : "Enviar pedido")}`}
           </button>
+          ${state.data.config.whatsapp ? `<p class="cp-total-note">Se abre WhatsApp con tu pedido ya escrito. Solo tocá enviar.</p>` : ""}
         </form>
       </div>`;
 
@@ -467,6 +470,9 @@
 
     try { localStorage.setItem("catalogo_cliente", JSON.stringify({ nombre, telefono })); } catch (_) { /* nada */ }
 
+    const whatsapp = state.data.config.whatsapp;
+    if (whatsapp) return enviarPorWhatsapp({ whatsapp, nombre, telefono, nota, items, sitioWeb: form.sitio_web.value });
+
     state.enviando = true;
     conservarFormulario(() => renderPedido());
     try {
@@ -499,7 +505,68 @@
     state.enviando = false;
   }
 
+  function textoWhatsapp({ nombre, telefono, nota, items }) {
+    const c = state.data.config;
+    const tienda = c.nombre_publico || "";
+    const lineas = [state.tipo === "CONSULTA"
+      ? `Hola ${tienda}! Quiero consultar si tienen disponible:`
+      : `Hola ${tienda}! Quiero hacer un pedido:`];
+    if (items.length) {
+      lineas.push("");
+      items.forEach((it) => {
+        const precio = Number(it.item.precio) || 0;
+        const sub = c.mostrar_precios && precio > 0 ? ` - ${gs(precio * it.cantidad)}` : "";
+        lineas.push(`• ${it.cantidad} x ${it.item.nombre}${sub}`);
+      });
+      const total = totalCarrito();
+      if (c.mostrar_precios && total > 0) { lineas.push(""); lineas.push(`Total estimado: ${gs(total)}`); }
+    }
+    if (nota) { lineas.push(""); lineas.push(state.tipo === "CONSULTA" && !items.length ? nota : `Nota: ${nota}`); }
+    lineas.push("");
+    lineas.push(`Nombre: ${nombre}`);
+    lineas.push(`Teléfono: ${telefono}`);
+    return lineas.join("\n");
+  }
+
+  /** Abre WhatsApp con el pedido ya escrito. Tambien lo guarda en el sistema, sin esperar. */
+  function enviarPorWhatsapp({ whatsapp, nombre, telefono, nota, items, sitioWeb }) {
+    const url = `https://wa.me/${encodeURIComponent(whatsapp)}?text=${encodeURIComponent(textoWhatsapp({ nombre, telefono, nota, items }))}`;
+    const ventana = window.open(url, "_blank", "noopener");
+
+    fetch(`${API}/${encodeURIComponent(state.slug)}/pedido`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      keepalive: true,
+      body: JSON.stringify({
+        tipo: state.tipo, nombre, telefono, nota, sitio_web: sitioWeb,
+        items: items.map((c) => ({ clase: c.clase, id: c.id, cantidad: c.cantidad }))
+      })
+    }).catch(() => { /* el mensaje ya va por WhatsApp */ });
+
+    const tipo = state.tipo;
+    state.carrito = [];
+    state.tipo = "PEDIDO";
+    guardarCarrito();
+    actualizarFab();
+    mostrarExito({ whatsapp_url: url, directo: true }, tipo);
+    // Si el navegador no dejo abrir otra pestaña, se abre en esta.
+    if (!ventana) window.location.href = url;
+  }
+
   function mostrarExito(data, tipo) {
+    if (data.directo) {
+      $("pedidoContenido").innerHTML = `
+        <div class="cp-success">
+          <i class="fa-brands fa-whatsapp big"></i>
+          <h2>¡Ya casi!</h2>
+          <p>Se abrió WhatsApp con tu ${tipo === "CONSULTA" ? "consulta" : "pedido"} escrito. Tocá <strong>enviar</strong> allí y te respondemos.</p>
+          <div class="cp-actions">
+            <a class="cp-btn wa" href="${esc(safeUrl(data.whatsapp_url))}" target="_blank" rel="noopener"><i class="fa-brands fa-whatsapp"></i>Abrir WhatsApp de nuevo</a>
+            <button type="button" class="cp-btn secondary" data-close="pedido">Seguir mirando</button>
+          </div>
+        </div>`;
+      return;
+    }
     const wa = safeUrl(data.whatsapp_url);
     $("pedidoContenido").innerHTML = `
       <div class="cp-success">
