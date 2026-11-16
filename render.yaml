@@ -19,3 +19,5 @@ services:
         generateValue: true  # Render inventa una clave segura
       - key: CATALOGO_SOLO
         value: "true"        # en internet corre solo el catalogo; el sistema completo sigue en la PC
+      - key: CATALOGO_WHATSAPP
+        value: "595986210051" # WhatsApp que recibe los pedidos si no hay otro cargado en el catalogo

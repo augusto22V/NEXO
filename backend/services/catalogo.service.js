@@ -177,7 +177,8 @@ function mapConfig(row = {}) {
     publicado: row.publicado !== false,
     nombre_publico: toText(row.nombre_publico) || toText(row.empresa_nombre) || "Catálogo",
     mensaje: toText(row.mensaje),
-    whatsapp: normalizeWhatsapp(row.whatsapp),
+    // Si no se cargo en la configuracion, se usa el de CATALOGO_WHATSAPP (variable del servidor).
+    whatsapp: normalizeWhatsapp(row.whatsapp) || normalizeWhatsapp(process.env.CATALOGO_WHATSAPP),
     direccion: toText(row.direccion),
     horario: toText(row.horario),
     // El violeta era el color inicial anterior: se reemplaza por el azul del logo.
