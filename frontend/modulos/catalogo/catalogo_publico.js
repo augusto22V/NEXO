@@ -308,7 +308,7 @@
     $("detMenos").onclick = () => { cantidad = Math.max(1, cantidad - 1); actualizar(); };
     $("detMas").onclick = () => { cantidad = Math.min(999, cantidad + 1); actualizar(); };
     $("detAgregar").onclick = () => { agregar(clase, id, cantidad); cerrar("detalle"); };
-    $("detConsultar").onclick = () => { cerrar("detalle"); consultar(clase, id, cantidad); };
+    $("detConsultar").onclick = () => { cerrar("detalle", true); consultar(clase, id, cantidad); };
     abrir("detalle");
   }
 
@@ -584,17 +584,27 @@
   }
 
   /* ------------------------- modales ------------------------- */
+  // Cada ventana abierta deja una entrada en el historial, asi el boton "atras" del celular la cierra.
   function abrir(nombre) {
     const el = nombre === "detalle" ? $("detalleModal") : $("pedidoPanel");
     el.hidden = false;
     document.body.style.overflow = "hidden";
+    const st = history.state;
+    if (st && st.cpModal) history.replaceState({ cpModal: nombre }, "");
+    else history.pushState({ cpModal: nombre }, "");
   }
 
-  function cerrar(nombre) {
+  /** soloOcultar: no tocar el historial (cuando lo cerro el "atras" o se abre otra ventana enseguida). */
+  function cerrar(nombre, soloOcultar = false) {
     const el = nombre === "detalle" ? $("detalleModal") : $("pedidoPanel");
+    if (el.hidden) return;
     el.hidden = true;
     if ($("detalleModal").hidden && $("pedidoPanel").hidden) document.body.style.overflow = "";
+    if (!soloOcultar && history.state && history.state.cpModal === nombre) history.back();
   }
+
+  window.addEventListener("popstate", () => { cerrar("detalle", true); cerrar("pedido", true); });
+  if (history.state && history.state.cpModal) history.replaceState(null, "");
 
   async function compartir() {
     const url = window.location.href;
