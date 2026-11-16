@@ -53,15 +53,16 @@ function ensureUploadDirs() {
 }
 
 /** Guarda en la base el archivo de disco `rutaDisco` bajo su URL publica (ej. "/uploads/productos/1.webp"). */
-async function guardarArchivoEnBase(rutaPublica, rutaDisco) {
+async function guardarArchivoEnBase(rutaPublica, rutaDisco, opciones = {}) {
   try {
     await ensureArchivosSchema();
-    const datos = await fs.promises.readFile(rutaDisco);
+    const datos = opciones.datos || (await fs.promises.readFile(rutaDisco));
+    const mime = opciones.mime || mimeDe(rutaDisco);
     await pool.query(
       `INSERT INTO archivo_subido (ruta, mime, datos, actualizado)
        VALUES ($1, $2, $3, now())
        ON CONFLICT (ruta) DO UPDATE SET mime = EXCLUDED.mime, datos = EXCLUDED.datos, actualizado = now()`,
-      [rutaPublica, mimeDe(rutaDisco), datos]
+      [rutaPublica, mime, datos]
     );
   } catch (err) {
     console.error(`No se pudo guardar ${rutaPublica} en la base:`, err.message);
