@@ -118,7 +118,7 @@
     }
 
     const wa = c.whatsapp
-      ? `<a class="cp-pill-btn wa" href="https://wa.me/${esc(c.whatsapp)}" target="_blank" rel="noopener"><i class="fa-brands fa-whatsapp"></i>Escribinos</a>`
+      ? `<a class="cp-pill-btn wa" href="https://wa.me/${esc(c.whatsapp)}?text=${encodeURIComponent(`¡Hola ${c.nombre_publico || ""}! Vi su catálogo online y quería hacer una consulta.`)}" target="_blank" rel="noopener"><i class="fa-brands fa-whatsapp"></i>Escribinos</a>`
       : "";
     const logo = safeUrl(c.logo);
 
