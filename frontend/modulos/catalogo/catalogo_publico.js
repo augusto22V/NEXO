@@ -531,7 +531,9 @@
   /** Abre WhatsApp con el pedido ya escrito. Tambien lo guarda en el sistema, sin esperar. */
   function enviarPorWhatsapp({ whatsapp, nombre, telefono, nota, items, sitioWeb }) {
     const url = `https://wa.me/${encodeURIComponent(whatsapp)}?text=${encodeURIComponent(textoWhatsapp({ nombre, telefono, nota, items }))}`;
-    const ventana = window.open(url, "_blank", "noopener");
+    // Sin "noopener" en las opciones: con esa opcion window.open devuelve null aunque abra la pestaña.
+    const ventana = window.open(url, "_blank");
+    if (ventana) { try { ventana.opener = null; } catch (_) { /* nada */ } }
 
     fetch(`${API}/${encodeURIComponent(state.slug)}/pedido`, {
       method: "POST",
