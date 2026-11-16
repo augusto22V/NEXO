@@ -471,7 +471,12 @@
     try { localStorage.setItem("catalogo_cliente", JSON.stringify({ nombre, telefono })); } catch (_) { /* nada */ }
 
     const whatsapp = state.data.config.whatsapp;
-    if (whatsapp) return enviarPorWhatsapp({ whatsapp, nombre, telefono, nota, items, sitioWeb: form.sitio_web.value });
+    if (whatsapp) {
+      // Evita guardar el mismo pedido dos veces por un doble toque.
+      state.enviando = true;
+      setTimeout(() => { state.enviando = false; }, 3000);
+      return enviarPorWhatsapp({ whatsapp, nombre, telefono, nota, items, sitioWeb: form.sitio_web.value });
+    }
 
     state.enviando = true;
     conservarFormulario(() => renderPedido());
@@ -531,7 +536,10 @@
   /** Abre WhatsApp con el pedido ya escrito. Tambien lo guarda en el sistema, sin esperar. */
   function enviarPorWhatsapp({ whatsapp, nombre, telefono, nota, items, sitioWeb }) {
     const url = `https://wa.me/${encodeURIComponent(whatsapp)}?text=${encodeURIComponent(textoWhatsapp({ nombre, telefono, nota, items }))}`;
-    const ventana = window.open(url, "_blank", "noopener");
+    // Sin "noopener": con esa opcion el navegador devuelve null aunque abra la pestaña,
+    // y el catalogo volvia a abrir WhatsApp tambien en esta pestaña (se abria 2 veces).
+    const ventana = window.open(url, "_blank");
+    if (ventana) { try { ventana.opener = null; } catch (_) { /* nada */ } }
 
     fetch(`${API}/${encodeURIComponent(state.slug)}/pedido`, {
       method: "POST",
