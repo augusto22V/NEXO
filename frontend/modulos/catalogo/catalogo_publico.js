@@ -117,8 +117,10 @@
       if (meta) meta.setAttribute("content", c.color);
     }
 
+    // "Escribinos" abre WhatsApp con un saludo ya escrito.
+    const saludo = `Hola ${c.nombre_publico || ""}! Vi su catálogo online y tengo una consulta: `.replace("Hola !", "Hola!");
     const wa = c.whatsapp
-      ? `<a class="cp-pill-btn wa" href="https://wa.me/${esc(c.whatsapp)}" target="_blank" rel="noopener"><i class="fa-brands fa-whatsapp"></i>Escribinos</a>`
+      ? `<a class="cp-pill-btn wa" href="https://wa.me/${esc(c.whatsapp)}?text=${esc(encodeURIComponent(saludo))}" target="_blank" rel="noopener"><i class="fa-brands fa-whatsapp"></i>Escribinos</a>`
       : "";
     const logo = safeUrl(c.logo);
 
