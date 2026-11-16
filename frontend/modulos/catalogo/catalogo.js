@@ -308,6 +308,44 @@
     }
   });
 
+  /* ---------------- copia a internet ---------------- */
+  function hace(iso) {
+    if (!iso) return "";
+    const min = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
+    if (min < 1) return "recién";
+    if (min < 60) return `hace ${min} min`;
+    return `hace ${Math.round(min / 60)} h`;
+  }
+
+  function pintarNube(nube) {
+    const barra = $("nubeBarra");
+    if (!nube || !nube.configurada) { barra.hidden = true; return; }
+    barra.hidden = false;
+    barra.classList.toggle("error", nube.ok === false);
+    let texto;
+    if (nube.en_curso) texto = "Copiando productos, precios y fotos a internet…";
+    else if (nube.ok === false) texto = `No se pudo actualizar el catálogo en internet (${nube.mensaje}). Revisá la conexión a internet.`;
+    else if (nube.ultima) texto = `Catálogo en internet actualizado ${hace(nube.ultima)}${nube.resumen ? ` · ${nube.resumen.productos} productos` : ""}. Se actualiza solo cada 10 minutos.`;
+    else texto = "El catálogo en internet se actualiza solo cada 10 minutos.";
+    $("nubeTexto").textContent = texto;
+  }
+
+  $("nubeSincronizar").addEventListener("click", async () => {
+    const btn = $("nubeSincronizar");
+    btn.disabled = true;
+    pintarNube({ configurada: true, en_curso: true });
+    try {
+      const data = await api(`${API}/nube/sincronizar`, { method: "POST" });
+      pintarNube(data.estado);
+      toast("Catálogo en internet actualizado");
+    } catch (error) {
+      toast(error.message);
+      api(`${API}/nube`).then(pintarNube).catch(() => {});
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
   /* ---------------- inicio ---------------- */
   async function iniciar() {
     try {
@@ -317,6 +355,7 @@
       state.servicios = data.servicios;
       renderServicios();
       setPendientes(data.pendientes);
+      pintarNube(data.nube);
       cargarPedidos();
     } catch (error) {
       $("listaPedidos").innerHTML = `<div class="ca-empty">${esc(error.message)}</div>`;
@@ -325,5 +364,9 @@
 
   iniciar();
   // Revisa pedidos nuevos cada minuto mientras la pantalla esta abierta.
-  setInterval(() => { if (!document.hidden) cargarPedidos(); }, 60000);
+  setInterval(() => {
+    if (document.hidden) return;
+    cargarPedidos();
+    api(`${API}/nube`).then(pintarNube).catch(() => {});
+  }, 60000);
 })();

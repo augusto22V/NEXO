@@ -81,13 +81,11 @@ function normalizeWhatsapp(value) {
   return digits.slice(0, 20);
 }
 
-async function ensureCatalogoSchema() {
-  if (schemaPromise) return schemaPromise;
-
-  schemaPromise = (async () => {
+/** Crea las tablas del catalogo en la base indicada (por defecto la del sistema). */
+async function crearSchemaCatalogo(q) {
     ensureCatalogoUploadDir();
 
-    await db.query(`
+    await q.query(`
       CREATE TABLE IF NOT EXISTS catalogo_config (
         id BIGSERIAL PRIMARY KEY,
         empresa_id INTEGER NOT NULL UNIQUE REFERENCES empresa(id) ON DELETE CASCADE,
@@ -106,7 +104,7 @@ async function ensureCatalogoSchema() {
       )
     `);
 
-    await db.query(`
+    await q.query(`
       CREATE TABLE IF NOT EXISTS catalogo_servicio (
         id BIGSERIAL PRIMARY KEY,
         empresa_id INTEGER NOT NULL REFERENCES empresa(id) ON DELETE CASCADE,
@@ -122,7 +120,7 @@ async function ensureCatalogoSchema() {
       )
     `);
 
-    await db.query(`
+    await q.query(`
       CREATE TABLE IF NOT EXISTS catalogo_pedido (
         id BIGSERIAL PRIMARY KEY,
         empresa_id INTEGER NOT NULL REFERENCES empresa(id) ON DELETE CASCADE,
@@ -139,25 +137,31 @@ async function ensureCatalogoSchema() {
       )
     `);
 
-    await db.query(`
+    await q.query(`
       CREATE INDEX IF NOT EXISTS idx_catalogo_servicio_empresa
       ON catalogo_servicio(empresa_id, orden, id)
     `);
 
-    await db.query(`
+    await q.query(`
       CREATE INDEX IF NOT EXISTS idx_catalogo_pedido_empresa_estado
       ON catalogo_pedido(empresa_id, estado, created_at DESC)
     `);
 
     // Columnas de producto que usa el catalogo (por si la base es antigua).
-    await db.query(`
+    await q.query(`
       ALTER TABLE producto
         ADD COLUMN IF NOT EXISTS es_insumo BOOLEAN NOT NULL DEFAULT false,
         ADD COLUMN IF NOT EXISTS es_servicio BOOLEAN DEFAULT false,
         ADD COLUMN IF NOT EXISTS no_control_stock BOOLEAN DEFAULT false,
         ADD COLUMN IF NOT EXISTS ocultar_catalogo BOOLEAN NOT NULL DEFAULT false
     `);
-  })().catch((error) => {
+}
+
+async function ensureCatalogoSchema(queryable) {
+  if (queryable && queryable !== db) return crearSchemaCatalogo(queryable);
+  if (schemaPromise) return schemaPromise;
+
+  schemaPromise = crearSchemaCatalogo(db).catch((error) => {
     schemaPromise = null;
     throw error;
   });

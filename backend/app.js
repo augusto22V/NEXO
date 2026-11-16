@@ -16,6 +16,7 @@ const { ensureMonedaSchema } = require("./services/moneda.schema.service");
 const { ensureOperacionCatalogSchema } = require("./services/operacion.catalog.service");
 const { ensureMenuDigitalSchema } = require("./services/menu_digital.service");
 const { ensureCatalogoSchema, getDefaultPublishedSlug } = require("./services/catalogo.service");
+const { iniciarSincronizacionAutomatica } = require("./services/catalogo_sync.service");
 const { ensureKitchenPrintSchema } = require("./services/cocina_print.service");
 const { ensureTerminalConfigSchema } = require("./services/terminal_config.service");
 const { ensureSchemaCompat } = require("./services/schema_compat.service");
@@ -335,6 +336,7 @@ setImmediate(() => {
   bootstrapSchemas()
     .then(() => {
       console.log(" Migraciones de esquema finalizadas.");
+      iniciarSincronizacionAutomatica();
     })
     .catch((err) => {
       console.error(" Migraciones de esquema (error global):", err?.message || err);

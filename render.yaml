@@ -17,3 +17,5 @@ services:
         sync: false          # se pega a mano: la direccion de la base de Neon
       - key: JWT_SECRET
         generateValue: true  # Render inventa una clave segura
+      - key: CATALOGO_SOLO
+        value: "true"        # en internet corre solo el catalogo; el sistema completo sigue en la PC

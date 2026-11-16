@@ -8,6 +8,12 @@ const db = require("../db");
 const authMiddleware = require("../Auth.middleware");
 const { guardarArchivoEnBase } = require("../services/archivos_db.service");
 const {
+  nubeConfigurada,
+  getNubePool,
+  sincronizarCatalogo,
+  estadoSincronizacion
+} = require("../services/catalogo_sync.service");
+const {
   CATALOGO_UPLOAD_DIR,
   ensureCatalogoUploadDir,
   ensureCatalogoSchema,
@@ -54,8 +60,15 @@ function empresaDe(req) {
   return toId(req?.usuario?.empresa_id);
 }
 
+/** Donde viven los pedidos: en la nube si el catalogo esta publicado alli, si no en la base local. */
+function pedidosDb() {
+  return nubeConfigurada() ? getNubePool() : db;
+}
+
 function publicOrigin(req) {
-  const configured = String(process.env.PUBLIC_BASE_URL || process.env.APP_PUBLIC_URL || "").trim().replace(/\/+$/, "");
+  const configured = String(
+    process.env.CATALOGO_PUBLIC_URL || process.env.PUBLIC_BASE_URL || process.env.APP_PUBLIC_URL || ""
+  ).trim().replace(/\/+$/, "");
   if (configured) return configured;
   const proto = String(req.headers["x-forwarded-proto"] || req.protocol || "http").split(",")[0].trim();
   const host = String(req.headers["x-forwarded-host"] || req.get("host") || "localhost:3000").split(",")[0].trim();
@@ -160,12 +173,13 @@ router.get("/admin", async (req, res) => {
     const config = await getOrCreateConfig(db, empresaDe(req));
     const [servicios, pendientes] = await Promise.all([
       listServicios(db, config.empresa_id, true),
-      contarPendientes(db, config.empresa_id)
+      contarPendientes(pedidosDb(), config.empresa_id).catch(() => 0)
     ]);
     res.json({
       config,
       servicios,
       pendientes,
+      nube: estadoSincronizacion(),
       enlace: publicUrl(req, config.slug),
       qr_url: "/api/catalogo/admin/qr.png"
     });
@@ -292,8 +306,8 @@ router.get("/admin/pedidos", async (req, res) => {
   try {
     const empresaId = empresaDe(req);
     const [pedidos, pendientes] = await Promise.all([
-      listPedidos(db, empresaId, { estado: req.query.estado, limit: req.query.limit }),
-      contarPendientes(db, empresaId)
+      listPedidos(pedidosDb(), empresaId, { estado: req.query.estado, limit: req.query.limit }),
+      contarPendientes(pedidosDb(), empresaId)
     ]);
     res.json({ pedidos, pendientes });
   } catch (error) {
@@ -304,9 +318,28 @@ router.get("/admin/pedidos", async (req, res) => {
 router.put("/admin/pedidos/:id", async (req, res) => {
   try {
     await ensureCatalogoSchema();
-    res.json(await actualizarPedido(db, empresaDe(req), req.params.id, req.body || {}));
+    res.json(await actualizarPedido(pedidosDb(), empresaDe(req), req.params.id, req.body || {}));
   } catch (error) {
     sendError(res, error, "No se pudo actualizar el pedido");
+  }
+});
+
+/* ---- Copia del catalogo a internet ---- */
+
+router.get("/admin/nube", (_req, res) => {
+  res.json(estadoSincronizacion());
+});
+
+router.post("/admin/nube/sincronizar", async (_req, res) => {
+  if (!nubeConfigurada()) {
+    return res.status(400).json({ error: "El catálogo en internet todavía no está configurado en esta PC." });
+  }
+  try {
+    const resumen = await sincronizarCatalogo();
+    res.json({ ok: true, resumen, estado: estadoSincronizacion() });
+  } catch (error) {
+    console.error("No se pudo sincronizar el catalogo", error);
+    res.status(502).json({ error: `No se pudo copiar a internet: ${error.message}`, estado: estadoSincronizacion() });
   }
 });
 
