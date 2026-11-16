@@ -33,7 +33,20 @@ echo Guardado. Copiando el catalogo a internet por primera vez (puede tardar por
 pushd "%~dp0backend"
 node scripts\sincronizar_catalogo.js
 popd
+
+REM Copia automatica cada 10 minutos, aunque el sistema este cerrado (sin ventanas).
+set "VBS=%~dp0backend\scripts\sincronizar_catalogo_oculto.vbs"
+> "%VBS%" echo Set sh = CreateObject("WScript.Shell")
+>> "%VBS%" echo sh.CurrentDirectory = "%~dp0backend"
+>> "%VBS%" echo sh.Run "cmd /c node scripts\sincronizar_catalogo.js > scripts\ultima_sincronizacion.log 2>&1", 0, True
+schtasks /create /f /sc minute /mo 10 /tn "NEXO Catalogo internet" /tr "wscript.exe \"%VBS%\"" >nul
+if errorlevel 1 (
+  echo No se pudo programar la copia automatica. El sistema abierto igual la hace cada 10 minutos.
+) else (
+  echo Copia automatica programada: cada 10 minutos.
+)
+
 echo.
-echo Listo. Cerra y volve a abrir el sistema para que el catalogo se actualice solo cada 10 minutos.
+echo Listo. Las fotos, precios y stock se copian solos a internet cada 10 minutos.
 echo Link para tus clientes: %WEB_URL%/catalogo
 pause

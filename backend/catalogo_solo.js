@@ -52,7 +52,8 @@ app.get("/catalogo/:slug", (_req, res) => {
 const estaticos = { maxAge: "1d", fallthrough: true };
 app.use("/modulos/catalogo", (req, res, next) => {
   if (!/^\/catalogo_publico\.(css|js)$/.test(req.path)) return next();
-  return express.static(path.join(FRONTEND, "modulos/catalogo"), { maxAge: "1h" })(req, res, next);
+  // Sin cache larga: cada cambio publicado se ve al recargar (el navegador revalida con etag).
+  return express.static(path.join(FRONTEND, "modulos/catalogo"), { maxAge: 0 })(req, res, next);
 });
 app.use("/recursos/css", express.static(path.join(FRONTEND, "recursos/css"), estaticos));
 app.use("/recursos/webfonts", express.static(path.join(FRONTEND, "recursos/webfonts"), estaticos));

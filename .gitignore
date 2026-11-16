@@ -11,3 +11,5 @@ frontend/.env
 
 *.log
 *.tmp
+backend/scripts/sincronizar_catalogo_oculto.vbs
+backend/scripts/ultima_sincronizacion.log
