@@ -9,6 +9,7 @@
 require("dotenv").config({ path: require("path").join(__dirname, "../.env") });
 const fs = require("fs");
 const path = require("path");
+const sharp = require("sharp");
 const pool = require("../db");
 const { UPLOADS_DIR, ensureArchivosSchema, guardarArchivoEnBase } = require("../services/archivos_db.service");
 
@@ -24,13 +25,29 @@ function listar(dir) {
   await ensureArchivosSchema();
   const archivos = listar(UPLOADS_DIR).filter((f) => /\.(webp|png|jpe?g|gif|svg)$/i.test(f));
   let n = 0;
+  let total = 0;
   for (const archivo of archivos) {
     const rutaPublica = "/uploads/" + path.relative(UPLOADS_DIR, archivo).split(path.sep).join("/");
-    await guardarArchivoEnBase(rutaPublica, archivo);
+    // Se achica cada foto (max 1000px, WebP) para que entren en el plan gratis de Neon (0,5 GB).
+    let opciones = {};
+    if (!/\.svg$/i.test(archivo)) {
+      try {
+        const datos = await sharp(archivo)
+          .rotate()
+          .resize({ width: 1000, height: 1000, fit: "inside", withoutEnlargement: true })
+          .webp({ quality: 75 })
+          .toBuffer();
+        opciones = { datos, mime: "image/webp" };
+      } catch (err) {
+        console.warn(`  No se pudo achicar ${rutaPublica}, se guarda tal cual: ${err.message}`);
+      }
+    }
+    await guardarArchivoEnBase(rutaPublica, archivo, opciones);
+    total += (opciones.datos ? opciones.datos.length : fs.statSync(archivo).size);
     n++;
     if (n % 50 === 0) console.log(`  ${n} de ${archivos.length}...`);
   }
-  console.log(`Fotos copiadas a la base: ${n}`);
+  console.log(`Fotos copiadas a la base: ${n} (${(total / 1024 / 1024).toFixed(1)} MB)`);
   await pool.end();
 })().catch(async (err) => {
   console.error("Error copiando fotos:", err.message);
