@@ -155,12 +155,20 @@ async function upsertFilas(nube, tabla, filas, { clave = "id", basicas = [] } = 
 async function leerFotoLocal(ruta) {
   const limpio = String(ruta || "").split("?")[0];
   if (!limpio.startsWith("/")) return null;
+  // Carpetas donde buscar: este proyecto y, si se configuro, la carpeta del sistema que se usa
+  // a diario (CATALOGO_SISTEMA_DIR), donde quedan las fotos nuevas que se cargan en Productos.
+  const raices = [];
+  const sistema = String(process.env.CATALOGO_SISTEMA_DIR || "").trim();
+  if (sistema) raices.push({ backend: path.join(sistema, "backend"), frontend: path.join(sistema, "frontend") });
+  raices.push({ backend: BACKEND_DIR, frontend: FRONTEND_DIR });
   const candidatos = [];
-  if (limpio.startsWith("/uploads/")) candidatos.push(path.join(BACKEND_DIR, limpio));
-  else candidatos.push(path.join(FRONTEND_DIR, limpio));
-  for (const archivo of candidatos) {
+  for (const raiz of raices) {
+    const base = limpio.startsWith("/uploads/") ? raiz.backend : raiz.frontend;
+    candidatos.push({ archivo: path.join(base, limpio), base });
+  }
+  for (const { archivo, base } of candidatos) {
     const normal = path.normalize(archivo);
-    if (!normal.startsWith(BACKEND_DIR) && !normal.startsWith(FRONTEND_DIR)) continue;
+    if (!normal.startsWith(path.normalize(base))) continue;
     if (fs.existsSync(normal) && fs.statSync(normal).isFile()) {
       return { datos: await fs.promises.readFile(normal), mime: MIME[path.extname(normal).toLowerCase()] || "application/octet-stream" };
     }
