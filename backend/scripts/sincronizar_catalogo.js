@@ -14,6 +14,10 @@ const { sincronizarCatalogo, nubeConfigurada } = require("../services/catalogo_s
   }
   try {
     const r = await sincronizarCatalogo();
+    if (r.omitida) {
+      console.log("El sistema abierto ya estaba copiando el catalogo en este momento. Listo, no hace falta repetir.");
+      process.exit(0);
+    }
     console.log("Listo. Catalogo en internet actualizado:");
     console.log(`  Productos: ${r.productos}  Categorias: ${r.categorias}  Precios: ${r.precios}  Servicios: ${r.servicios}`);
     console.log(`  Fotos nuevas: ${r.fotos_subidas}  Sin cambios: ${r.fotos_sin_cambios}  No encontradas: ${r.fotos_no_encontradas}`);

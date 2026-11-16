@@ -209,9 +209,26 @@ async function ajustarSecuencia(nube, tabla) {
   } catch (_) { /* tabla sin secuencia */ }
 }
 
+const LOCK_ID = 774411; // candado en la nube: evita dos PCs/procesos copiando a la vez
+
 async function sincronizarAhora() {
   const nube = getNubePool();
   if (!nube) throw new Error("Falta CATALOGO_NUBE_URL en backend/.env");
+  const candado = await nube.connect();
+  try {
+    const r = await candado.query("SELECT pg_try_advisory_lock($1) AS ok", [LOCK_ID]);
+    if (!r.rows[0].ok) return { omitida: true, motivo: "Otra copia ya estaba en curso" };
+    try {
+      return await copiarTodo(nube);
+    } finally {
+      await candado.query("SELECT pg_advisory_unlock($1)", [LOCK_ID]).catch(() => {});
+    }
+  } finally {
+    candado.release();
+  }
+}
+
+async function copiarTodo(nube) {
   const inicio = Date.now();
 
   await ensureCatalogoSchema();
@@ -287,6 +304,7 @@ async function sincronizarCatalogo() {
   enCurso = (async () => {
     try {
       const resumen = await sincronizarAhora();
+      if (resumen.omitida) return { ...estado.resumen, omitida: true };
       Object.assign(estado, { ultima: new Date().toISOString(), ok: true, mensaje: "", resumen });
       return resumen;
     } catch (error) {
@@ -308,7 +326,7 @@ function iniciarSincronizacionAutomatica() {
   if (!nubeConfigurada()) return;
   const minutos = Math.max(2, Number(process.env.CATALOGO_SYNC_MINUTOS) || 10);
   const correr = () => sincronizarCatalogo()
-    .then((r) => console.log(`Catalogo nube sincronizado: ${r.productos} productos, ${r.fotos_subidas} fotos nuevas (${r.segundos}s)`))
+    .then((r) => r && !r.omitida && console.log(`Catalogo nube sincronizado: ${r.productos} productos, ${r.fotos_subidas} fotos nuevas (${r.segundos}s)`))
     .catch((e) => console.error("Catalogo nube: no se pudo sincronizar:", e.message));
   setTimeout(correr, 20 * 1000);
   setInterval(correr, minutos * 60 * 1000).unref();
