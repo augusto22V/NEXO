@@ -105,6 +105,10 @@ img { display: block; max-width: 100%; }
   scrollbar-width: none;
 }
 .cp-chips::-webkit-scrollbar { display: none; }
+/* En compu se ven todas las categorias (en varias lineas); en celular se deslizan con el dedo. */
+@media (min-width: 760px) {
+  .cp-chips { flex-wrap: wrap; overflow: visible; }
+}
 .cp-chip {
   flex: none; padding: 7px 14px; border-radius: 999px;
   background: var(--cp-bg); color: var(--cp-text); font-size: 14px; font-weight: 600;
