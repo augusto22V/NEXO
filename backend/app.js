@@ -103,6 +103,8 @@ app.use("/api", (req, res, next) => {
 /* ==============================
    HEALTHCHECK LAN
 ============================== */
+app.get("/", (req, res) => res.redirect("/login/login.html"));
+
 app.get("/api/health", (req, res) => {
   res.json({ ok: true, app: "libreriasys", ts: new Date().toISOString() });
 });
