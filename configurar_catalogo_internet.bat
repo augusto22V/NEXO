@@ -23,10 +23,14 @@ if "%WEB_URL%"=="" set "WEB_URL=%DEFAULT_WEB%"
 
 if not exist "%ENVFILE%" type nul > "%ENVFILE%"
 REM Quitar valores anteriores y agregar los nuevos
-findstr /v /b /c:"CATALOGO_NUBE_URL=" /c:"CATALOGO_PUBLIC_URL=" "%ENVFILE%" > "%ENVFILE%.tmp"
+findstr /v /b /c:"CATALOGO_NUBE_URL=" /c:"CATALOGO_PUBLIC_URL=" /c:"CATALOGO_SISTEMA_DIR=" "%ENVFILE%" > "%ENVFILE%.tmp"
 move /y "%ENVFILE%.tmp" "%ENVFILE%" >nul
 >> "%ENVFILE%" echo CATALOGO_NUBE_URL=!NEON_URL!
 >> "%ENVFILE%" echo CATALOGO_PUBLIC_URL=!WEB_URL!
+REM Si el sistema de todos los dias esta en la carpeta LibreriaSys de al lado, tomar de ahi las fotos nuevas.
+if exist "%~dp0..\LibreriaSys\backend" (
+  for %%I in ("%~dp0..\LibreriaSys") do >> "%ENVFILE%" echo CATALOGO_SISTEMA_DIR=%%~fI
+)
 
 echo.
 echo Guardado. Copiando el catalogo a internet por primera vez (puede tardar por las fotos)...
