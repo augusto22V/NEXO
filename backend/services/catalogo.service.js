@@ -407,13 +407,18 @@ async function listServicios(queryable, empresaId, includeInactive = false) {
   return result.rows.map(mapServicio);
 }
 
+const CATEGORIAS_SERVICIO = /servicio|impresi|fotocop/i;
+
 async function buildPublicPayload(queryable, config) {
   const todos = await listProductosPublicos(queryable, { mostrarSinStock: config.mostrar_sin_stock });
-  const productos = todos.filter((p) => !p.es_servicio);
-  // Servicios: los cargados en el catalogo + los productos marcados como "Es servicio".
+  // Las categorias de impresiones/fotocopias/servicios se muestran juntas en la seccion de servicios,
+  // asi el cliente encuentra todo en un solo lugar.
+  const vaConServicios = (p) => p.es_servicio || CATEGORIAS_SERVICIO.test(String(p.categoria_nombre || ""));
+  const productos = todos.filter((p) => !vaConServicios(p));
+  // Servicios: los cargados en el catalogo + los productos marcados como "Es servicio" o de esas categorias.
   const servicios = [
     ...(await listServicios(queryable, config.empresa_id, false)).map((s) => ({ ...s, clase: "servicio" })),
-    ...todos.filter((p) => p.es_servicio).map((p) => ({
+    ...todos.filter(vaConServicios).sort((x, y) => Number(y.es_servicio) - Number(x.es_servicio)).map((p) => ({
       id: p.id,
       clase: "producto",
       nombre: p.nombre,
