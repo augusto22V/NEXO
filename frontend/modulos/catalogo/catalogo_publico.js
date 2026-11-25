@@ -174,7 +174,7 @@
       chips.push(`<button type="button" class="cp-chip ${state.categoria === String(cat.id) ? "active" : ""}" data-cat="${cat.id}">${esc(cat.nombre)}<small>${cat.total}</small></button>`);
     });
     if (data.servicios.length) {
-      chips.push(`<button type="button" class="cp-chip ${state.categoria === "servicios" ? "active" : ""}" data-cat="servicios"><i class="fa-solid fa-screwdriver-wrench"></i> Servicios</button>`);
+      chips.push(`<button type="button" class="cp-chip ${state.categoria === "servicios" ? "active" : ""}" data-cat="servicios"><i class="fa-solid fa-print"></i> Impresiones y servicios</button>`);
     }
     $("chips").innerHTML = chips.join("");
     $("chips").querySelectorAll("[data-cat]").forEach((btn) => {
@@ -258,7 +258,7 @@
     if (servicios.length) {
       html += `
         <section class="cp-section" id="servicios">
-          <div class="cp-section-head"><h2><i class="fa-solid fa-screwdriver-wrench" style="color:var(--cp-primary)"></i> Servicios que ofrecemos</h2></div>
+          <div class="cp-section-head"><h2><i class="fa-solid fa-print" style="color:var(--cp-primary)"></i> Impresiones y servicios</h2></div>
           <div class="cp-services">${servicios.map(cardServicio).join("")}</div>
         </section>`;
     }
