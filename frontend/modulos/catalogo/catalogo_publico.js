@@ -174,6 +174,10 @@
 
       <div class="cp-catbar">
         <div class="cp-catbar-inner">
+          <button type="button" class="cp-cat-toggle" id="catToggle" aria-expanded="true" aria-controls="chips">
+            <span><i class="fa-solid fa-layer-group"></i> Categorías <b id="catActual"></b></span>
+            <span class="cp-cat-toggle-txt"><span id="catToggleTxt">Ocultar</span> <i class="fa-solid fa-chevron-up"></i></span>
+          </button>
           <nav class="cp-chips" id="chips" aria-label="Categorías"></nav>
         </div>
       </div>
@@ -201,8 +205,22 @@
     });
     $("compartirBtn").addEventListener("click", compartir);
     if ($("compartirInfo")) $("compartirInfo").addEventListener("click", compartir);
+    $("catToggle").addEventListener("click", () => {
+      const cerrada = !document.querySelector(".cp-catbar").classList.contains("cerrada");
+      ponerCategoriasOcultas(cerrada);
+      try { localStorage.setItem("catalogo_cat_oculta", cerrada ? "1" : "0"); } catch (_) { /* nada */ }
+    });
+    let oculta = false;
+    try { oculta = localStorage.getItem("catalogo_cat_oculta") === "1"; } catch (_) { /* nada */ }
+    ponerCategoriasOcultas(oculta);
     renderChips();
     renderContenido();
+  }
+
+  function ponerCategoriasOcultas(cerrada) {
+    document.querySelector(".cp-catbar").classList.toggle("cerrada", cerrada);
+    $("catToggle").setAttribute("aria-expanded", String(!cerrada));
+    $("catToggleTxt").textContent = cerrada ? "Mostrar" : "Ocultar";
   }
 
   function renderChips() {
@@ -213,6 +231,8 @@
     data.categorias.forEach((cat) => chips.push(chip(String(cat.id), cat.nombre, iconoCategoria(cat.nombre))));
     if (data.servicios.length) chips.push(chip("servicios", "Impresiones y servicios", "fa-print"));
     $("chips").innerHTML = chips.join("");
+    const activo = $("chips").querySelector(".cp-chip.active");
+    $("catActual").textContent = activo ? "· " + activo.textContent.trim() : "";
     $("chips").querySelectorAll("[data-cat]").forEach((btn) => {
       btn.addEventListener("click", () => {
         state.categoria = btn.dataset.cat;
