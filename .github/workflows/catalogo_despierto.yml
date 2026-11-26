@@ -1,5 +1,6 @@
-# Mantiene despierto el catalogo en Render (plan gratis se duerme a los 15 minutos sin visitas
-# y la primera visita tardaba casi 1 minuto). Solo consulta /api/health: no toca la base.
+# Ayuda extra para mantener despierto el catalogo en Render (el plan gratis se duerme a los 15 minutos
+# sin visitas). GitHub no garantiza el horario de estas corridas: el aviso principal lo da la PC
+# (scripts/sincronizar_catalogo.js cada 10 minutos). Solo consulta /api/health: no toca la base.
 name: Catalogo despierto
 
 on:
