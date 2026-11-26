@@ -107,6 +107,29 @@
   }
 
   /* ------------------------- render ------------------------- */
+  const TAG_CORTO = { DISPONIBLE: "Disponible", POCAS_UNIDADES: "Últimas", SIN_STOCK: "Consultar" };
+
+  function iconoCategoria(nombre) {
+    const n = normalizar(nombre);
+    const mapa = [
+      [/arte|manualid/, "fa-palette"], [/boligraf|pluma|lapicer/, "fa-pen"], [/borrador|corrector/, "fa-eraser"],
+      [/carpeta|archivo|sobre/, "fa-folder-open"], [/cartulina|papel|hoja/, "fa-file-lines"], [/cuaderno|libro/, "fa-book"],
+      [/lapi|ecolapi/, "fa-pencil"], [/marcador|resaltador/, "fa-highlighter"], [/mochila|accesorio|cartuchera/, "fa-bag-shopping"],
+      [/util|oficina|escolar/, "fa-ruler"], [/impresi|fotocop|servicio/, "fa-print"]
+    ];
+    const hit = mapa.find(([re]) => re.test(n));
+    return hit ? hit[1] : "fa-tag";
+  }
+
+  function telefonoLindo(numero) {
+    const d = String(numero || "").replace(/\D/g, "");
+    if (d.startsWith("595") && d.length >= 11) {
+      const local = `0${d.slice(3)}`;
+      return `${local.slice(0, 4)} ${local.slice(4, 7)} ${local.slice(7)}`.trim();
+    }
+    return d;
+  }
+
   function renderShell() {
     const c = state.data.config;
     document.title = `${c.nombre_publico} · Catálogo`;
@@ -114,47 +137,61 @@
       document.documentElement.style.setProperty("--cp-primary", c.color);
       document.documentElement.style.setProperty("--cp-primary-soft", `${c.color}1F`);
       const meta = document.querySelector('meta[name="theme-color"]');
-      if (meta) meta.setAttribute("content", c.color);
+      if (meta) meta.setAttribute("content", "#0B0D12");
     }
 
-    const wa = c.whatsapp
-      ? `<a class="cp-pill-btn wa" href="https://wa.me/${esc(c.whatsapp)}?text=${encodeURIComponent(`¡Hola ${c.nombre_publico || ""}! Vi su catálogo online y quería hacer una consulta.`)}" target="_blank" rel="noopener"><i class="fa-brands fa-whatsapp"></i>Escribinos</a>`
+    const waUrl = c.whatsapp
+      ? `https://wa.me/${encodeURIComponent(c.whatsapp)}?text=${encodeURIComponent(`¡Hola ${c.nombre_publico || ""}! Vi su catálogo online y quería hacer una consulta.`)}`
       : "";
     const logo = safeUrl(c.logo);
+    const mapa = c.direccion ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(c.direccion)}` : "";
+
+    const datos = [];
+    if (waUrl) datos.push(`<a class="cp-info" href="${esc(waUrl)}" target="_blank" rel="noopener"><strong><i class="fa-brands fa-whatsapp"></i> ${esc(telefonoLindo(c.whatsapp))}</strong><small>Consultas y pedidos</small></a>`);
+    datos.push(c.horario
+      ? `<div class="cp-info"><strong><i class="fa-regular fa-clock"></i> ${esc(c.horario)}</strong><small>Horario</small></div>`
+      : `<div class="cp-info cp-info-opt"><strong><i class="fa-solid fa-bolt"></i> Respuesta rápida</strong><small>Te confirmamos por WhatsApp</small></div>`);
+    datos.push(mapa
+      ? `<a class="cp-info" href="${esc(mapa)}" target="_blank" rel="noopener"><strong><i class="fa-solid fa-location-dot"></i> Ver en mapa</strong><small>${esc(c.direccion)}</small></a>`
+      : `<button type="button" class="cp-info" id="compartirInfo"><strong><i class="fa-solid fa-share-nodes"></i> Compartir</strong><small>Enviá el catálogo</small></button>`);
 
     $("app").innerHTML = `
       <header class="cp-hero">
         <div class="cp-hero-inner">
           ${logo ? `<img class="cp-logo" src="${esc(logo)}" alt="" onerror="this.remove()">` : ""}
-          <div>
-            <h1>${esc(c.nombre_publico)}</h1>
-            ${c.mensaje ? `<p>${esc(c.mensaje)}</p>` : ""}
-            <div class="cp-hero-meta">
-              ${c.horario ? `<span><i class="fa-regular fa-clock"></i>${esc(c.horario)}</span>` : ""}
-              ${c.direccion ? `<span><i class="fa-solid fa-location-dot"></i>${esc(c.direccion)}</span>` : ""}
+          <div class="cp-hero-text">
+            <div class="cp-hero-title">
+              <h1>${esc(c.nombre_publico)}</h1>
+              ${waUrl ? `<a class="cp-round-btn wa" href="${esc(waUrl)}" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>` : ""}
+              <button type="button" class="cp-round-btn" id="compartirBtn" aria-label="Compartir"><i class="fa-solid fa-share-nodes"></i></button>
             </div>
-            <div class="cp-hero-actions">
-              ${wa}
-              <button type="button" class="cp-pill-btn" id="compartirBtn"><i class="fa-solid fa-share-nodes"></i>Compartir</button>
-            </div>
+            <p>${esc(c.mensaje || "Mirá nuestros productos y servicios. Consultá disponibilidad o hacé tu pedido por WhatsApp.")}</p>
           </div>
         </div>
       </header>
 
-      <div class="cp-toolbar">
-        <div class="cp-toolbar-card">
-          <label class="cp-search">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input id="buscar" type="search" placeholder="Buscar productos o servicios…" autocomplete="off" aria-label="Buscar">
-          </label>
+      <div class="cp-infobar"><div class="cp-infobar-inner">${datos.join("")}</div></div>
+
+      <div class="cp-catbar">
+        <div class="cp-catbar-inner">
           <nav class="cp-chips" id="chips" aria-label="Categorías"></nav>
         </div>
+      </div>
+
+      <div class="cp-searchrow">
+        <label class="cp-search">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input id="buscar" type="search" placeholder="Buscar productos o servicios…" autocomplete="off" aria-label="Buscar">
+        </label>
       </div>
 
       <main class="cp-main" id="contenido"></main>
 
       <footer class="cp-footer">
-        Los precios y la disponibilidad se confirman al responder tu pedido.
+        <div class="cp-footer-inner">
+          <strong>${esc(c.nombre_publico)}</strong>
+          <span>Los precios y la disponibilidad se confirman al responderte por WhatsApp.</span>
+        </div>
       </footer>
     `;
 
@@ -163,19 +200,18 @@
       renderContenido();
     });
     $("compartirBtn").addEventListener("click", compartir);
+    if ($("compartirInfo")) $("compartirInfo").addEventListener("click", compartir);
     renderChips();
     renderContenido();
   }
 
   function renderChips() {
     const data = state.data;
-    const chips = [`<button type="button" class="cp-chip ${state.categoria === "todas" ? "active" : ""}" data-cat="todas">Todo</button>`];
-    data.categorias.forEach((cat) => {
-      chips.push(`<button type="button" class="cp-chip ${state.categoria === String(cat.id) ? "active" : ""}" data-cat="${cat.id}">${esc(cat.nombre)}<small>${cat.total}</small></button>`);
-    });
-    if (data.servicios.length) {
-      chips.push(`<button type="button" class="cp-chip ${state.categoria === "servicios" ? "active" : ""}" data-cat="servicios"><i class="fa-solid fa-print"></i> Impresiones y servicios</button>`);
-    }
+    const chip = (cat, nombre, icono, extra = "") =>
+      `<button type="button" class="cp-chip ${state.categoria === cat ? "active" : ""}" data-cat="${esc(cat)}"><span class="cp-chip-ico"><i class="fa-solid ${icono}"></i></span>${esc(nombre)}${extra}</button>`;
+    const chips = [chip("todas", "Todo", "fa-border-all")];
+    data.categorias.forEach((cat) => chips.push(chip(String(cat.id), cat.nombre, iconoCategoria(cat.nombre))));
+    if (data.servicios.length) chips.push(chip("servicios", "Impresiones y servicios", "fa-print"));
     $("chips").innerHTML = chips.join("");
     $("chips").querySelectorAll("[data-cat]").forEach((btn) => {
       btn.addEventListener("click", () => {
@@ -183,55 +219,51 @@
         renderChips();
         renderContenido();
         const cont = $("contenido");
-        if (cont) window.scrollTo({ top: Math.max(0, cont.offsetTop - 150), behavior: "smooth" });
+        if (cont) window.scrollTo({ top: Math.max(0, cont.offsetTop - 140), behavior: "smooth" });
+        const activo = $("chips").querySelector(".cp-chip.active");
+        if (activo) activo.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
       });
     });
   }
 
-  function cardProducto(p) {
-    const img = safeUrl(p.imagen);
+  /** Tarjeta unica para productos y servicios. */
+  function cardItem(item, clase) {
+    const img = safeUrl(item.imagen || item.imagen_url);
+    const ver = `${clase}:${item.id}`;
+    const ph = clase === "servicio" || item.es_servicio || !item.categoria_nombre || /impresi|fotocop|servicio/i.test(item.categoria_nombre || "")
+      ? "fa-print" : iconoCategoria(item.categoria_nombre);
     const media = img
-      ? `<img class="cp-card-img" src="${esc(img)}" alt="" loading="lazy" onerror="this.outerHTML='<div class=&quot;cp-card-ph&quot;><i class=&quot;fa-solid fa-book&quot;></i></div>'">`
-      : `<div class="cp-card-ph"><i class="fa-solid fa-book"></i></div>`;
+      ? `<img class="cp-card-img" src="${esc(img)}" alt="" loading="lazy" onerror="this.outerHTML='<div class=&quot;cp-card-ph&quot;><i class=&quot;fa-solid ${ph}&quot;></i></div>'">`
+      : `<div class="cp-card-ph"><i class="fa-solid ${ph}"></i></div>`;
+    const d = item.disponibilidad ? (DISPONIBILIDAD[item.disponibilidad] || DISPONIBILIDAD.DISPONIBLE) : null;
     return `
       <article class="cp-card">
-        <button type="button" data-ver="producto:${p.id}" style="text-align:left;display:block" aria-label="Ver ${esc(p.nombre)}">
-          ${media}
-        </button>
+        <div class="cp-card-media">
+          <button type="button" data-ver="${ver}" class="cp-card-media-btn" aria-label="Ver ${esc(item.nombre)}">${media}</button>
+          <button type="button" data-ver="${ver}" class="cp-zoom" aria-label="Ver grande"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+          ${d ? `<span class="cp-tag ${d.clase}"><i class="fa-solid ${d.icono}"></i>${TAG_CORTO[item.disponibilidad] || d.texto}</span>` : ""}
+        </div>
         <div class="cp-card-body">
-          <button type="button" data-ver="producto:${p.id}" style="text-align:left;padding:0">
-            <h3 class="cp-card-name">${esc(p.nombre)}</h3>
-          </button>
-          ${p.descripcion ? `<p class="cp-card-desc">${esc(p.descripcion)}</p>` : ""}
-          ${badgeHtml(p.disponibilidad)}
+          <h3 class="cp-card-name">${esc(item.nombre)}</h3>
+          ${item.descripcion ? `<p class="cp-card-desc">${esc(item.descripcion)}</p>` : ""}
+          <button type="button" class="cp-more" data-ver="${ver}">Ver más</button>
           <div class="cp-card-foot">
-            ${precioHtml(p.precio)}
+            ${precioHtml(item.precio, item.precio_texto)}
             <div class="cp-card-actions">
-              <button type="button" class="cp-icon-btn soft" data-consultar="producto:${p.id}" title="Preguntar disponibilidad" aria-label="Preguntar disponibilidad"><i class="fa-regular fa-comment-dots"></i></button>
-              <button type="button" class="cp-icon-btn" data-agregar="producto:${p.id}" title="Agregar al pedido" aria-label="Agregar al pedido"><i class="fa-solid fa-plus"></i></button>
+              <button type="button" class="cp-icon-btn soft" data-consultar="${ver}" title="Preguntar disponibilidad" aria-label="Preguntar disponibilidad"><i class="fa-regular fa-comment-dots"></i></button>
+              <button type="button" class="cp-icon-btn" data-agregar="${ver}" title="Agregar al pedido" aria-label="Agregar al pedido"><i class="fa-solid fa-plus"></i></button>
             </div>
           </div>
         </div>
       </article>`;
   }
 
-  function cardServicio(s) {
-    const img = safeUrl(s.imagen_url);
+  function seccion(id, titulo, icono, items) {
     return `
-      <article class="cp-service">
-        ${img ? `<img class="cp-service-img" src="${esc(img)}" alt="" loading="lazy">` : `<div class="cp-service-ph"><i class="fa-solid fa-screwdriver-wrench"></i></div>`}
-        <div class="cp-service-body">
-          <h3>${esc(s.nombre)}</h3>
-          ${s.descripcion ? `<p>${esc(s.descripcion)}</p>` : ""}
-          <div class="cp-service-foot">
-            ${precioHtml(s.precio, s.precio_texto)}
-            <div class="cp-card-actions">
-              <button type="button" class="cp-icon-btn soft" data-consultar="${s.clase}:${s.id}" title="Consultar" aria-label="Consultar"><i class="fa-regular fa-comment-dots"></i></button>
-              <button type="button" class="cp-icon-btn" data-agregar="${s.clase}:${s.id}" title="Agregar al pedido" aria-label="Agregar al pedido"><i class="fa-solid fa-plus"></i></button>
-            </div>
-          </div>
-        </div>
-      </article>`;
+      <section class="cp-section" id="${id}">
+        <div class="cp-section-head"><h2><i class="fa-solid ${icono}"></i>${esc(titulo)}</h2><span>${items.length} ${items.length === 1 ? "producto" : "productos"}</span></div>
+        <div class="cp-grid">${items.join("")}</div>
+      </section>`;
   }
 
   function renderContenido() {
@@ -248,19 +280,10 @@
 
     let html = "";
     grupos.forEach((g, key) => {
-      html += `
-        <section class="cp-section" id="cat-${key}">
-          <div class="cp-section-head"><h2>${esc(g.nombre)}</h2><span>${g.items.length} ${g.items.length === 1 ? "producto" : "productos"}</span></div>
-          <div class="cp-grid">${g.items.map(cardProducto).join("")}</div>
-        </section>`;
+      html += seccion(`cat-${key}`, g.nombre || "Otros", iconoCategoria(g.nombre), g.items.map((p) => cardItem(p, "producto")));
     });
-
     if (servicios.length) {
-      html += `
-        <section class="cp-section" id="servicios">
-          <div class="cp-section-head"><h2><i class="fa-solid fa-print" style="color:var(--cp-primary)"></i> Impresiones y servicios</h2></div>
-          <div class="cp-services">${servicios.map(cardServicio).join("")}</div>
-        </section>`;
+      html += seccion("servicios", "Impresiones y servicios", "fa-print", servicios.map((s) => cardItem(s, s.clase)));
     }
 
     if (!html) {
@@ -268,7 +291,7 @@
         ? `<div class="cp-no-results"><i class="fa-solid fa-magnifying-glass" style="font-size:28px"></i><p>No encontramos “${esc(state.filtro)}”.<br>¿No está lo que buscás? <button type="button" class="cp-link-btn" data-consulta-libre="1">Preguntanos</button></p></div>`
         : `<div class="cp-no-results"><p>Todavía no hay productos cargados en el catálogo.</p></div>`;
     } else if (state.categoria === "todas" && !state.filtro) {
-      html = `<p class="cp-note"><i class="fa-solid fa-circle-info"></i><span>Elegí lo que necesitás y mandanos tu pedido, o tocá <i class="fa-regular fa-comment-dots"></i> para preguntar si hay disponible. Te respondemos para confirmar.</span></p>` + html;
+      html = `<p class="cp-note"><i class="fa-solid fa-circle-info"></i><span>Elegí lo que necesitás y mandanos tu pedido, o tocá <i class="fa-regular fa-comment-dots"></i> para preguntar si hay disponible. Te respondemos por WhatsApp.</span></p>` + html;
     }
 
     cont.innerHTML = html;
