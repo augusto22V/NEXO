@@ -121,14 +121,25 @@ function superaLimite(ip) {
 
 /* ===================== PUBLICO (sin login) ===================== */
 
+// El catalogo publico se guarda 2 minutos en memoria: asi abre al instante y no consulta la base
+// en cada visita. La PC lo actualiza cada 10 minutos, asi que no se nota la diferencia.
+const CACHE_PUBLICO_MS = 2 * 60 * 1000;
+const cachePublico = new Map();
+
 router.get("/publico/:slug", async (req, res) => {
   try {
+    const slug = String(req.params.slug || "").toLowerCase();
+    const guardado = cachePublico.get(slug);
+    if (guardado && Date.now() - guardado.t < CACHE_PUBLICO_MS) return res.json(guardado.data);
+
     const config = await getConfigBySlug(db, req.params.slug);
     const esDueno = config && empresaDe(req) === config.empresa_id;
     if (!config || (!config.publicado && !esDueno)) {
       return res.status(404).json({ error: "Este catálogo no está disponible por ahora." });
     }
-    res.json(await buildPublicPayload(db, config));
+    const data = await buildPublicPayload(db, config);
+    if (config.publicado) cachePublico.set(slug, { t: Date.now(), data });
+    res.json(data);
   } catch (error) {
     sendError(res, error, "No se pudo cargar el catálogo");
   }
