@@ -172,6 +172,12 @@
       ? `https://wa.me/${encodeURIComponent(c.whatsapp)}?text=${encodeURIComponent(`¡Hola ${c.nombre_publico || ""}! Vi su catálogo online y quería hacer una consulta.`)}`
       : "";
     const logo = safeUrl(c.logo);
+    if (logo) {
+      const fav = document.getElementById("favicon");
+      if (fav) fav.href = logo;
+      const touch = document.getElementById("touchIcon");
+      if (touch) touch.href = logo;
+    }
     const mapa = c.direccion ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(c.direccion)}` : "";
 
     const datos = [];
