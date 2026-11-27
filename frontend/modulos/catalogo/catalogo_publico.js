@@ -206,6 +206,8 @@
 
       <div class="cp-infobar"><div class="cp-infobar-inner">${datos.join("")}</div></div>
 
+      <div class="cp-layout">
+      <aside class="cp-side"><div class="cp-side-inner">
       <div class="cp-catbar">
         <div class="cp-catbar-inner">
           <button type="button" class="cp-cat-toggle" id="catToggle" aria-expanded="true" aria-controls="chips">
@@ -216,17 +218,8 @@
         </div>
       </div>
 
-      <div class="cp-searchrow">
-        <label class="cp-search">
-          <i class="fa-solid fa-magnifying-glass"></i>
-          <input id="buscar" type="search" placeholder="Buscar productos o servicios…" autocomplete="off" aria-label="Buscar">
-        </label>
-        <button type="button" class="cp-filter-btn" id="filtrosBtn" aria-expanded="false" aria-controls="filtrosPanel">
-          <i class="fa-solid fa-sliders"></i><span>Filtros</span><b class="cp-filter-count" id="filtrosCount" hidden></b>
-        </button>
-      </div>
       <div class="cp-filters" id="filtrosPanel" hidden>
-        <label class="cp-filter-field">
+        <label class="cp-filter-field cp-filter-cat">
           <span>Categoría</span>
           <select id="fCategoria"></select>
         </label>
@@ -251,8 +244,21 @@
         </label>
         <button type="button" class="cp-filter-clear" id="fLimpiar"><i class="fa-solid fa-rotate-left"></i> Limpiar</button>
       </div>
+      </div></aside>
 
+      <div class="cp-maincol">
+      <div class="cp-searchrow">
+        <label class="cp-search">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input id="buscar" type="search" placeholder="Buscar productos o servicios…" autocomplete="off" aria-label="Buscar">
+        </label>
+        <button type="button" class="cp-filter-btn" id="filtrosBtn" aria-expanded="false" aria-controls="filtrosPanel">
+          <i class="fa-solid fa-sliders"></i><span>Filtros</span><b class="cp-filter-count" id="filtrosCount" hidden></b>
+        </button>
+      </div>
       <main class="cp-main" id="contenido"></main>
+      </div>
+      </div>
 
       <footer class="cp-footer">
         <div class="cp-footer-inner">
