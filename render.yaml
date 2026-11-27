@@ -7,6 +7,13 @@ services:
     runtime: node
     plan: free
     rootDir: backend
+    # Sin esto Render solo se actualiza cuando cambia algo en backend/,
+    # y los cambios del catalogo (que estan en frontend/) no se publicaban solos.
+    autoDeploy: true
+    buildFilter:
+      paths:
+        - backend/**
+        - frontend/**
     buildCommand: npm ci
     startCommand: npm start
     healthCheckPath: /api/health
