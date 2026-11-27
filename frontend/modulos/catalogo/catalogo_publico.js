@@ -262,8 +262,36 @@
 
       <footer class="cp-footer">
         <div class="cp-footer-inner">
-          <strong>${esc(c.nombre_publico)}</strong>
-          <span>Los precios y la disponibilidad se confirman al responderte por WhatsApp.</span>
+          <div class="cp-foot-brand">
+            <div class="cp-foot-brand-top">
+              ${logo ? `<img src="${esc(logo)}" alt="" onerror="this.remove()">` : ""}
+              <strong>${esc(c.nombre_publico)}</strong>
+            </div>
+            <p>${esc(c.mensaje || "Librería y papelería. Mirá nuestros productos y servicios, y hacé tu pedido por WhatsApp.")}</p>
+            ${waUrl ? `<a class="cp-foot-wa" href="${esc(waUrl)}" target="_blank" rel="noopener"><i class="fa-brands fa-whatsapp"></i> Escribinos</a>` : ""}
+          </div>
+          <div class="cp-foot-col">
+            <h3>Contacto</h3>
+            <ul>
+              ${c.whatsapp ? `<li><i class="fa-brands fa-whatsapp"></i><a href="${esc(waUrl)}" target="_blank" rel="noopener">${esc(telefonoLindo(c.whatsapp))}</a></li>` : ""}
+              ${c.horario ? `<li><i class="fa-regular fa-clock"></i><span>${esc(c.horario)}</span></li>` : ""}
+              ${c.direccion ? `<li><i class="fa-solid fa-location-dot"></i><a href="${esc(mapa)}" target="_blank" rel="noopener">${esc(c.direccion)}</a></li>` : ""}
+              <li><i class="fa-solid fa-share-nodes"></i><button type="button" class="cp-foot-link" data-foot-share="1">Compartir catálogo</button></li>
+            </ul>
+          </div>
+          <div class="cp-foot-col cp-foot-cats">
+            <h3>Categorías</h3>
+            <ul>
+              ${state.data.categorias.map((cat) => `<li><button type="button" class="cp-foot-link" data-foot-cat="${esc(String(cat.id))}">${esc(cat.nombre)}</button></li>`).join("")}
+              ${state.data.servicios.length ? `<li><button type="button" class="cp-foot-link" data-foot-cat="servicios">Impresiones y servicios</button></li>` : ""}
+            </ul>
+          </div>
+        </div>
+        <div class="cp-foot-bottom">
+          <div class="cp-foot-bottom-inner">
+            <span><i class="fa-solid fa-shield-halved"></i> © ${new Date().getFullYear()} ${esc(c.nombre_publico)}. Todos los derechos reservados.</span>
+            <span>Precios y disponibilidad sujetos a confirmación por WhatsApp.</span>
+          </div>
         </div>
       </footer>
     `;
@@ -274,6 +302,15 @@
     });
     $("compartirBtn").addEventListener("click", compartir);
     montarFiltros();
+    document.querySelectorAll("[data-foot-cat]").forEach((btn) => btn.addEventListener("click", () => {
+      state.categoria = btn.dataset.footCat;
+      renderChips();
+      renderContenido();
+      const cont = $("contenido");
+      if (cont) window.scrollTo({ top: Math.max(0, cont.getBoundingClientRect().top + window.scrollY - 140), behavior: "smooth" });
+    }));
+    const footShare = document.querySelector("[data-foot-share]");
+    if (footShare) footShare.addEventListener("click", compartir);
     if ($("compartirInfo")) $("compartirInfo").addEventListener("click", compartir);
     $("catToggle").addEventListener("click", () => {
       const cerrada = !document.querySelector(".cp-catbar").classList.contains("cerrada");

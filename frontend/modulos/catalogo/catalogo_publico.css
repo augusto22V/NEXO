@@ -290,12 +290,44 @@ a.cp-info:hover, button.cp-info:hover { border-color: var(--cp-primary); }
 
 .cp-no-results { text-align: center; color: var(--cp-muted); padding: 40px 10px; }
 
-.cp-footer { margin-top: 36px; background: #0B0D12; color: rgba(255,255,255,.8); font-size: 13px; }
+.cp-footer { margin-top: 40px; background: #0B0D12; color: rgba(255,255,255,.72); font-size: 14px; border-top: 3px solid var(--cp-primary); }
 .cp-footer-inner {
-  max-width: 1140px; margin: 0 auto; padding: 18px 16px calc(96px + env(safe-area-inset-bottom));
-  display: flex; flex-wrap: wrap; gap: 6px 16px; justify-content: space-between; align-items: center;
+  max-width: 1240px; margin: 0 auto; padding: 36px 16px 28px;
+  display: grid; grid-template-columns: 1.3fr 1fr 1.4fr; gap: 28px 40px;
 }
-.cp-footer strong { color: #fff; }
+.cp-foot-brand-top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.cp-foot-brand-top img { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; border: 2px solid var(--cp-primary); }
+.cp-foot-brand-top strong { color: #fff; font-size: 20px; font-weight: 800; letter-spacing: .02em; }
+.cp-foot-brand p { margin: 0 0 14px; line-height: 1.5; max-width: 340px; }
+.cp-foot-wa {
+  display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 999px;
+  background: #25D366; color: #fff; font-weight: 700; text-decoration: none;
+}
+.cp-foot-wa:hover { filter: brightness(1.06); }
+.cp-foot-col h3 { margin: 4px 0 12px; color: #fff; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
+.cp-foot-col ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 9px; }
+.cp-foot-col li { display: flex; align-items: flex-start; gap: 10px; }
+.cp-foot-col li > i { width: 16px; margin-top: 3px; color: var(--cp-primary); text-align: center; }
+.cp-foot-col a, .cp-foot-link {
+  color: rgba(255,255,255,.78); text-decoration: none; background: none; border: 0; padding: 0;
+  font: inherit; text-align: left; cursor: pointer;
+}
+.cp-foot-col a:hover, .cp-foot-link:hover { color: #fff; text-decoration: underline; }
+.cp-foot-cats ul { grid-template-columns: 1fr 1fr; gap: 8px 18px; }
+.cp-foot-bottom { border-top: 1px solid rgba(255,255,255,.08); background: #07080C; }
+.cp-foot-bottom-inner {
+  max-width: 1240px; margin: 0 auto; padding: 16px 16px calc(96px + env(safe-area-inset-bottom));
+  display: flex; flex-wrap: wrap; gap: 6px 20px; justify-content: space-between; font-size: 12.5px; color: rgba(255,255,255,.55);
+}
+.cp-foot-bottom-inner i { color: var(--cp-primary); margin-right: 4px; }
+@media (max-width: 860px) {
+  .cp-footer-inner { grid-template-columns: 1fr 1fr; }
+  .cp-foot-brand { grid-column: 1 / -1; }
+}
+@media (max-width: 520px) {
+  .cp-footer-inner { grid-template-columns: 1fr; gap: 24px; padding-top: 28px; }
+  .cp-foot-bottom-inner { flex-direction: column; }
+}
 .cp-app { padding-bottom: 0; }
 
 /* ---------- Boton flotante del pedido ---------- */
