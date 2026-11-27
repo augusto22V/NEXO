@@ -13,6 +13,10 @@
     data: null,
     filtro: "",
     categoria: "todas",
+    orden: "recomendado",
+    precioMin: 0,
+    precioMax: 0,
+    soloDisponibles: false,
     carrito: [],
     tipo: "PEDIDO",
     enviando: false
@@ -90,11 +94,35 @@
     return data.productos.find((p) => p.id === id) || data.servicios.find((s) => s.clase === "producto" && s.id === id);
   }
 
+  /** Filtros extra: precio y disponibilidad. */
+  function pasaFiltrosExtra(item) {
+    const precio = Number(item.precio || 0);
+    if ((state.precioMin || state.precioMax) && precio <= 0) return false;
+    if (state.precioMin && precio < state.precioMin) return false;
+    if (state.precioMax && precio > state.precioMax) return false;
+    if (state.soloDisponibles && item.disponibilidad === "SIN_STOCK") return false;
+    return true;
+  }
+
+  function hayFiltrosExtra() {
+    return state.orden !== "recomendado" || state.precioMin > 0 || state.precioMax > 0 || state.soloDisponibles;
+  }
+
+  function ordenar(items) {
+    const precio = (x) => Number(x.precio || 0);
+    const lista = [...items];
+    if (state.orden === "menor") lista.sort((a, b) => (precio(a) || Infinity) - (precio(b) || Infinity));
+    else if (state.orden === "mayor") lista.sort((a, b) => precio(b) - precio(a));
+    else if (state.orden === "nombre") lista.sort((a, b) => String(a.nombre).localeCompare(String(b.nombre), "es"));
+    return lista;
+  }
+
   function productosFiltrados() {
     const q = normalizar(state.filtro);
     return state.data.productos.filter((p) => {
       if (state.categoria !== "todas" && state.categoria !== "servicios" && String(p.categoria_id) !== state.categoria) return false;
       if (state.categoria === "servicios") return false;
+      if (!pasaFiltrosExtra(p)) return false;
       if (!q) return true;
       return normalizar(`${p.nombre} ${p.descripcion} ${p.categoria_nombre} ${p.codigo}`).includes(q);
     });
@@ -103,7 +131,7 @@
   function serviciosFiltrados() {
     if (state.categoria !== "todas" && state.categoria !== "servicios") return [];
     const q = normalizar(state.filtro);
-    return state.data.servicios.filter((s) => !q || normalizar(`${s.nombre} ${s.descripcion}`).includes(q));
+    return state.data.servicios.filter((s) => pasaFiltrosExtra(s) && (!q || normalizar(`${s.nombre} ${s.descripcion}`).includes(q)));
   }
 
   /* ------------------------- render ------------------------- */
@@ -187,6 +215,35 @@
           <i class="fa-solid fa-magnifying-glass"></i>
           <input id="buscar" type="search" placeholder="Buscar productos o servicios…" autocomplete="off" aria-label="Buscar">
         </label>
+        <button type="button" class="cp-filter-btn" id="filtrosBtn" aria-expanded="false" aria-controls="filtrosPanel">
+          <i class="fa-solid fa-sliders"></i><span>Filtros</span><b class="cp-filter-count" id="filtrosCount" hidden></b>
+        </button>
+      </div>
+      <div class="cp-filters" id="filtrosPanel" hidden>
+        <label class="cp-filter-field">
+          <span>Categoría</span>
+          <select id="fCategoria"></select>
+        </label>
+        <label class="cp-filter-field">
+          <span>Ordenar por</span>
+          <select id="fOrden">
+            <option value="recomendado">Recomendado</option>
+            ${c.mostrar_precios ? `<option value="menor">Menor precio</option><option value="mayor">Mayor precio</option>` : ""}
+            <option value="nombre">Nombre (A-Z)</option>
+          </select>
+        </label>
+        ${c.mostrar_precios ? `
+        <div class="cp-filter-field">
+          <span>Precio (Gs)</span>
+          <div class="cp-filter-range">
+            <input id="fMin" type="number" inputmode="numeric" min="0" step="500" placeholder="Desde">
+            <input id="fMax" type="number" inputmode="numeric" min="0" step="500" placeholder="Hasta">
+          </div>
+        </div>` : ""}
+        <label class="cp-filter-check">
+          <input id="fDisp" type="checkbox"> <span>Solo disponibles</span>
+        </label>
+        <button type="button" class="cp-filter-clear" id="fLimpiar"><i class="fa-solid fa-rotate-left"></i> Limpiar</button>
       </div>
 
       <main class="cp-main" id="contenido"></main>
@@ -204,6 +261,7 @@
       renderContenido();
     });
     $("compartirBtn").addEventListener("click", compartir);
+    montarFiltros();
     if ($("compartirInfo")) $("compartirInfo").addEventListener("click", compartir);
     $("catToggle").addEventListener("click", () => {
       const cerrada = !document.querySelector(".cp-catbar").classList.contains("cerrada");
@@ -215,6 +273,51 @@
     ponerCategoriasOcultas(oculta);
     renderChips();
     renderContenido();
+  }
+
+  function montarFiltros() {
+    const panel = $("filtrosPanel");
+    $("filtrosBtn").addEventListener("click", () => {
+      panel.hidden = !panel.hidden;
+      $("filtrosBtn").setAttribute("aria-expanded", String(!panel.hidden));
+      $("filtrosBtn").classList.toggle("open", !panel.hidden);
+    });
+    const leerNumero = (id) => { const el = $(id); return el ? Math.max(0, Number(el.value) || 0) : 0; };
+    const aplicar = () => {
+      state.categoria = $("fCategoria").value;
+      state.orden = $("fOrden").value;
+      state.precioMin = leerNumero("fMin");
+      state.precioMax = leerNumero("fMax");
+      state.soloDisponibles = $("fDisp").checked;
+      renderChips();
+      renderContenido();
+    };
+    ["fCategoria", "fOrden", "fDisp"].forEach((id) => $(id).addEventListener("change", aplicar));
+    ["fMin", "fMax"].forEach((id) => { if ($(id)) $(id).addEventListener("input", aplicar); });
+    $("fLimpiar").addEventListener("click", () => {
+      $("fCategoria").value = "todas";
+      $("fOrden").value = "recomendado";
+      if ($("fMin")) $("fMin").value = "";
+      if ($("fMax")) $("fMax").value = "";
+      $("fDisp").checked = false;
+      aplicar();
+    });
+  }
+
+  /** Mantiene el panel de filtros igual a lo elegido en los botones de categoria. */
+  function sincronizarFiltros() {
+    const sel = $("fCategoria");
+    if (!sel) return;
+    const data = state.data;
+    const opciones = [`<option value="todas">Todas</option>`]
+      .concat(data.categorias.map((cat) => `<option value="${esc(String(cat.id))}">${esc(cat.nombre)}</option>`));
+    if (data.servicios.length) opciones.push(`<option value="servicios">Impresiones y servicios</option>`);
+    if (sel.options.length !== opciones.length) sel.innerHTML = opciones.join("");
+    sel.value = state.categoria;
+    const activos = (state.categoria !== "todas" ? 1 : 0) + (state.orden !== "recomendado" ? 1 : 0)
+      + (state.precioMin || state.precioMax ? 1 : 0) + (state.soloDisponibles ? 1 : 0);
+    $("filtrosCount").hidden = !activos;
+    $("filtrosCount").textContent = activos || "";
   }
 
   function ponerCategoriasOcultas(cerrada) {
@@ -233,6 +336,7 @@
     $("chips").innerHTML = chips.join("");
     const activo = $("chips").querySelector(".cp-chip.active");
     $("catActual").textContent = activo ? "· " + activo.textContent.trim() : "";
+    sincronizarFiltros();
     $("chips").querySelectorAll("[data-cat]").forEach((btn) => {
       btn.addEventListener("click", () => {
         state.categoria = btn.dataset.cat;
@@ -299,22 +403,34 @@
     });
 
     let html = "";
-    grupos.forEach((g, key) => {
-      html += seccion(`cat-${key}`, g.nombre || "Otros", iconoCategoria(g.nombre), g.items.map((p) => cardItem(p, "producto")));
-    });
-    if (servicios.length) {
-      html += seccion("servicios", "Impresiones y servicios", "fa-print", servicios.map((s) => cardItem(s, s.clase)));
+    if (state.orden !== "recomendado" && productos.length + servicios.length) {
+      // Ordenado: una sola lista con todo lo que coincide.
+      const todos = ordenar([...productos.map((p) => ({ item: p, clase: "producto", nombre: p.nombre, precio: p.precio })),
+        ...servicios.map((s) => ({ item: s, clase: s.clase, nombre: s.nombre, precio: s.precio }))]);
+      const titulo = { menor: "Menor precio primero", mayor: "Mayor precio primero", nombre: "Ordenado de la A a la Z" }[state.orden];
+      html = seccion("resultados", titulo, "fa-arrow-down-wide-short", todos.map((x) => cardItem(x.item, x.clase)));
+    } else {
+      grupos.forEach((g, key) => {
+        html += seccion(`cat-${key}`, g.nombre || "Otros", iconoCategoria(g.nombre), g.items.map((p) => cardItem(p, "producto")));
+      });
+      if (servicios.length) {
+        html += seccion("servicios", "Impresiones y servicios", "fa-print", servicios.map((s) => cardItem(s, s.clase)));
+      }
     }
 
     if (!html) {
-      html = state.filtro
+      html = hayFiltrosExtra()
+        ? `<div class="cp-no-results"><i class="fa-solid fa-sliders" style="font-size:28px"></i><p>No hay productos con esos filtros.<br><button type="button" class="cp-link-btn" data-limpiar-filtros="1">Limpiar filtros</button></p></div>`
+        : state.filtro
         ? `<div class="cp-no-results"><i class="fa-solid fa-magnifying-glass" style="font-size:28px"></i><p>No encontramos “${esc(state.filtro)}”.<br>¿No está lo que buscás? <button type="button" class="cp-link-btn" data-consulta-libre="1">Preguntanos</button></p></div>`
         : `<div class="cp-no-results"><p>Todavía no hay productos cargados en el catálogo.</p></div>`;
-    } else if (state.categoria === "todas" && !state.filtro) {
+    } else if (state.categoria === "todas" && !state.filtro && !hayFiltrosExtra()) {
       html = `<p class="cp-note"><i class="fa-solid fa-circle-info"></i><span>Elegí lo que necesitás y mandanos tu pedido, o tocá <i class="fa-regular fa-comment-dots"></i> para preguntar si hay disponible. Te respondemos por WhatsApp.</span></p>` + html;
     }
 
     cont.innerHTML = html;
+    const limpiar = cont.querySelector("[data-limpiar-filtros]");
+    if (limpiar) limpiar.addEventListener("click", () => $("fLimpiar").click());
   }
 
   /* ------------------------- detalle ------------------------- */
