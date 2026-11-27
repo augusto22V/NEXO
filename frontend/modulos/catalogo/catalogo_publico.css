@@ -140,6 +140,7 @@ a.cp-info:hover, button.cp-info:hover { border-color: var(--cp-primary); }
   display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; align-items: end;
 }
 .cp-filters[hidden] { display: none; }
+.cp-filter-count[hidden] { display: none; }
 .cp-filter-field { display: grid; gap: 5px; min-width: 0; }
 .cp-filter-field > span { font-size: 12px; font-weight: 700; color: var(--cp-muted); text-transform: uppercase; letter-spacing: .03em; }
 .cp-filter-field select, .cp-filter-range input {
@@ -405,3 +406,49 @@ a.cp-info:hover, button.cp-info:hover { border-color: var(--cp-primary); }
 
 .cp-cart-fab[hidden] { display: none; }
 .cp-card-body .cp-badge, .cp-detail-row .cp-badge { align-self: flex-start; }
+
+/* ---------- Columna de categorias y filtros ---------- */
+/* Celular y tablet: todo en una columna (categorias arriba, buscador, filtros, productos). */
+.cp-layout { display: flex; flex-direction: column; }
+.cp-side, .cp-side-inner, .cp-maincol { display: contents; }
+.cp-catbar { order: 1; }
+.cp-searchrow { order: 2; }
+.cp-filters { order: 3; }
+.cp-main { order: 4; }
+
+/* Compu: categorias y filtros fijos en una columna a la izquierda, productos a la derecha. */
+@media (min-width: 1024px) {
+  .cp-layout {
+    display: grid; grid-template-columns: 270px minmax(0, 1fr); gap: 22px; align-items: start;
+    max-width: 1240px; margin: 0 auto; padding: 18px 16px 0;
+  }
+  .cp-side { display: block; align-self: stretch; }
+  .cp-side-inner {
+    display: flex; flex-direction: column; gap: 14px;
+    position: sticky; top: 14px; max-height: calc(100vh - 28px); overflow-y: auto;
+    scrollbar-width: thin;
+  }
+  .cp-maincol { display: block; min-width: 0; }
+  .cp-catbar {
+    position: static; padding: 14px; border: 1px solid var(--cp-line); border-radius: 16px;
+    background: #fff; box-shadow: 0 1px 3px rgba(38,33,47,.06); backdrop-filter: none;
+  }
+  .cp-chips, .cp-chips { flex-direction: column; flex-wrap: nowrap; overflow: visible; gap: 4px; justify-content: flex-start; }
+  .cp-chip { width: 100%; justify-content: flex-start; padding: 9px 12px; border-radius: 10px; background: transparent; white-space: normal; text-align: left; }
+  .cp-chip:hover { background: #F1F4F9; }
+  .cp-chip.active { background: var(--cp-primary); }
+  .cp-chip-ico { width: 18px; text-align: center; flex: none; }
+  .cp-side .cp-filters, .cp-side .cp-filters[hidden] {
+    display: grid; grid-template-columns: 1fr; width: auto; max-width: none; margin: 0;
+    box-shadow: 0 1px 3px rgba(38,33,47,.06);
+  }
+  .cp-side .cp-filters::before {
+    content: "Filtros"; font-weight: 800; font-size: 14px; color: #1C2230;
+  }
+  .cp-filter-cat, .cp-filter-btn { display: none !important; }
+  .cp-filter-clear { justify-self: start; padding: 0; }
+  .cp-searchrow { padding: 0; justify-content: stretch; }
+  .cp-searchrow .cp-search { max-width: none; }
+  .cp-main { max-width: none; padding: 0; }
+  .cp-main > .cp-section:first-child, .cp-main > .cp-note:first-child { margin-top: 14px; }
+}
